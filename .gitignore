@@ -52,3 +52,6 @@ _cgo_export.*
 _testmain.go
 
 *.exe
+mongodb/
+pkg/
+bin/
