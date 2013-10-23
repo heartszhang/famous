@@ -1,7 +1,7 @@
 $project_root = split-path $MyInvocation.MyCommand.Path
 
-$env:GOPATH = $env:GOPATH + ";$project_root"
-$env:PATH = $env:PATH + ";$project_root/bin"
+$env:GOPATH = "$env:GOPATH;$project_root"
+$env:PATH = "$env:PATH;$project_root/bin"
 # mongod --config /etc/mongodb.conf
 $mongo_conf = (Get-ChildItem mongod.conf).FullName
 
@@ -14,8 +14,8 @@ $mongo_conf = (Get-ChildItem mongod.conf).FullName
 
 #mongod -v --bind_ip 127.0.01 --logpath xxxxx --dbpath xxxxx
 $mongo_ip = "127.0.0.1"
-$mongo_logpath = $env:GOPATH + "\mongodb\mongo.log"
-$mongo_dbpath = $env:GOPATH + "\mongodb\db\"
+$mongo_logpath = "$project_root\mongodb\mongo.log"
+$mongo_dbpath = "$project_root\mongodb\db\"
 #"--bing_ip $mongo_ip -- logpath $mongo_logpath --dbpath $mongo_dbpath"
 
 function db_start(){
@@ -30,3 +30,10 @@ function db_stop(){
 #go get github.com/robfig/revel/revel
 #go get labix.org/v2/mgo
 #wget http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-2.4.6.zip
+# go get -u github.com/djimenez/iconv-go
+# configure cgo 
+#CGO_CFLAGS=-IC:\MINGW64/include
+#CGO_LDFLAGS=-LC:\MINGW64/lib
+#download libiconv for windows 64bits
+#go get github.com/djimenez/iconv-go
+# // #cgo windows LDFLAGS: -liconv // add to iconv.go
