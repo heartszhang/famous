@@ -1,7 +1,8 @@
 package backend
 
 import (
-	"time"
+	"fmt"
+	"github.com/heartszhang/curl"
 )
 
 // since_unixtime , 0: from now
@@ -63,8 +64,25 @@ func tick() (FeedsStatus, error) {
 	return s, nil
 }
 
-func feed_source_subscribe(url string, source_type uint, category uint64) (FeedSource, error) {
-	return FeedSource{}, nil
+func Subscribe(url string) (FeedSource, error) {
+	return feed_source_subscribe(url, feed_type_feed, feed_category_root)
+}
+
+func feed_source_subscribe(url string, source_type uint, category uint64) (v FeedSource, err error) {
+	curler := curl.NewCurl(BackendConfig().FeedSourceDir)
+	cache, err := curler.GetUtf8(url, curl.CurlProxyPolicyUseProxy)
+	fmt.Println(cache, err)
+
+	if cache.LocalUtf8 != "" {
+		fstype := detect_feedsource_type(cache.LocalUtf8)
+		switch fstype {
+		case feed_type_rss:
+			v, err = CreateFeedSourceRss2(cache.LocalUtf8)
+		case feed_type_atom:
+			v, err = CreateFeedSourceAtom(cache.LocalUtf8)
+		}
+	}
+	return
 }
 
 var (
@@ -72,6 +90,7 @@ var (
 		"":        feed_type_unknown,
 		"rss":     feed_type_rss,
 		"atom":    feed_type_atom,
+		"feed":    feed_type_atom,
 		"blog":    feed_type_blog,
 		"tweet":   feed_type_tweet,
 		"weibo":   feed_type_sina_weibo,
@@ -86,8 +105,8 @@ func meta_categories() ([]FeedCategory, error) {
 	return nil, nil
 }
 
-func meta() (FeedsProfile, error) {
-	return feedsprofile(), nil
+func meta() (FeedsBackendConfig, error) {
+	return BackendConfig(), nil
 }
 
 func meta_cleanup() error {
@@ -100,14 +119,4 @@ func source_type_map(sourcetype string) uint {
 		v = feed_type_unknown
 	}
 	return v
-}
-
-func unixtime_now() int64 {
-	return time.Now().UnixNano()
-}
-
-func unixtime_nano(nano int64) time.Time {
-	sec := time.Duration(nano) / time.Second
-	n := time.Duration(nano) % time.Second
-	return time.Unix(int64(sec), int64(n))
 }

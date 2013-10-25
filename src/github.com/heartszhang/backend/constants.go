@@ -19,7 +19,7 @@ const (
 )
 
 const (
-	feed_status_fulltext_ready uint = 1 << iota
+	feed_status_fulltext_ready uint64 = 1 << iota
 	feed_status_thumbnail_ready
 	feed_status_has_image
 	feed_status_has_audio
@@ -60,80 +60,81 @@ const (
 
 type FeedLink struct {
 	media_type   uint   // feed_media_type...
-	Uri          string `json:"uri,omitempty"`           // url
-	Alias        string `json:"alias,omitempty"`         // title may be
-	Local        string `json:"local,omitempty"`         // downloaded origin html
-	CleanedLocal string `json:"cleaned_local,omitempty"` // cleaned-doc local rel path
-	Words        int    `json:"words"`                   // words after cleaned
-	Sentences    int    `json:"sentences"`               // sentences after cleaned
-	Links        int    `json:"links"`                   // links after cleaned
-	Density      int    `json:"density"`                 // density of original doc
-	Length       int64  `json:"length"`
-	Readable     bool   `json:"readable"` // cleaned doc has perfect content
+	Uri          string `uri,omitempty`           // url
+	Alias        string `alias,omitempty`         // title may be
+	Local        string `local,omitempty`         // downloaded origin html
+	CleanedLocal string `cleaned_local,omitempty` // cleaned-doc local rel path
+	Words        int    `words`                   // words after cleaned
+	Sentences    int    `sentences`               // sentences after cleaned
+	Links        int    `links`                   // links after cleaned
+	Density      int    `density`                 // density of original doc
+	Length       int64  `length`
+	Readable     bool   `readable` // cleaned doc has perfect content
 
-	Images []FeedImage `json:"images,omitempty"`
-	Video  []FeedMedia `json:"videos,omitempty"`
-	Audio  []FeedMedia `json:"audios,omitempty"`
+	Images []FeedImage `images,omitempty`
+	Videos []FeedMedia `videos,omitempty`
+	Audios []FeedMedia `audios,omitempty`
 }
 
 type FeedMedia struct {
 	media_type  uint
-	Title       string `json:"title,omitempty"`
-	Description string `json:"desc,omitempty"`
-	Uri         string `json:"uri,omitempty"`   // original url
-	Local       string `json:"local,omitempty"` // image : download rel path, video : extraced flv/mp4 url
-	Width       int    `json:"width"`           // -1 :unknown
-	Height      int    `json:"height"`          // -1 : unknown
-	Length      int64  `json:"length"`
-	Duration    int    `json:"duration"` // seconds, only for vidoe/audio
-	Mime        string `json:"mime,omitempty"`
+	Title       string `title,omitempty`
+	Description string `desc,omitempty`
+	Uri         string `uri,omitempty`   // original url
+	Local       string `local,omitempty` // image : download rel path, video : extraced flv/mp4 url
+	Width       int    `width`           // -1 :unknown
+	Height      int    `height`          // -1 : unknown
+	Length      int64  `length`
+	Duration    int    `duration` // seconds, only for vidoe/audio
+	Mime        string `mime,omitempty`
 }
 
 type FeedImage FeedMedia
 
 type FeedAuthor struct {
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-	Id    uint64 `json:"id"` // for tweet, weibo etc
+	Name  string `name,omitempty`
+	Email string `email,omitempty`
+	Id    uint64 `id` // for tweet, weibo etc
 }
 
 type FeedTitle struct {
-	Main   string   `json:"main,omitempty"`   // primary title
-	Others []string `json:"second,omitempty"` // secondary or alternative titles, not including main
+	Main   string   `main,omitempty`   // primary title
+	Others []string `second,omitempty` // secondary or alternative titles, not including main
 }
 
 type FeedContent struct {
-	Uri     string      `json:"uri"`
-	Local   string      `json:"local"`
-	Words   uint        `json:"words"`
-	Density uint        `json:"density"`
-	Links   uint        `json:"links"`
-	Status  uint64      `json:"status"`
-	Images  []FeedImage `json:"images"`
-	Media   []FeedMedia `json:"media"`
+	Uri      string      `uri`
+	Local    string      `local`
+	FullText string      `-`
+	Words    uint        `words`
+	Density  uint        `density`
+	Links    uint        `links`
+	Status   uint64      `status`
+	Images   []FeedImage `images`
+	Medias   []FeedMedia `media`
 }
 
 type FeedEntry struct {
-	Id     string `json:"_id"`
-	Flags  uint   `json:"flags"`
-	Source string `json:"src,omitempty"` // source's uri
-	Type   uint   `json:"type"`          // feed_type...
-
-	Uri      string      `json:"uri, omitempty"`
-	Title    FeedTitle   `json:"title,omitempty"`
-	Author   FeedAuthor  `json:"author,omitempty"`
-	PubDate  int64       `json:"pubdate"` // unix time
-	Summary  string      `json:"summary,omitempty"`
-	Content  FeedContent `json:"content,omitempty"`
-	Tags     []string    `json:"tags,omitempty"`
-	Images   []FeedImage `json:"images,omitempty"`
-	Video    []FeedMedia `json:"videos,omitempty"`
-	Audio    []FeedMedia `json:"audios,omitempty"`
-	Links    []FeedLink  `json:"links,omitempty"`
-	Words    uint        `json:"words"`
-	Density  uint        `json:"density"` // percent
-	Status   uint64      `json:"status"`
-	Category uint64      `json:"category"`
+	Id       string      `bson:"_id" json:"id"`
+	Flags    uint        `flags`
+	Source   string      `src,omitempty` // source's uri
+	Type     uint        `type`          // feed_type...
+	Uri      string      `uri, omitempty`
+	Title    FeedTitle   `title,omitempty`
+	Author   FeedAuthor  `author,omitempty`
+	PubDate  int64       `pubdate` // unix time
+	Summary  string      `summary,omitempty`
+	Content  FeedContent `content,omitempty`
+	Tags     []string    `tags,omitempty`
+	Images   []FeedImage `images,omitempty`
+	Videos   []FeedMedia `videos,omitempty`
+	Audios   []FeedMedia `audios,omitempty`
+	Links    []FeedLink  `links,omitempty`
+	Readed   bool        `readed`
+	Words    uint        `words`   // of sumary
+	Density  uint        `density` // percent
+	Status   uint64      `status`
+	Category uint64      `category`
 }
 
 const (
@@ -141,49 +142,23 @@ const (
 )
 
 type FeedSource struct {
-	Name        string    `json:"name, omitempty"`
-	Uri         string    `json:"uri,omitempty"` // rss/atom url
-	Local       string    `json:"local"`
-	Period      uint      `json:"period"`   // hour
-	TouchAt     int64     `json:"touch_at"` // unixtime_nano
-	Category    uint64    `json:"category"` //categories
-	Type        uint      `json:"type"`     // feed_type...
-	Disabled    bool      `json:"disabled"` //auto refresh enabled
-	EnableProxy bool      `json:"enable_proxy"`
-	PubDate     int64     `json:"pubdate"`           // the last time, we refreshed, unix-time
-	WebSite     string    `json:"website,omitempty"` // home
-	Tags        []string  `json:"tags,omitempty"`
-	Media       FeedMedia `json:"media,omitmepty"`
-	Description string    `json:"description, omitempty"`
+	Name        string    `name, omitempty`
+	Uri         string    `uri,omitempty` // rss/atom url
+	Local       string    `local`
+	Period      uint      `period`   // minutes
+	DueAt       int64     `due_at`   // unixtime_nano
+	Category    uint64    `category` //categories
+	Type        uint      `type`     // feed_type...
+	Disabled    bool      `disabled` //auto refresh enabled
+	EnableProxy bool      `enable_proxy`
+	Update      int64     `update`            // the last time, we refreshed, unix-time
+	WebSite     string    `website,omitempty` // home
+	Tags        []string  `tags,omitempty`
+	Media       FeedMedia `media,omitmepty`
+	Description string    `description, omitempty`
 }
 
 type FeedCategory struct {
-	Mask uint64 `json:"mask"`
-	Name string `json:"name"`
-}
-
-type FeedsProfile struct {
-	Categories   []FeedCategory `json:"categories,omitempty"`
-	DataDir      string         `json:"data_dir,omitempty"`     //absolute
-	Usage        uint64         `json:"usage"`                  //bytes
-	ImageDir     string         `json:"image_dir,omitempty"`    //absolute
-	DocumentDir  string         `json:"document_dir,omitempty"` //absolute
-	Proxy        string         `json:"proxy, omitempty"`       // "127.0.0.1:8087"
-	CategoryMask uint64         `json:"category_mask"`          // masked all categories
-}
-
-var ( // global status
-	profile = FeedsProfile{}
-)
-
-func init() {
-}
-
-// need not lock
-func feedsprofile() FeedsProfile {
-	return profile
-}
-
-func (this FeedsProfile) content_dir() string {
-	return this.DataDir + "content/"
+	Mask uint64 `mask`
+	Name string `name`
 }

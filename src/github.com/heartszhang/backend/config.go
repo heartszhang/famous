@@ -1,58 +1,69 @@
 package backend
 
 import (
-	"flag"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 )
 
-type feeds_config struct {
-	ip   string
-	port uint
+type FeedsBackendConfig struct {
+	Ip            string         `json:"web_ip"`
+	Port          uint           `json:"port"`
+	DbAddress     string         `json:"db_address"` // ip:port or ip
+	DbName        string         `json:"db_name"`
+	Categories    []FeedCategory `json:"categories,omitempty"`
+	DataDir       string         `json:"data_dir,omitempty"` //absolute
+	Usage         uint64         `json:"usage"`              //bytes
+	ImageDir      string         `json:"image,omitempty"`    //absolute
+	DocumentDir   string         `json:"document,omitempty"` //absolute
+	FeedSourceDir string         `json:"feed_source,omitmepty"`
+	FeedEntryDir  string         `json:"feed_entry,omitempty"`
+	Proxy         string         `json:"proxy, omitempty"` // "127.0.0.1:8087"
+	CategoryMask  uint64         `json:"category_mask"`    // masked all categories}
 }
 
-type FeedsBackendConfig struct {
-	Ip   string `json:bind_ip`
-	Port uint   `json:port`
+func init() {
+	config.Ip = "127.0.0.1"
+	config.Port = 8002
+	config.DbAddress = "127.0.0.1"
+	config.DbName = "backend"
+	config.DataDir = "data/"
+	config.ImageDir = config.DataDir + "image/"
+	config.DocumentDir = config.DataDir + "fulltext/"
+	config.FeedSourceDir = config.DataDir + "sources/"
+	config.FeedEntryDir = config.DataDir + "entries/"
+	config.Categories = make([]FeedCategory, 0)
+	os.MkdirAll(config.ImageDir, 0644)
+	os.MkdirAll(config.DocumentDir, 0644)
+	os.MkdirAll(config.FeedSourceDir, 0644)
+	os.MkdirAll(config.FeedEntryDir, 0644)
+	status.startat = time.Now()
 }
 
 func (this FeedsBackendConfig) Address() string {
 	return fmt.Sprintf("%v:%d", this.Ip, this.Port)
 }
 
-type feeds_status struct {
-	startat time.Time
-}
-
 type FeedsStatus struct {
-	Runned int64 `json:"runned"` // seconds
+	startat time.Time `json:"-"`
+	Runned  int64     `json:"runned"` // seconds
 }
 
-func (this feeds_status) runned_nano() int64 {
+func (this FeedsStatus) runned_nano() int64 {
 	return int64(time.Since(this.startat).Seconds())
 }
 
 var (
 	locker sync.Mutex
-	config feeds_config
-	status feeds_status
-
-	bind_ip = flag.String("bind_ip", "127.0.0.1", "binding address should be localhost")
-	port    = flag.Uint("port", 8002, "backend working port default 8002")
+	config FeedsBackendConfig
+	status FeedsStatus
 )
-
-func init() {
-	flag.Parse()
-	config.ip = *bind_ip
-	config.port = *port
-	status.startat = time.Now()
-}
 
 func BackendConfig() FeedsBackendConfig {
 	locker.Lock()
 	defer locker.Unlock()
-	return FeedsBackendConfig{Ip: config.ip, Port: config.port}
+	return config
 }
 
 func BackendStatus() FeedsStatus {

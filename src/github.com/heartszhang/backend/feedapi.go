@@ -8,10 +8,6 @@ func feed_source_create(filepath string, url string) (FeedSource, error) {
 	return FeedSource{}, nil
 }
 
-func feed_source_create_opml(filepath string, url string) (FeedSource, error) {
-	return FeedSource{}, nil
-}
-
 func feed_source_create_sina_weibo(filepath string, url string) (FeedSource, error) {
 	return FeedSource{}, nil
 }

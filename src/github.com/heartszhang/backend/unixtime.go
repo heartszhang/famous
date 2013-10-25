@@ -40,3 +40,13 @@ func unixtime_nano_rfc822(t string, formats ...string) int64 {
 	}
 	return time.Now().UnixNano()
 }
+
+func unixtime_now() int64 {
+	return time.Now().UnixNano()
+}
+
+func unixtime_nano(nano int64) time.Time {
+	sec := time.Duration(nano) / time.Second
+	n := time.Duration(nano) % time.Second
+	return time.Unix(int64(sec), int64(n))
+}

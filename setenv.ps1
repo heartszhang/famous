@@ -35,5 +35,7 @@ function db_stop(){
 #CGO_CFLAGS=-IC:\MINGW64/include
 #CGO_LDFLAGS=-LC:\MINGW64/lib
 #download libiconv for windows 64bits
-#go get github.com/djimenez/iconv-go
+#go get -u github.com/qiniu/iconv
 # // #cgo windows LDFLAGS: -liconv // add to iconv.go
+
+[Console]::OutputEncoding = [Text.Encoding]::Utf8
