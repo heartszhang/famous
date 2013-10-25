@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+ <head>
+  <title>hearts.zhang subscriptions in Aol Reader</title>
+ </head>
+ <body>
+  <outline title="TECH" text="TECH">
+   <outline title="博客园" text="博客园" type="rss" xmlUrl="http://www.cnblogs.com/rss" htmlUrl="http://www.cnblogs.com/"/>
+   <outline title="Developing for Windows" text="Developing for Windows" type="rss" xmlUrl="http://windowsteamblog.com/windows/b/developers/rss.aspx" htmlUrl="http://blogs.windows.com/windows/archive/b/developers/default.aspx"/>
+   <outline title="Windows App Builder Blog" text="Windows App Builder Blog" type="rss" xmlUrl="http://blogs.windows.com/windows/b/appbuilder/rss.aspx" htmlUrl="http://blogs.windows.com/windows/b/appbuilder/default.aspx"/>
+   <outline title="wooyun.org 最新提交漏洞" text="wooyun.org 最新提交漏洞" type="rss" xmlUrl="http://www.wooyun.org/feeds/submit" htmlUrl="http://www.wooyun.org/"/>
+   <outline title="Parallel Programming in Native Code" text="Parallel Programming in Native Code" type="rss" xmlUrl="http://blogs.msdn.com/b/nativeconcurrency/atom.aspx" htmlUrl="http://blogs.msdn.com/b/nativeconcurrency/"/>
+   <outline title="互联网产品设计" text="互联网产品设计" type="rss" xmlUrl="http://www.alibuybuy.com/feed" htmlUrl="http://www.alibuybuy.com/"/>
+   <outline title="C++博客-牵着老婆满街逛" text="C++博客-牵着老婆满街逛" type="rss" xmlUrl="http://www.cppblog.com/tx7do/Rss.aspx" htmlUrl="http://www.cppblog.com/tx7do/"/>
+   <outline title="The Visual Studio Blog" text="The Visual Studio Blog" type="rss" xmlUrl="http://blogs.msdn.com/visualstudio/rss.xml" htmlUrl="http://blogs.msdn.com/b/visualstudio/"/>
+   <outline title="Sutter&amp;#039;s Mill" text="Sutter&amp;#039;s Mill" type="rss" xmlUrl="http://herbsutter.com/feed/" htmlUrl="http://herbsutter.com/"/>
+   <outline title="C++博客-首页原创精华区" text="C++博客-首页原创精华区" type="rss" xmlUrl="http://www.cppblog.com/rss.aspx" htmlUrl="http://www.cppblog.com/"/>
+  </outline>
+  <outline title="blogger-following" text="blogger-following">
+   <outline title="科学松鼠会" text="科学松鼠会" type="rss" xmlUrl="http://songshuhui.net/feed" htmlUrl="http://songshuhui.net/"/>
+   <outline title="南方周末-首页" text="南方周末-首页" type="rss" xmlUrl="http://www.infzm.com/rss/home/rss2.0.xml" htmlUrl="http://www.infzm.com/"/>
+  </outline>
+  <outline title="设计｜生活｜发现新鲜" text="设计｜生活｜发现新鲜" type="rss" xmlUrl="http://feed.feedsky.com/since1984" htmlUrl="http://since1984.cn/"/>
+  <outline title="gfwlist 更新记录" text="gfwlist 更新记录" type="rss" xmlUrl="http://feeds.feedburner.com/gfwlist" htmlUrl="http://autoproxy2pac.appspot.com/changelog/gfwlist"/>
+  <outline title="疯狂的设计" text="疯狂的设计" type="rss" xmlUrl="http://hi.baidu.com/madesign/rss" htmlUrl="http://hi.baidu.com/madesign"/>
+  <outline title="新闻-阿波罗网" text="新闻-阿波罗网" type="rss" xmlUrl="http://www.aboluowang.com/news/rss.xml" htmlUrl="http://www.aboluowang.com/"/>
+  <outline title="互联网的那点事..." text="互联网的那点事..." type="rss" xmlUrl="http://feed.feedsky.com/alibuybuy" htmlUrl="http://www.alibuybuy.com/"/>
+  <outline title="Leica中文摄影杂志" text="Leica中文摄影杂志" type="rss" xmlUrl="http://feed.feedsky.com/leica" htmlUrl="http://www.leica.org.cn/index.php"/>
+  <outline title="一五一十部落头条" text="一五一十部落头条" type="rss" xmlUrl="http://feed.feedsky.com/my1510" htmlUrl="http://www.my1510.cn/"/>
+  <outline title="互联网的一些事" text="互联网的一些事" type="rss" xmlUrl="http://feed.feedsky.com/yixieshi" htmlUrl="http://www.yixieshi.com/"/>
+ </body>
+</opml>
