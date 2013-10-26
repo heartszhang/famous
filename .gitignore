@@ -55,3 +55,4 @@ _testmain.go
 mongodb/
 pkg/
 bin/
+*_sample/

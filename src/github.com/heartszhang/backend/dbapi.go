@@ -1,21 +1,22 @@
 package backend
 
 import (
+	feed "github.com/heartszhang/feedfeed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"time"
 )
 
 type FeedSourceOperator interface {
-	Save(feeds []FeedSource) ([]FeedSource, error)
-	Upsert(f *FeedSource) error
-	Find(uri string) (*FeedSource, error)
-	TimeoutSources() ([]FeedSource, error)
-	AllSources() ([]FeedSource, error)
+	Save(feeds []feed.FeedSource) ([]feed.FeedSource, error)
+	Upsert(f *feed.FeedSource) error
+	Find(uri string) (*feed.FeedSource, error)
+	TimeoutSources() ([]feed.FeedSource, error)
+	AllSources() ([]feed.FeedSource, error)
 	Touch(uri string, ttl int) error
 	Drop(uri string) error
 	Disable(uri string, dis bool) error
-	Update(f *FeedSource) error
+	Update(f *feed.FeedSource) error
 }
 
 func NewFeedSourceOperator() FeedSourceOperator {
@@ -24,8 +25,8 @@ func NewFeedSourceOperator() FeedSourceOperator {
 
 type feedsource_op struct{}
 
-func (feedsource_op) Save(feeds []FeedSource) (inserted []FeedSource, err error) {
-	inserted = make([]FeedSource, 0)
+func (feedsource_op) Save(feeds []feed.FeedSource) (inserted []feed.FeedSource, err error) {
+	inserted = make([]feed.FeedSource, 0)
 	err = do_in_session("feedsources", func(coll *mgo.Collection) error {
 		for _, f := range feeds {
 			ci, err := coll.Upsert(bson.M{"uri": f.Uri}, bson.M{"$setOnInsert": f})
@@ -41,7 +42,7 @@ func (feedsource_op) Save(feeds []FeedSource) (inserted []FeedSource, err error)
 	return
 }
 
-func (feedsource_op) Upsert(f *FeedSource) error {
+func (feedsource_op) Upsert(f *feed.FeedSource) error {
 	return do_in_session("feedsources", func(coll *mgo.Collection) error {
 		_, err := coll.Upsert(bson.M{"uri": f.Uri}, bson.M{"$setOnInsert": f})
 		return err
@@ -60,7 +61,7 @@ func (feedsource_op) Disable(uri string, dis bool) error {
 	})
 }
 
-func (feedsource_op) Update(f *FeedSource) error {
+func (feedsource_op) Update(f *feed.FeedSource) error {
 	return do_in_session("feedsources", func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": f.Uri},
 			bson.M{
@@ -69,8 +70,8 @@ func (feedsource_op) Update(f *FeedSource) error {
 	})
 }
 
-func (feedsource_op) Find(uri string) (*FeedSource, error) {
-	rtn := new(FeedSource)
+func (feedsource_op) Find(uri string) (*feed.FeedSource, error) {
+	rtn := new(feed.FeedSource)
 	err := do_in_session("feedsources", func(coll *mgo.Collection) error {
 		err := coll.Find(bson.M{"uri": uri}).One(rtn)
 		return err
@@ -78,17 +79,17 @@ func (feedsource_op) Find(uri string) (*FeedSource, error) {
 	return rtn, err
 }
 
-func (feedsource_op) AllSources() (feds []FeedSource, err error) {
-	feds = make([]FeedSource, 0)
+func (feedsource_op) AllSources() (feds []feed.FeedSource, err error) {
+	feds = make([]feed.FeedSource, 0)
 	err = do_in_session("feedsources", func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"disabled": false}).All(&feds)
 	})
 	return
 }
-func (feedsource_op) TimeoutSources() ([]FeedSource, error) {
-	rtn := make([]FeedSource, 0)
+func (feedsource_op) TimeoutSources() ([]feed.FeedSource, error) {
+	rtn := make([]feed.FeedSource, 0)
 	err := do_in_session("feedsources", func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"disabled": false, "due_at": bson.M{"$lt": unixtime_now()}}).All(&rtn)
+		return coll.Find(bson.M{"disabled": false, "due_at": bson.M{"$lt": feed.UnixTimeNow()}}).All(&rtn)
 	})
 	return rtn, err
 }
@@ -101,13 +102,13 @@ func (feedsource_op) Touch(uri string, ttl int) error {
 }
 
 type FeedEntryOperator interface {
-	Save([]FeedEntry) ([]FeedEntry, error)
-	SaveOne(FeedEntry) (interface{}, error)
-	TopN(skip, limit int) ([]FeedEntry, error)
-	TopNByCategory(skip, limit int, category string) ([]FeedEntry, error)
-	TopNByFeed(skip, limit int, feed string) ([]FeedEntry, error)
+	Save([]feed.FeedEntry) ([]feed.FeedEntry, error)
+	SaveOne(feed.FeedEntry) (interface{}, error)
+	TopN(skip, limit int) ([]feed.FeedEntry, error)
+	TopNByCategory(skip, limit int, category string) ([]feed.FeedEntry, error)
+	TopNByFeedSource(skip, limit int, feed string) ([]feed.FeedEntry, error)
 	MarkRead(link string, readed bool) error
-	SetContent(link string, filepath string, words int, imgs []FeedImage) error
+	SetContent(link string, filepath string, words int, imgs []feed.FeedImage) error
 }
 
 func NewFeedEntryOperator() FeedEntryOperator {
@@ -123,8 +124,8 @@ func (feedentry_op) MarkRead(uri string, readed bool) error {
 	})
 }
 
-func (feedentry_op) Save(entries []FeedEntry) ([]FeedEntry, error) {
-	inserted := make([]FeedEntry, 0)
+func (feedentry_op) Save(entries []feed.FeedEntry) ([]feed.FeedEntry, error) {
+	inserted := make([]feed.FeedEntry, 0)
 	err := do_in_session("entries", func(coll *mgo.Collection) error {
 		for _, entry := range entries {
 			iid, err := insert_entry(coll, entry)
@@ -140,7 +141,7 @@ func (feedentry_op) Save(entries []FeedEntry) ([]FeedEntry, error) {
 	return inserted, err
 }
 
-func (feedentry_op) SaveOne(entry FeedEntry) (uid interface{}, err error) {
+func (feedentry_op) SaveOne(entry feed.FeedEntry) (uid interface{}, err error) {
 	do_in_session("entries", func(coll *mgo.Collection) error {
 		uid, err = insert_entry(coll, entry)
 		return err
@@ -148,24 +149,24 @@ func (feedentry_op) SaveOne(entry FeedEntry) (uid interface{}, err error) {
 	return uid, err
 }
 
-func (feedentry_op) TopN(skip, limit int) ([]FeedEntry, error) {
-	rtn := make([]FeedEntry, 0)
+func (feedentry_op) TopN(skip, limit int) ([]feed.FeedEntry, error) {
+	rtn := make([]feed.FeedEntry, 0)
 	err := do_in_session("entries", func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
 
-func (feedentry_op) TopNByFeed(skip, limit int, feed string) ([]FeedEntry, error) {
-	rtn := make([]FeedEntry, 0)
+func (feedentry_op) TopNByFeedSource(skip, limit int, source string) ([]feed.FeedEntry, error) {
+	rtn := make([]feed.FeedEntry, 0)
 	err := do_in_session("entries", func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"readed": false, "feed": feed}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
+		return coll.Find(bson.M{"readed": false, "source": source}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
 
-func (feedentry_op) TopNByCategory(skip, limit int, tag string) ([]FeedEntry, error) {
-	rtn := make([]FeedEntry, 0)
+func (feedentry_op) TopNByCategory(skip, limit int, tag string) ([]feed.FeedEntry, error) {
+	rtn := make([]feed.FeedEntry, 0)
 	err := do_in_session("entries", func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false, "tags": tag}).
 			Sort("-created").
@@ -176,18 +177,18 @@ func (feedentry_op) TopNByCategory(skip, limit int, tag string) ([]FeedEntry, er
 	return rtn, err
 }
 
-func insert_entry(coll *mgo.Collection, entry FeedEntry) (interface{}, error) {
+func insert_entry(coll *mgo.Collection, entry feed.FeedEntry) (interface{}, error) {
 	ci, err := coll.Upsert(bson.M{"uri": entry.Uri}, bson.M{"$setOnInsert": &entry})
 	return ci.UpsertedId, err
 }
 
-func (feedentry_op) SetContent(uri, filepath string, words int, imgs []FeedImage) error {
-	status := feed_content_failed
+func (feedentry_op) SetContent(uri, filepath string, words int, imgs []feed.FeedImage) error {
+	status := feed.Feed_content_failed
 	imgc := len(imgs)
 	if len(filepath) > 0 && (words+imgc*128) > 192 {
-		status = feed_content_ready
+		status = feed.Feed_content_ready
 	}
-	cs := FeedContent{Uri: uri, Local: filepath, Words: uint(words), Status: status, Images: imgs}
+	cs := feed.FeedContent{Uri: uri, Local: filepath, Words: uint(words), Status: status, Images: imgs}
 
 	return do_in_session("entries", func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{

@@ -1,4 +1,4 @@
-package backend
+package feedfeed
 
 import (
 	"net/http"
@@ -45,6 +45,9 @@ func unixtime_now() int64 {
 	return time.Now().UnixNano()
 }
 
+func UnixTimeNow() int64 {
+	return unixtime_now()
+}
 func unixtime_nano(nano int64) time.Time {
 	sec := time.Duration(nano) / time.Second
 	n := time.Duration(nano) % time.Second

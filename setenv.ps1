@@ -38,4 +38,4 @@ function db_stop(){
 #go get -u github.com/qiniu/iconv
 # // #cgo windows LDFLAGS: -liconv // add to iconv.go
 
-[Console]::OutputEncoding = [Text.Encoding]::Utf8
+$OutputEncoding = New-Object -typename System.Text.UTF8Encoding

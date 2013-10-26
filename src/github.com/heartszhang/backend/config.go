@@ -2,25 +2,26 @@ package backend
 
 import (
 	"fmt"
+	feed "github.com/heartszhang/feedfeed"
 	"os"
 	"sync"
 	"time"
 )
 
 type FeedsBackendConfig struct {
-	Ip            string         `json:"web_ip"`
-	Port          uint           `json:"port"`
-	DbAddress     string         `json:"db_address"` // ip:port or ip
-	DbName        string         `json:"db_name"`
-	Categories    []FeedCategory `json:"categories,omitempty"`
-	DataDir       string         `json:"data_dir,omitempty"` //absolute
-	Usage         uint64         `json:"usage"`              //bytes
-	ImageDir      string         `json:"image,omitempty"`    //absolute
-	DocumentDir   string         `json:"document,omitempty"` //absolute
-	FeedSourceDir string         `json:"feed_source,omitmepty"`
-	FeedEntryDir  string         `json:"feed_entry,omitempty"`
-	Proxy         string         `json:"proxy, omitempty"` // "127.0.0.1:8087"
-	CategoryMask  uint64         `json:"category_mask"`    // masked all categories}
+	Ip            string              `json:"web_ip"`
+	Port          uint                `json:"port"`
+	DbAddress     string              `json:"db_address"` // ip:port or ip
+	DbName        string              `json:"db_name"`
+	Categories    []feed.FeedCategory `json:"categories,omitempty"`
+	DataDir       string              `json:"data_dir,omitempty"` //absolute
+	Usage         uint64              `json:"usage"`              //bytes
+	ImageDir      string              `json:"image,omitempty"`    //absolute
+	DocumentDir   string              `json:"document,omitempty"` //absolute
+	FeedSourceDir string              `json:"feed_source,omitmepty"`
+	FeedEntryDir  string              `json:"feed_entry,omitempty"`
+	Proxy         string              `json:"proxy, omitempty"` // "127.0.0.1:8087"
+	CategoryMask  uint64              `json:"category_mask"`    // masked all categories}
 }
 
 func init() {
@@ -33,7 +34,7 @@ func init() {
 	config.DocumentDir = config.DataDir + "fulltext/"
 	config.FeedSourceDir = config.DataDir + "sources/"
 	config.FeedEntryDir = config.DataDir + "entries/"
-	config.Categories = make([]FeedCategory, 0)
+	config.Categories = make([]feed.FeedCategory, 0)
 	os.MkdirAll(config.ImageDir, 0644)
 	os.MkdirAll(config.DocumentDir, 0644)
 	os.MkdirAll(config.FeedSourceDir, 0644)
