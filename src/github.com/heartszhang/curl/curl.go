@@ -39,23 +39,31 @@ type Curler interface {
 	GetUtf8(uri string, proxypolicy int) (Cache, error)
 }
 
-type Curl struct {
+type curler struct {
 	data_dir string
 }
 
 func NewCurl(datadir string) Curler {
-	return &Curl{data_dir: datadir}
+	return &curler{data_dir: datadir}
 }
 
 const (
-	connection_timeout = 10 //seconds
-	response_timeout   = 20 // seconds
+	connection_speedup_timeout = 4
+	connection_timeout         = 10 //seconds
+	response_timeout           = 20 // seconds
 )
 
+func new_timeout_dialer(timeo int) func(string, string) (net.Conn, error) {
+	return func(network, addr string) (net.Conn, error) {
+		return net.DialTimeout(network, addr, time.Duration(timeo)*time.Second)
+	}
+}
+
+/*
 func timeout_dialer(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, time.Duration(connection_timeout*time.Second))
 }
-
+*/
 func client_do_get(client *http.Client, uri string) (resp *http.Response, err error) {
 	req, err := http.NewRequest("GET", uri, nil)
 	if err == nil {
@@ -66,8 +74,12 @@ func client_do_get(client *http.Client, uri string) (resp *http.Response, err er
 }
 
 func do_get(uri string, useproxy int) (*http.Response, error) {
+	return do_get_timeo(uri, useproxy, connection_timeout)
+}
+
+func do_get_timeo(uri string, useproxy int, timeo int) (*http.Response, error) {
 	trans := &http.Transport{
-		Dial: timeout_dialer,
+		Dial: new_timeout_dialer(timeo),
 		ResponseHeaderTimeout: time.Duration(response_timeout * time.Second),
 	}
 
@@ -85,7 +97,7 @@ func do_get(uri string, useproxy int) (*http.Response, error) {
 	client := &http.Client{Transport: trans}
 	resp, err := client_do_get(client, uri)
 	if err != nil && noretry == false {
-		log.Println("try again with proxy")
+		log.Println("try again with proxy", uri)
 		trans.Proxy = http.ProxyFromEnvironment
 		resp, err = client_do_get(client, uri)
 	}
@@ -210,7 +222,7 @@ func file_detect_content_type(local, mime string) string {
 // only when converting sucessfully, Cache.LocalUtf8 would be set
 // when convert non-utf8 encoded xml, file would be saved as utf-8, but xml declares another encoding
 // xml-decoder should use a passthrough charset-reader
-func (this *Curl) GetUtf8(uri string, proxypolicy int) (Cache, error) {
+func (this *curler) GetUtf8(uri string, proxypolicy int) (Cache, error) {
 	v, err := this.Get(uri, proxypolicy)
 	if err != nil {
 		return v, err
@@ -273,7 +285,7 @@ func (this *Curl) GetUtf8(uri string, proxypolicy int) (Cache, error) {
 // use env-proxy or goagent for all http sessions, if direct conn fail
 // detect charset by mimetype
 // use server-site filename as name-prefix
-func (this *Curl) Get(uri string, useproxy int) (Cache, error) {
+func (this *curler) Get(uri string, useproxy int) (Cache, error) {
 	v := Cache{}
 	resp, err := do_get(uri, useproxy)
 	if err != nil {
