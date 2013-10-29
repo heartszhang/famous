@@ -1,6 +1,6 @@
 $project_root = split-path $MyInvocation.MyCommand.Path
-
 $env:GOPATH = "$env:GOPATH;$project_root"
+#$env:GOPATH = "$project_root"
 $env:PATH = "$env:PATH;$project_root/bin"
 # mongod --config /etc/mongodb.conf
 $mongo_conf = (Get-ChildItem mongod.conf).FullName
@@ -18,10 +18,10 @@ $mongo_logpath = "$project_root\mongodb\mongo.log"
 $mongo_dbpath = "$project_root\mongodb\db\"
 #"--bing_ip $mongo_ip -- logpath $mongo_logpath --dbpath $mongo_dbpath"
 
-function db_start(){
+function db_start {
     Start-Process "mongod.exe" "--bind_ip $mongo_ip --logpath $mongo_logpath --dbpath $mongo_dbpath"
 }
-function db_stop(){
+function db_stop {
     Start-Process "mongo.exe" "$mongo_ip/admin mongo_stop.js"
 }
 
@@ -36,6 +36,7 @@ function db_stop(){
 #CGO_LDFLAGS=-LC:\MINGW64/lib
 #download libiconv for windows 64bits
 #go get -u github.com/qiniu/iconv
+#github.com/nfnt/resize
 # // #cgo windows LDFLAGS: -liconv // add to iconv.go
 
 $OutputEncoding = New-Object -typename System.Text.UTF8Encoding

@@ -17,11 +17,14 @@ type FeedsBackendConfig struct {
 	DataDir       string              `json:"data_dir,omitempty"` //absolute
 	Usage         uint64              `json:"usage"`              //bytes
 	ImageDir      string              `json:"image,omitempty"`    //absolute
+	ThumbnailDir  string              `json:"thumbnail,omitempty"`
 	DocumentDir   string              `json:"document,omitempty"` //absolute
 	FeedSourceDir string              `json:"feed_source,omitmepty"`
 	FeedEntryDir  string              `json:"feed_entry,omitempty"`
 	Proxy         string              `json:"proxy, omitempty"` // "127.0.0.1:8087"
-	CategoryMask  uint64              `json:"category_mask"`    // masked all categories}
+
+	SummaryThreshold uint `json:"summary_threshold" bson:"summary_threshuld"`
+	ThumbnailWidth   uint `json:"thumbnail_width"`
 }
 
 func init() {
@@ -30,11 +33,14 @@ func init() {
 	config.DbAddress = "127.0.0.1"
 	config.DbName = "backend"
 	config.DataDir = "data/"
-	config.ImageDir = config.DataDir + "image/"
+	config.ImageDir = config.DataDir + "images/"
+	config.ThumbnailDir = config.DataDir + "thumbnails/"
 	config.DocumentDir = config.DataDir + "fulltext/"
 	config.FeedSourceDir = config.DataDir + "sources/"
 	config.FeedEntryDir = config.DataDir + "entries/"
-	config.Categories = make([]feed.FeedCategory, 0)
+	config.SummaryThreshold = 250
+	//	config.Categories = make([]feed.FeedCategory, 0)
+	config.ThumbnailWidth = 320
 	os.MkdirAll(config.ImageDir, 0644)
 	os.MkdirAll(config.DocumentDir, 0644)
 	os.MkdirAll(config.FeedSourceDir, 0644)
@@ -61,13 +67,17 @@ var (
 	status FeedsStatus
 )
 
-func BackendConfig() FeedsBackendConfig {
+func backend_config() FeedsBackendConfig {
 	locker.Lock()
 	defer locker.Unlock()
 	return config
 }
 
-func BackendStatus() FeedsStatus {
+func BackendConfig() FeedsBackendConfig {
+	return backend_config()
+}
+
+func backend_status() FeedsStatus {
 	locker.Lock()
 	defer locker.Unlock()
 	return FeedsStatus{Runned: status.runned_nano()}

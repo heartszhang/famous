@@ -3,6 +3,7 @@ package backend
 import (
 	"encoding/json"
 	"github.com/gorilla/pat"
+	feed "github.com/heartszhang/feedfeed"
 	"net/http"
 	"strconv"
 )
@@ -30,15 +31,17 @@ func init() {
 	http.Handle("/", p)
 }
 
+const uint64_bits int = 64
+
 // uri: /feeds/entries_since.json/{since_unixtime:[0-9]+}/{category:[0-9]+}/{count:[0-9]+}/{page:[0-9]+}
 func webapi_feeds_entries_since(w http.ResponseWriter, r *http.Request) {
 	since, err := strconv.ParseInt(r.URL.Query().Get(":since_unixtime"), 0, uint64_bits)
 	if err != nil {
-		since = unixtime_now()
+		since = feed.UnixTimeNow()
 	}
 	category, err := strconv.ParseUint(r.URL.Query().Get(":category"), 0, uint64_bits)
 	if err != nil {
-		category = feed_category_root
+		category = feed.Feed_category_root
 	}
 	count, err := strconv.ParseUint(r.URL.Query().Get(":count"), 0, 0)
 	if err != nil {
@@ -63,7 +66,7 @@ func webapi_feed_source_subscribe(w http.ResponseWriter, r *http.Request) {
 	source_type := source_type_map(r.URL.Query().Get(":source_type"))
 	category, err := strconv.ParseUint(r.URL.Query().Get(":category"), 0, uint64_bits)
 	if err != nil {
-		category = feed_category_root
+		category = feed.Feed_category_root
 	}
 
 	fs, err := feed_source_subscribe(url, source_type, category)
@@ -147,7 +150,7 @@ func webapi_feed_entry_media(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get(":entry_id")
 	media_type, err := strconv.ParseUint(r.URL.Query().Get(":media_type"), 0, 0)
 	if err != nil {
-		media_type = uint64(feed_media_type_unknown)
+		media_type = uint64(feed.Feed_media_type_unknown)
 	}
 	v, err := feed_entry_media(url, id, uint(media_type))
 	if err != nil {
@@ -200,7 +203,7 @@ func webapi_feed_source_unsubscribe(w http.ResponseWriter, r *http.Request) {
 	source_type := source_type_map(r.URL.Query().Get(":source_type"))
 	category, err := strconv.ParseUint(r.URL.Query().Get(":category"), 0, uint64_bits)
 	if err != nil {
-		category = feed_category_none
+		category = feed.Feed_category_none
 	}
 	err = feed_source_unsubscribe(url, source_type, category)
 	webapi_write_error(w, err)

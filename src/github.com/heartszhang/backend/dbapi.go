@@ -7,27 +7,31 @@ import (
 	"time"
 )
 
-type FeedSourceOperator interface {
-	Save(feeds []feed.FeedSource) ([]feed.FeedSource, error)
-	Upsert(f *feed.FeedSource) error
-	Find(uri string) (*feed.FeedSource, error)
-	TimeoutSources() ([]feed.FeedSource, error)
-	AllSources() ([]feed.FeedSource, error)
-	Touch(uri string, ttl int) error
-	Drop(uri string) error
-	Disable(uri string, dis bool) error
-	Update(f *feed.FeedSource) error
+type feedsource_operator interface {
+	save(feeds []feed.FeedSource) ([]feed.FeedSource, error)
+	upsert(f *feed.FeedSource) error
+	find(uri string) (*feed.FeedSource, error)
+	expired() ([]feed.FeedSource, error)
+	all() ([]feed.FeedSource, error)
+	touch(uri string, ttl int) error
+	drop(uri string) error
+	disable(uri string, dis bool) error
+	update(f *feed.FeedSource) error
 }
 
-func NewFeedSourceOperator() FeedSourceOperator {
-	return &feedsource_op{}
+func new_feedsource_operator() feedsource_operator {
+	return &feedsource_op{coll: "feed_sources"}
 }
 
-type feedsource_op struct{}
+type coll_op struct {
+	coll string
+}
 
-func (feedsource_op) Save(feeds []feed.FeedSource) (inserted []feed.FeedSource, err error) {
+type feedsource_op coll_op
+
+func (this feedsource_op) save(feeds []feed.FeedSource) (inserted []feed.FeedSource, err error) {
 	inserted = make([]feed.FeedSource, 0)
-	err = do_in_session("feedsources", func(coll *mgo.Collection) error {
+	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
 		for _, f := range feeds {
 			ci, err := coll.Upsert(bson.M{"uri": f.Uri}, bson.M{"$setOnInsert": f})
 			if err != nil {
@@ -42,27 +46,27 @@ func (feedsource_op) Save(feeds []feed.FeedSource) (inserted []feed.FeedSource, 
 	return
 }
 
-func (feedsource_op) Upsert(f *feed.FeedSource) error {
-	return do_in_session("feedsources", func(coll *mgo.Collection) error {
+func (this feedsource_op) upsert(f *feed.FeedSource) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		_, err := coll.Upsert(bson.M{"uri": f.Uri}, bson.M{"$setOnInsert": f})
 		return err
 	})
 }
 
-func (feedsource_op) Drop(uri string) error {
-	return do_in_session("feedsources", func(coll *mgo.Collection) error {
+func (this feedsource_op) drop(uri string) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Remove(bson.M{"uri": uri})
 	})
 }
 
-func (feedsource_op) Disable(uri string, dis bool) error {
-	return do_in_session("feedsources", func(coll *mgo.Collection) error {
+func (this feedsource_op) disable(uri string, dis bool) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"disabled": dis}})
 	})
 }
 
-func (feedsource_op) Update(f *feed.FeedSource) error {
-	return do_in_session("feedsources", func(coll *mgo.Collection) error {
+func (this feedsource_op) update(f *feed.FeedSource) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": f.Uri},
 			bson.M{
 				"$set":      bson.M{"period": f.Period},
@@ -70,63 +74,116 @@ func (feedsource_op) Update(f *feed.FeedSource) error {
 	})
 }
 
-func (feedsource_op) Find(uri string) (*feed.FeedSource, error) {
+func (this feedsource_op) find(uri string) (*feed.FeedSource, error) {
 	rtn := new(feed.FeedSource)
-	err := do_in_session("feedsources", func(coll *mgo.Collection) error {
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		err := coll.Find(bson.M{"uri": uri}).One(rtn)
 		return err
 	})
 	return rtn, err
 }
 
-func (feedsource_op) AllSources() (feds []feed.FeedSource, err error) {
+func (this feedsource_op) all() (feds []feed.FeedSource, err error) {
 	feds = make([]feed.FeedSource, 0)
-	err = do_in_session("feedsources", func(coll *mgo.Collection) error {
+	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"disabled": false}).All(&feds)
 	})
 	return
 }
-func (feedsource_op) TimeoutSources() ([]feed.FeedSource, error) {
+func (this feedsource_op) expired() ([]feed.FeedSource, error) {
 	rtn := make([]feed.FeedSource, 0)
-	err := do_in_session("feedsources", func(coll *mgo.Collection) error {
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"disabled": false, "due_at": bson.M{"$lt": feed.UnixTimeNow()}}).All(&rtn)
 	})
 	return rtn, err
 }
 
-func (feedsource_op) Touch(uri string, ttl int) error {
+func (this feedsource_op) touch(uri string, ttl int) error {
 	dl := time.Now().Add(time.Duration(ttl) * time.Minute)
-	return do_in_session("feedsources", func(coll *mgo.Collection) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"due_at": dl}})
 	})
 }
 
-type FeedEntryOperator interface {
-	Save([]feed.FeedEntry) ([]feed.FeedEntry, error)
-	SaveOne(feed.FeedEntry) (interface{}, error)
-	TopN(skip, limit int) ([]feed.FeedEntry, error)
-	TopNByCategory(skip, limit int, category string) ([]feed.FeedEntry, error)
-	TopNByFeedSource(skip, limit int, feed string) ([]feed.FeedEntry, error)
-	MarkRead(link string, readed bool) error
-	SetContent(link string, filepath string, words int, imgs []feed.FeedImage) error
+type feedcategory_operator interface {
+	save(cate string) (interface{}, error)
+	all() ([]string, error)
+	drop(category string) error
+}
+type feedcategory_op coll_op
+type feedtag_operator feedcategory_operator
+
+func new_feedtag_operator() feedtag_operator {
+	return feedcategory_op{coll: "feed_tags"}
 }
 
-func NewFeedEntryOperator() FeedEntryOperator {
-	return new(feedentry_op)
+func new_feedcategory_operator() feedcategory_operator {
+	return feedcategory_op{coll: "feed_categories"}
 }
 
-type feedentry_op struct {
+func (this feedcategory_op) all() ([]string, error) {
+	var v []struct {
+		Name string `bson:"name"`
+	}
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Find(nil).All(&v)
+	})
+	x := make([]string, len(v))
+	for i, c := range v {
+		x[i] = c.Name
+	}
+	return x, err
 }
 
-func (feedentry_op) MarkRead(uri string, readed bool) error {
-	return do_in_session("entries", func(coll *mgo.Collection) error {
-		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"readed": readed}})
+func (this feedcategory_op) drop(cate string) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Remove(bson.M{"name": cate})
 	})
 }
 
-func (feedentry_op) Save(entries []feed.FeedEntry) ([]feed.FeedEntry, error) {
+func (this feedcategory_op) save(cate string) (uid interface{}, err error) {
+	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
+		ci, err := coll.Upsert(bson.M{"name": cate}, bson.M{"$setOnInsert": bson.M{"name": cate}})
+		uid = ci.UpsertedId
+		return err
+	})
+	return
+}
+
+type feedentry_operator interface {
+	save([]feed.FeedEntry) ([]feed.FeedEntry, error)
+	save_one(feed.FeedEntry) (interface{}, error)
+	topn(skip, limit int) ([]feed.FeedEntry, error)
+	topn_by_category(skip, limit int, category string) ([]feed.FeedEntry, error)
+	topn_by_feedsource(skip, limit int, feed string) ([]feed.FeedEntry, error)
+	mark(link string, newmark uint) error
+	umark(uri string, markbit uint) error
+	setcontent(link string, filepath string, words int, imgs []feed.FeedMedia) error
+}
+
+type feedentry_op coll_op
+
+func new_feedentry_operator() feedentry_operator {
+	return feedentry_op{coll: "feed_entries"}
+}
+
+func (this feedentry_op) mark(uri string, newmark uint) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		//	return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"flags": newmark}})
+		return coll.Update(bson.M{"uri": uri}, bson.M{"$bit": bson.M{"flags": bson.M{"$or": newmark}}})
+	})
+}
+
+func (this feedentry_op) umark(uri string, markbit uint) error {
+	mask := ^markbit
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Update(bson.M{"uri": uri}, bson.M{"$bit": bson.M{"flags": bson.M{"$and": mask}}})
+	})
+}
+
+func (this feedentry_op) save(entries []feed.FeedEntry) ([]feed.FeedEntry, error) {
 	inserted := make([]feed.FeedEntry, 0)
-	err := do_in_session("entries", func(coll *mgo.Collection) error {
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		for _, entry := range entries {
 			iid, err := insert_entry(coll, entry)
 			if err != nil {
@@ -141,33 +198,33 @@ func (feedentry_op) Save(entries []feed.FeedEntry) ([]feed.FeedEntry, error) {
 	return inserted, err
 }
 
-func (feedentry_op) SaveOne(entry feed.FeedEntry) (uid interface{}, err error) {
-	do_in_session("entries", func(coll *mgo.Collection) error {
+func (this feedentry_op) save_one(entry feed.FeedEntry) (uid interface{}, err error) {
+	do_in_session(this.coll, func(coll *mgo.Collection) error {
 		uid, err = insert_entry(coll, entry)
 		return err
 	})
 	return uid, err
 }
 
-func (feedentry_op) TopN(skip, limit int) ([]feed.FeedEntry, error) {
+func (this feedentry_op) topn(skip, limit int) ([]feed.FeedEntry, error) {
 	rtn := make([]feed.FeedEntry, 0)
-	err := do_in_session("entries", func(coll *mgo.Collection) error {
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
 
-func (feedentry_op) TopNByFeedSource(skip, limit int, source string) ([]feed.FeedEntry, error) {
+func (this feedentry_op) topn_by_feedsource(skip, limit int, source string) ([]feed.FeedEntry, error) {
 	rtn := make([]feed.FeedEntry, 0)
-	err := do_in_session("entries", func(coll *mgo.Collection) error {
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false, "source": source}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
 
-func (feedentry_op) TopNByCategory(skip, limit int, tag string) ([]feed.FeedEntry, error) {
+func (this feedentry_op) topn_by_category(skip, limit int, tag string) ([]feed.FeedEntry, error) {
 	rtn := make([]feed.FeedEntry, 0)
-	err := do_in_session("entries", func(coll *mgo.Collection) error {
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false, "tags": tag}).
 			Sort("-created").
 			Skip(skip).
@@ -178,11 +235,15 @@ func (feedentry_op) TopNByCategory(skip, limit int, tag string) ([]feed.FeedEntr
 }
 
 func insert_entry(coll *mgo.Collection, entry feed.FeedEntry) (interface{}, error) {
-	ci, err := coll.Upsert(bson.M{"uri": entry.Uri}, bson.M{"$setOnInsert": &entry})
+	xe := struct {
+		feed.FeedEntry
+		TTL time.Time
+	}{entry, time.Now()}
+	ci, err := coll.Upsert(bson.M{"uri": entry.Uri}, bson.M{"$setOnInsert": &xe})
 	return ci.UpsertedId, err
 }
 
-func (feedentry_op) SetContent(uri, filepath string, words int, imgs []feed.FeedImage) error {
+func (this feedentry_op) setcontent(uri, filepath string, words int, imgs []feed.FeedMedia) error {
 	status := feed.Feed_content_failed
 	imgc := len(imgs)
 	if len(filepath) > 0 && (words+imgc*128) > 192 {
@@ -190,7 +251,7 @@ func (feedentry_op) SetContent(uri, filepath string, words int, imgs []feed.Feed
 	}
 	cs := feed.FeedContent{Uri: uri, Local: filepath, Words: uint(words), Status: status, Images: imgs}
 
-	return do_in_session("entries", func(coll *mgo.Collection) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{
 			"status":  status,
 			"content": cs,

@@ -38,6 +38,8 @@ $RECYCLE.BIN/
 # Folders
 _obj
 _test
+_sample
+
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -56,3 +58,4 @@ mongodb/
 pkg/
 bin/
 *_sample/
+sample_*/
