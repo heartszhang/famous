@@ -97,7 +97,7 @@ func do_get_timeo(uri string, useproxy int, timeo int) (*http.Response, error) {
 	client := &http.Client{Transport: trans}
 	resp, err := client_do_get(client, uri)
 	if err != nil && noretry == false {
-		log.Println("try again with proxy", uri)
+		log.Println("try again with proxy", uri, err)
 		trans.Proxy = http.ProxyFromEnvironment
 		resp, err = client_do_get(client, uri)
 	}
@@ -250,6 +250,7 @@ func (this *curler) GetUtf8(uri string, proxypolicy int) (Cache, error) {
 	}
 	if v.Charset == "utf-8" {
 		v.LocalUtf8 = v.Local
+		v.LengthUtf8 = v.Length
 		return v, err
 	}
 	converter, err := iconv.Open("utf-8", v.Charset)
