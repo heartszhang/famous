@@ -2,7 +2,6 @@ package cleaner
 
 import (
 	"code.google.com/p/go.net/html"
-	"log"
 )
 
 type boilerpiper struct {
@@ -136,12 +135,4 @@ func (this *boilerpiper) classify(prev *boilerpipe_score,
 	if current.forms > 0 && current.words == 0 {
 		current.is_content = false
 	}
-
-	log.Println("is-content:", current.is_content,
-		"words:", current.words,
-		"imgs:", current.imgs,
-		"lines:", current.lines(),
-		"density:", current.link_density(),
-		"links:", current.anchors,
-		"aimgs:", current.anchor_imgs)
 }
