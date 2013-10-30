@@ -22,8 +22,8 @@ func NewThumbnail(localfile, tmp string, width, height uint) (filepath, mediatyp
 	h = img.Bounds().Max.Y
 
 	imgnew := resize.Resize(width, height, img, resize.MitchellNetravali)
-
-	of, err := ioutil.TempFile(tmp, "")
+	ext := mime_to_ext(mediatype, "")
+	of, err := ioutil.TempFile(tmp, ext)
 	if err != nil {
 		return
 	}
