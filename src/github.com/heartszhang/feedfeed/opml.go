@@ -61,8 +61,7 @@ func (this opml_outline) export_feedsource(v []FeedSource) []FeedSource {
 			Local:       "",
 			Period:      _2hours,
 			Deadline:    unixtime_now() + int64(_2hours*time.Hour),
-			Category:    Feed_category_root, // to be implemented, this.Category
-			Type:        Feed_type_feed,     // may be atom?
+			Type:        Feed_type_feed, // may be atom?
 			Disabled:    false,
 			EnableProxy: false,
 			Update:      0,
