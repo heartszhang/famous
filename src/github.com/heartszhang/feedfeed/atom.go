@@ -98,7 +98,6 @@ func (this atom_feed) to_feed_soruce() FeedSource {
 		Local:       "",
 		Period:      _2hours,
 		Deadline:    unixtime_nano_rfc822(this.Updated) + int64(_2hours*time.Hour),
-		Category:    Feed_category_root,
 		Type:        Feed_type_atom,
 		Disabled:    false,
 		EnableProxy: false,
