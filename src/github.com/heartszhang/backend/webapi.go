@@ -3,6 +3,7 @@ package backend
 import (
 	"encoding/json"
 	feed "github.com/heartszhang/feedfeed"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -14,7 +15,7 @@ func init() {
 	http.HandleFunc("/api/meta/cleanup.json", webapi_meta_cleanup)
 	http.HandleFunc("/api/feed_category/all.json", webapi_feedcategory_all)
 	http.HandleFunc("/api/feed_category/create.json", webapi_feedcategory_create)
-	http.HandleFunc("/api/feed_catetory/drop.json", webapi_feedcategory_drop)
+	http.HandleFunc("/api/feed_category/drop.json", webapi_feedcategory_drop)
 	http.HandleFunc("/api/feed_tag/all.json", webapi_feedtag_all)
 	http.HandleFunc("/api/feed_source/all.json", webapi_feedsource_all)
 	http.HandleFunc("/api/feed_source/subscribe.json", webapi_feedsource_subscribe)
@@ -25,7 +26,7 @@ func init() {
 	http.HandleFunc("/api/feed_entry/unread.json", webapi_feedentry_unread)
 	http.HandleFunc("/api/feed_entry/mark.json", webapi_feedentry_mark)
 	http.HandleFunc("/api/feed_entry/umark.json", webapi_feedentry_umark)
-	http.HandleFunc("/api/feed_entry/full_text.json}", webapi_feedentry_fulltext)
+	http.HandleFunc("/api/feed_entry/full_text.json", webapi_feedentry_fulltext)
 	http.HandleFunc("/api/feed_entry/image.json", webapi_feedentry_image)
 	http.HandleFunc("/api/feed_entry/media.json", webapi_feedentry_media)
 	http.HandleFunc("/api/feed_entry/drop.json", webapi_feedentry_drop)
@@ -43,6 +44,7 @@ func webapi_feedtag_all(w http.ResponseWriter, r *http.Request) {
 	default:
 		webapi_write_error(w, err)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri : /api/feed_category/all.json
@@ -53,12 +55,13 @@ func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {
 	default:
 		webapi_write_error(w, err)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /api/feed_source/entries_since.json/{since_unixtime:[0-9]+}/{source}/{count:[0-9]+}/{page:[0-9]+}
 /*
 func webapi_feedsource_entries_since(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.RequestURI())
+	log.Println(r.URL.RequestURI()())
 	since, _ := strconv.ParseInt(r.URL.Query().Get("since_unixtime"), 0, uint64_bits)
 	source, _ := url.QueryUnescape(r.URL.Query().Get("source"))
 
@@ -86,24 +89,25 @@ func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
 	default:
 		webapi_write_error(w, err)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_source/subscribe.json/{uri}/{source_type}/{category}
 func webapi_feedsource_subscribe(w http.ResponseWriter, r *http.Request) {
-	url := r.URL.Query().Get("uri")
+	uri := r.URL.Query().Get("uri")
 	source_type := source_type_map(r.URL.Query().Get("source_type"))
-	category, err := strconv.ParseUint(r.URL.Query().Get("category"), 0, uint64_bits)
-	if err != nil {
-		category = feed.Feed_category_root
-	}
-
-	fs, err := feedsource_subscribe(url, source_type, category)
-
+	_, err := url.Parse(uri)
 	if err != nil {
 		webapi_write_error(w, err)
-	} else {
-		webapi_write_as_json(w, fs)
+		return
 	}
+	switch fs, err := feedsource_subscribe(uri, source_type); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /meta.json
@@ -115,6 +119,7 @@ func webapi_meta(w http.ResponseWriter, r *http.Request) {
 	} else {
 		webapi_write_as_json(w, m)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_entry/mark.json/{entry_id}/{flags}
@@ -130,6 +135,8 @@ func webapi_feedentry_mark(w http.ResponseWriter, r *http.Request) {
 	} else {
 		webapi_write_as_json(w, struct{}{})
 	}
+	log.Println(r.URL.RequestURI())
+
 }
 
 // uri: /feed_entry/umark.json/{entry_id}/{flags}
@@ -145,30 +152,33 @@ func webapi_feedentry_umark(w http.ResponseWriter, r *http.Request) {
 	} else {
 		webapi_write_as_json(w, struct{}{})
 	}
+	log.Println(r.URL.RequestURI())
 }
 
-// uri: /feed_entry/full_text.json/{entry_id}/{uri}
+// uri: /feed_entry/full_text.json/{entry_uri}/{uri}
 func webapi_feedentry_fulltext(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("uri")
-	id := r.URL.Query().Get("entry_id")
-	ff, err := feedentry_fulltext(url, id)
+	entry_uri := r.URL.Query().Get("entry_uri")
+	ff, err := feedentry_fulltext(url, entry_uri)
 	if err != nil {
 		webapi_write_error(w, err)
 	} else {
 		webapi_write_as_json(w, ff)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_entry/image.json/{entry_id}/{url}
 func webapi_feedentry_image(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("uri")
-	id := r.URL.Query().Get("entry_id")
-	v, err := feedentry_image(url, id)
+	entry_uri := r.URL.Query().Get("entry_uri")
+	v, err := feedentry_image(url, entry_uri)
 	if err != nil {
 		webapi_write_error(w, err)
 	} else {
 		webapi_write_as_json(w, v)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_entry/media.json/{entry_id}/{url}/{media_type:[0-9]+}
@@ -186,6 +196,7 @@ func webapi_feedentry_media(w http.ResponseWriter, r *http.Request) {
 	} else {
 		webapi_write_as_json(w, v)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_entry/drop.json/{entry_id}
@@ -195,6 +206,7 @@ func webapi_feedentry_drop(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("entry_id")
 	err := feedentry_drop(id)
 	webapi_write_error(w, err)
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_category/create.json/{name}
@@ -206,6 +218,7 @@ func webapi_feedcategory_create(w http.ResponseWriter, r *http.Request) {
 	} else {
 		webapi_write_as_json(w, v)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_catetory/drop.json/{name}
@@ -213,6 +226,7 @@ func webapi_feedcategory_drop(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 	err := feedcategory_drop(name)
 	webapi_write_error(w, err)
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /tick.json
@@ -223,6 +237,7 @@ func webapi_tick(w http.ResponseWriter, r *http.Request) {
 	} else {
 		webapi_write_as_json(w, v)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 func webapi_feedsource_all(w http.ResponseWriter, r *http.Request) {
@@ -233,6 +248,7 @@ func webapi_feedsource_all(w http.ResponseWriter, r *http.Request) {
 	default:
 		webapi_write_error(w, err)
 	}
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_source/unsubscribe.json/{uri}
@@ -240,12 +256,14 @@ func webapi_feedsource_unsubscribe(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("uri")
 	err := feedsource_unsubscribe(url)
 	webapi_write_error(w, err)
+	log.Println(r.URL.RequestURI())
 }
 
 // uri: /meta/cleanup.json
 func webapi_meta_cleanup(w http.ResponseWriter, r *http.Request) {
 	err := meta_cleanup()
 	webapi_write_error(w, err)
+	log.Println(r.URL.RequestURI())
 }
 
 func webapi_write_as_json(w http.ResponseWriter, body interface{}) {
