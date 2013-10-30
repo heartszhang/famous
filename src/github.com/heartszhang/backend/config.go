@@ -45,6 +45,7 @@ func init() {
 	os.MkdirAll(config.DocumentDir, 0644)
 	os.MkdirAll(config.FeedSourceDir, 0644)
 	os.MkdirAll(config.FeedEntryDir, 0644)
+	os.MkdirAll(config.ThumbnailDir, 0644)
 	status.startat = time.Now()
 }
 
@@ -55,6 +56,7 @@ func (this FeedsBackendConfig) Address() string {
 type FeedsStatus struct {
 	startat time.Time `json:"-"`
 	Runned  int64     `json:"runned"` // seconds
+	Error   error     `json:"error,omitempty"`
 }
 
 func (this FeedsStatus) runned_nano() int64 {
