@@ -149,7 +149,6 @@ func (this rss_channel) to_source() FeedSource {
 		Local:       "", // filled later
 		Period:      this.ttl(),
 		Deadline:    unixtime_nano_rfc822(this.LastBuildDate) + int64(this.ttl())*int64(time.Hour),
-		Category:    Feed_category_root,
 		Type:        Feed_type_rss,
 		Disabled:    false,
 		EnableProxy: false,
