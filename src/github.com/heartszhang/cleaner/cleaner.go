@@ -212,7 +212,13 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 						cleaner.link_imgs++
 					}
 					//					log.Println(get_attribute(child, "src"))
-					trim_small_image(child)
+					drop = trim_small_image(child)
+					if !drop {
+						drop = trim_invisible_image(child)
+					}
+					if drop {
+						*dropping = append(*dropping, child)
+					}
 				case "a":
 					cleaner.links++
 					cleaner.fix_a_href(child)
@@ -256,7 +262,7 @@ const (
 	small_image_t = 180 // pixels
 )
 
-func trim_small_image(img *html.Node) {
+func trim_small_image(img *html.Node) (drop bool) {
 	width, werr := strconv.ParseInt(node_get_attribute(img, "width"), 0, 32)
 	height, herr := strconv.ParseInt(node_get_attribute(img, "height"), 0, 32)
 
@@ -269,14 +275,31 @@ func trim_small_image(img *html.Node) {
 		return
 	}
 	if width*height < small_image_t*small_image_t && img.Parent.Data == "a" {
-		for idx, attr := range img.Attr {
-			if attr.Key == "src" {
-				img.Attr[idx].Key = "srcbackup"
-			}
-		}
+		img.Data = "input"
+		drop = true
 	}
+	return
 }
 
+func trim_invisible_image(img *html.Node) (drop bool) {
+	width, werr := strconv.ParseInt(node_get_attribute(img, "width"), 0, 32)
+	height, herr := strconv.ParseInt(node_get_attribute(img, "height"), 0, 32)
+
+	// sina weibo use the wrong attribute
+	if herr != nil {
+		height, herr = strconv.ParseInt(node_get_attribute(img, "heigh"), 0, 32)
+	}
+
+	if werr != nil || herr != nil || img.Parent == nil {
+		return
+	}
+	// set width height explicit zero
+	if width == 0 || height == 0 {
+		img.Data = "input"
+		drop = true
+	}
+	return
+}
 func remove_children(a *html.Node) {
 	for a.FirstChild != nil {
 		a.RemoveChild(a.FirstChild)
