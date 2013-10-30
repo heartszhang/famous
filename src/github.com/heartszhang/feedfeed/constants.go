@@ -150,14 +150,15 @@ type FeedSource struct {
 	Uri         string     `json:"uri,omitempty" bson:"uri,omitempty"` // rss/atom url
 	Local       string     `json:"local" bson:"local"`
 	Period      uint       `json:"period" bson:"period"`     // minutes
-	Deadline    int64      `json:"due_at" bson:"due_at"`     // unixtime_nano
-	Category    uint64     `json:"category" bson:"category"` //categories
+	Deadline    int64      `json:"deadline" bson:"deadline"` // unixtime_nano
 	Type        uint       `json:"type" bson:"type"`         // feed_type...
 	Disabled    bool       `json:"disabled" bson:"disabled"` //auto refresh enabled
 	EnableProxy bool       `json:"enable_proxy" bson:"enable_proxy"`
 	Update      int64      `json:"update" bson:"update"`                       // the last time, we refreshed, unix-time
 	WebSite     string     `json:"website,omitempty" bson:"website,omitempty"` // home
 	Tags        []string   `json:"tags,omitempty" bson:"tags,omitempty"`
+	Categories  []string   `json:"categories,omitempty" bson:"categories,omitempty"`
+	Unreaded    int        `json:"unreaded" bson:"unreaded"`
 	Media       *FeedMedia `json:"media,omitempty" bson:"media,omitempty"`
 	Description string     `json:"description,omitempty" bson:"description,omitempty"`
 }
