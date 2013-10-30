@@ -7,6 +7,8 @@ import (
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
+	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 )
@@ -112,6 +114,26 @@ func html_create_fragment(fulltext string) (*html.Node, error) {
 		v.AppendChild(frag)
 	}
 	return v, err
+}
+
+func html_create_from_file(filepath string) (doc *html.Node, err error) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	doc, err = html.Parse(f)
+	return
+}
+
+func html_write_file(article *html.Node, dir string) (string, error) {
+	f, err := ioutil.TempFile(dir, "html.")
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	err = html.Render(f, article)
+	return f.Name(), err
 }
 
 const (
