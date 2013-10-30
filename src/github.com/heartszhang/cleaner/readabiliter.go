@@ -3,7 +3,6 @@ package cleaner
 import (
 	"code.google.com/p/go.net/html"
 	"fmt"
-	"log"
 )
 
 type readabilitier struct {
@@ -53,6 +52,10 @@ func (this *readabilitier) create_article() (*html.Node, *html.Node) {
 
 	class_name := node_get_attribute(this.article.element, "class")
 
+	if this.article.element.Parent == nil {
+		flatten_block_node(this.article.element, article, false, "")
+		return doc, article
+	}
 	foreach_child(this.article.element.Parent, func(neib *html.Node) {
 		append := false
 		if neib == this.article.element {
@@ -61,17 +64,17 @@ func (this *readabilitier) create_article() (*html.Node, *html.Node) {
 			cn := node_get_attribute(neib, "class")
 			if len(cn) > 0 && cn == class_name {
 				append = true
-				log.Println("append same class", ext)
+				//				log.Println("append same class", ext)
 			}
 			if ext.content_score > threshold {
 				append = true
-				log.Println("append high score neib", ext)
+				//				log.Println("append high score neib", ext)
 			}
 		} else if neib.Type == html.ElementNode && neib.Data == "p" {
 			sc := new_boilerpipe_score(neib)
 			if sc.words > 65 && sc.link_density() < 22 {
 				append = true
-				log.Println("append high p", neib)
+				//				log.Println("append high p", neib)
 			}
 		}
 		if append {
@@ -96,15 +99,16 @@ func (this *readabilitier) make_readability_score(n *html.Node) *readability_sco
 	parent := n.Parent
 	var grand *html.Node = nil
 
-	//parent isnt nil
-	if i, ok := this.candidates[parent]; ok {
-		pext = i
-	} else {
-		pext = new_readability_score(parent)
-		this.candidates[parent] = pext
-	}
-	if parent != this.body {
-		grand = parent.Parent
+	if parent != nil {
+		if i, ok := this.candidates[parent]; ok {
+			pext = i
+		} else {
+			pext = new_readability_score(parent)
+			this.candidates[parent] = pext
+		}
+		if parent != this.body {
+			grand = parent.Parent
+		}
 	}
 	if grand != nil {
 		if i, ok := this.candidates[grand]; ok {
@@ -119,6 +123,7 @@ func (this *readabilitier) make_readability_score(n *html.Node) *readability_sco
 	// wrap lines
 	score += min(bc.lines(), 3)
 	rtn.content_score += score
+
 	if pext != nil {
 		pext.content_score += score
 	}
