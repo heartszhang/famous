@@ -17,6 +17,7 @@ func DescribeImage(uri string) (mediatype string, width, height int, filelength 
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		filelength = int64(-resp.StatusCode)
 		err = fmt.Errorf("%v: %v", resp.StatusCode, http.StatusText(resp.StatusCode))
 		return
 	}
