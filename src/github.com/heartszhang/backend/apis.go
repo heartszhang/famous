@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"fmt"
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
@@ -159,10 +158,15 @@ func tick() (FeedsStatus, error) {
 	return s, nil
 }
 
-func feedsource_subscribe(url string, source_type uint) (v feed.FeedSource, err error) {
+func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err error) {
+	fso := new_feedsource_operator()
+	fs, err := fso.find(uri)
+	if err == nil {
+		return *fs, nil
+	}
 	curler := curl.NewCurl(backend_config().FeedSourceDir)
-	cache, err := curler.GetUtf8(url, curl.CurlProxyPolicyUseProxy)
-	fmt.Println(cache, err)
+	cache, err := curler.GetUtf8(uri, curl.CurlProxyPolicyUseProxy)
+	//	fmt.Println(cache, err)
 
 	if cache.LocalUtf8 != "" {
 		fstype := feed.DetectFeedSourceType(cache.LocalUtf8)
@@ -173,7 +177,10 @@ func feedsource_subscribe(url string, source_type uint) (v feed.FeedSource, err 
 			v, err = feed.CreateFeedSourceAtom(cache.LocalUtf8)
 		}
 	}
-	return
+	if err == nil {
+		err = fso.upsert(&v)
+	}
+	return v, err
 }
 
 func feedsource_unsubscribe(url string) error {

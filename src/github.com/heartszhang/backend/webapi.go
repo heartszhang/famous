@@ -96,11 +96,6 @@ func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
 func webapi_feedsource_subscribe(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Query().Get("uri")
 	source_type := source_type_map(r.URL.Query().Get("source_type"))
-	_, err := url.Parse(uri)
-	if err != nil {
-		webapi_write_error(w, err)
-		return
-	}
 	switch fs, err := feedsource_subscribe(uri, source_type); err {
 	case nil:
 		webapi_write_as_json(w, fs)
