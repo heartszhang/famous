@@ -33,6 +33,12 @@ namespace famousfront
             LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
             Log = LogManagerFactory.DefaultLogManager.GetLogger<App>();
         }
+        protected override void OnExit(ExitEventArgs e)
+        {
+            ServiceLocator.ClearMain();
+            ServiceLocator.ClearSettings();
+            base.OnExit(e);
+        }
         [Conditional("RELEASE")]
         private void WireUnhandledExceptionHandlers()
         {
@@ -58,7 +64,6 @@ namespace famousfront
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Log.Fatal("Unhandled AppDomain Exception", e.ExceptionObject as Exception);
-
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace famousfront.viewmodels
 {
-    class SettingsViewModel : famousfront.core.ViewModelBase
+    class OfflineViewModel : famousfront.core.DialogViewModel
     {
     }
 }

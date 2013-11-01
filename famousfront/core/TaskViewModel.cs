@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace famousfront.viewmodels
+namespace famousfront.core
 {
-    class SettingsViewModel : famousfront.core.ViewModelBase
+    class TaskViewModel : ViewModelBase
     {
     }
 }

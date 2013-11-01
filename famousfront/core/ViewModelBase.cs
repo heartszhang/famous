@@ -26,12 +26,16 @@ namespace famousfront.core
 
         public override void Cleanup()
         {
-            MessengerInstance.Unregister(this);
+            MessengerInstance.Unregister(this);            
         }
 
         protected override void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
             base.RaisePropertyChanged(propertyName);
+        }
+        protected void Set<T>(ref T field, T value, [CallerMemberName] string name = null)
+        {
+            Set(name, ref field, value);
         }
     }
 }

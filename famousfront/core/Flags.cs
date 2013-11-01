@@ -12,11 +12,11 @@ namespace famousfront.core
         public Flags()
         {
         }
-        public async Task Load()
+        public async void AsyncLoad()
         {
             await Task.Run(() => DoLoad());
         }
-        public async Task Save()
+        public async void AsyncSave()
         {
             await Task.Run(() => DoSave());
         }

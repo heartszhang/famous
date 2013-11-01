@@ -1,17 +1,18 @@
-﻿<metro:Window x:Class="famousfront.MainWindow"
+﻿<metro:Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:metro="http://schemas.codeplex.com/elysium"
         xmlns:params="http://schemas.codeplex.com/elysium/params"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:vm="clr-namespace:famousfront.viewmodels"
+    mc:Ignorable="d" x:Class="famousfront.MainWindow"
               Background="{DynamicResource BackgroundBrush}"
-              metro:Window.IsMainWindow="True"
-        Title="MainWindow" Height="550" Width="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="80*"/>
-            <ColumnDefinition Width="10*"/>
-        </Grid.ColumnDefinitions>
-
-    </Grid>
+              WindowStartupLocation="CenterScreen"              
+              DataContext="{StaticResource _locator}"
+        Title="FamousFront" Height="550" Width="800" x:Name="root">
+	<Grid d:DataContext="{d:DesignData /SampleData/FeedSourcesViewModelSampleData.xaml}">
+		<ContentPresenter x:Name="_content"/>
+		<!-- a event stack should be here-->
+	</Grid>
 </metro:Window>

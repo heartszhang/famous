@@ -28,6 +28,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <ExpressionBlendVersion>12.0.41002.1</ExpressionBlendVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -76,6 +77,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\MvvmLightLibs.4.2.30.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
     </Reference>
@@ -96,13 +98,28 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="core\DialogViewModel.cs" />
     <Compile Include="core\Flags.cs" />
-    <Compile Include="core\ViewBase.cs" />
+    <Compile Include="core\TaskViewModel.cs" />
+    <Compile Include="core\ViewModelBase.cs" />
+    <Compile Include="datamodels\datamodels.cs" />
+    <Compile Include="designtime\DesignWindow.xaml.cs">
+      <DependentUpon>DesignWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="utils\Notifier.cs" />
     <Compile Include="core\WeakEventHandler.cs" />
     <Compile Include="utils\ColorExtensions.cs" />
     <Compile Include="utils\NotificationExtensions.cs" />
     <Compile Include="utils\UrlLauncher.cs" />
+    <Compile Include="ServiceLocator.cs" />
+    <Compile Include="viewmodels\ConnectingViewModel.cs" />
+    <Compile Include="viewmodels\ContentViewModel.cs" />
+    <Compile Include="viewmodels\FeedEntriesViewModel.cs" />
+    <Compile Include="viewmodels\FeedEntryViewModel.cs" />
+    <Compile Include="viewmodels\FeedSourcesViewModel.cs" />
+    <Compile Include="viewmodels\FeedSourceViewModel.cs" />
+    <Compile Include="viewmodels\MainViewModel.cs" />
+    <Compile Include="viewmodels\OfflineViewModel.cs" />
     <Compile Include="viewmodels\SettingsViewModel.cs" />
     <Page Include="Controls.xaml">
       <SubType>Designer</SubType>
@@ -115,6 +132,10 @@
     <Page Include="DataTemplates.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="designtime\DesignWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -129,6 +150,42 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="views\ConnectingView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\ContentView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\FeedEntriesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\FeedEntryView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\FeedSourcesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\FeedSourceView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\MainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\OfflineView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\SettingsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -177,10 +234,13 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\" />
-    <Folder Include="views\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="gnote.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <DesignData Include="SampleData\FeedSourcesViewModelSampleData.xaml" />
+    <DesignData Include="SampleData\FeedSourceViewModelSampleData.xaml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

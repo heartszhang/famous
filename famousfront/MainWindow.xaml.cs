@@ -1,4 +1,5 @@
-﻿using System;
+﻿using famousfront.viewmodels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,19 @@ namespace famousfront
     /// </summary>
     public partial class MainWindow : Elysium.Controls.Window
     {
+        MainViewModel _main_viewmodel = null;
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();            
+            SetIsMainWindow(this, true);
+            // expression windowsinstance to window error if IsMainWindow setted in xaml
+        }
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+            var locator = DataContext as ServiceLocator;
+            _main_viewmodel = locator.MainViewModel;
+            _content.Content = _main_viewmodel;
         }
     }
 }

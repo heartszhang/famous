@@ -1,0 +1,20 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:metro="http://schemas.codeplex.com/elysium"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+    <DataTemplate DataType="{x:Type vm:ContentViewModel}" d:IsDesignTimeCreatable="false">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="80*"/>
+                <ColumnDefinition Width="10*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Panel.ZIndex="100" Width="300" HorizontalAlignment="Left" Grid.ColumnSpan="3" Background="BurlyWood" Visibility="Collapsed">
+                <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
+            </Grid>
+            <Grid Background="AliceBlue" Grid.Column="1" >
+                <ContentPresenter Content="{Binding FeedEntriesViewModel}"/>
+            </Grid>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
