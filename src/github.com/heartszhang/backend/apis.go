@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"fmt"
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
@@ -17,11 +18,19 @@ func feeds_entries_since(since_unixtime int64, category string, count uint, page
 
 func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, error) {
 	c := curl.NewCurl(backend_config().FeedEntryDir)
+	fmt.Println("before-get", source)
 	cache, err := c.GetUtf8(source, curl.CurlProxyPolicyUseProxy)
+	fmt.Println(cache, err)
 	if err != nil || cache.LocalUtf8 == "" {
 		return nil, err
 	}
-	v, err := feed.CreateFeedEntriesRss2(cache.LocalUtf8)
+	//atom+xml;xml;html
+	ext := curl.MimeToExt(cache.Mime)
+	if ext != "xml" && ext != "atom+xml" {
+		return nil, fmt.Errorf("unsupported mime: %v", cache.Mime)
+	}
+	v, err := feed.MakeFeedEntries(cache.LocalUtf8)
+	fmt.Println(v, err)
 	v = feed_entries_unreaded(v)
 	v = feed_entries_clean(v)
 	v = feed_entries_statis(v)
@@ -51,23 +60,6 @@ func feedentry_umark(uri string, flags uint) (uint, error) {
 	return flags, err
 }
 
-/*
-	media_type   uint   // feed_media_type...
-	Uri          string `json:"uri,omitempty" bson:"uri,omitempty"`                     // url
-	Alias        string `json:"alias,omitempty" bson:"alias,omitempty"`                 // title may be
-	Local        string `json:"local,omitempty" bson:"local,omitempty"`                 // downloaded origin html
-	CleanedLocal string `json:"cleaned_local,omitempty" bson:"cleaned_local,omitempty"` // cleaned-doc local rel path
-	Words        int    `json:"words" bson:"words"`                                     // words after cleaned
-	Sentences    int    `json:"sentences" bson:"sentences"`                             // sentences after cleaned
-	Links        int    `json:"links" bson:"links"`                                     // links after cleaned
-	Density      int    `json:"density" bson:"density"`                                 // density of original doc
-	Length       int64  `json:"length" bson:"length"`
-	Readable     bool   `json:"readable" bson:"readable"` // cleaned doc has perfect content
-
-	Images []FeedMedia `json:"images,omitempty" bson:"images,omitempty"`
-	Videos []FeedMedia `json:"videos,omitempty" bson:"videos,omitempty"`
-	Audios []FeedMedia `json:"audios,omitempty" bson:"audios,omitempty"`
-*/
 // /feed/entry/full_text.json/{url}/{entry_id}
 func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err error) {
 	c := curl.NewCurl(config.DocumentDir)
@@ -77,6 +69,9 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err erro
 	v.Length = cache.LengthUtf8
 	if err != nil {
 		return v, err
+	}
+	if curl.MimeToExt(cache.Mime) != "html" {
+		return v, fmt.Errorf("unsupported mime %v", cache.Mime)
 	}
 	doc, err := html_create_from_file(cache.LocalUtf8)
 	if err != nil {
@@ -166,16 +161,13 @@ func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err 
 	}
 	curler := curl.NewCurl(backend_config().FeedSourceDir)
 	cache, err := curler.GetUtf8(uri, curl.CurlProxyPolicyUseProxy)
-	//	fmt.Println(cache, err)
+	ext := curl.MimeToExt(cache.Mime)
+	if ext != "xml" && ext != "atom+xml" {
+		return v, fmt.Errorf("unsupported mime: %v", cache.Mime)
+	}
 
 	if cache.LocalUtf8 != "" {
-		fstype := feed.DetectFeedSourceType(cache.LocalUtf8)
-		switch fstype {
-		case feed.Feed_type_rss:
-			v, err = feed.CreateFeedSourceRss2(cache.LocalUtf8)
-		case feed.Feed_type_atom:
-			v, err = feed.CreateFeedSourceAtom(cache.LocalUtf8)
-		}
+		v, err = feed.MakeFeedSource(cache.LocalUtf8)
 	}
 	if err == nil {
 		err = fso.upsert(&v)
