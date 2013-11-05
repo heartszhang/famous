@@ -10,13 +10,13 @@ import (
 func node_is_not_empty(n *html.Node) bool {
 	switch n.Type {
 	case html.TextNode:
-		return len(n.Data) >= 0
+		return len(n.Data) > 0
 	case html.ElementNode:
 		switch n.Data {
 		case "video", "audio", "object", "embed", "img", "a":
 			return true
-		case "form", "input", "textarea":
-			return true
+		case "form", "input", "textarea": // why we reserve these nodes?
+			return false
 		default:
 			rtn := false
 			foreach_child(n, func(child *html.Node) {
@@ -98,14 +98,17 @@ func node_is_block(n *html.Node) bool {
 
 }
 
+var (
+	rex *regexp.Regexp = regexp.MustCompile(`\w+|\d+|[\W\D\S]`)
+)
+
 // number
 // word
 // zh-char
 // punc
 func string_tokens(t string) []string {
-	re := regexp.MustCompile(`\w+|\d+|[\W\D\S]`)
-	rtn := re.FindAllString(t, -1)
-	//	log.Println(t, rtn)
+	//	re := regexp.MustCompile(`\w+|\d+|[\W\D\S]`)
+	rtn := rex.FindAllString(t, -1)
 	return rtn
 }
 
