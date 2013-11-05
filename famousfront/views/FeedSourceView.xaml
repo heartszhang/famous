@@ -10,17 +10,20 @@
       <Grid x:Name="_label_wrap">
         <DockPanel HorizontalAlignment="Right"
                     TextElement.FontSize="{Binding (params:General.ContentFontSize), RelativeSource={RelativeSource self}}">
-          <TextBlock x:Name="label" Text="{Binding UnreadsCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
+          <TextBlock x:Name="_label" Text="{Binding UnreadsCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
                      Visibility="{Binding UnreadsCount, Converter={StaticResource IntToVisibilityConverter}, Mode=OneWay}"/>
-          <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+          <TextBlock x:Name="_name" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
         </DockPanel>
       </Grid>
 
     </StackPanel>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding UnreadsCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
-        <Setter TargetName="label" Property="TextBlock.FontWeight" Value="Bold" />
+        <Setter TargetName="_label" Property="TextBlock.FontWeight" Value="Bold" />
 
+      </DataTrigger>
+      <DataTrigger Binding="{Binding FontSize, ElementName=_name, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_name"/>
       </DataTrigger>
     </DataTemplate.Triggers>
   </DataTemplate>
