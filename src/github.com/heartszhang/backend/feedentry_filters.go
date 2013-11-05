@@ -8,12 +8,17 @@ import (
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"sync"
 )
 
 func feed_entries_unreaded(entries []feed.FeedEntry) []feed.FeedEntry {
+	return entries
+}
+
+func feed_entries_clean(entries []feed.FeedEntry) []feed.FeedEntry {
 	return entries
 }
 
@@ -31,35 +36,14 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 	return entries
 }
 
-func feed_entry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
-	defer wg.Done()
-	if entry.Content != nil && entry.Content.FullText != "" {
-		entry.Status |= feed.Feed_status_fulltext_inline
-		frag, _ := html_create_fragment(entry.Content.FullText)
-		frag, score, _ := cleaner.MakeFragmentReadable(frag)
-		entry.Content.FullText = html_encode_fragment(frag)
-		entry.Content.Words = uint(score.WordCount)
-		entry.Content.Medias = feed_medias_from_docsummary(score)
-		entry.Images = append(entry.Images, entry.Content.Medias...)
-
-		if len(entry.Content.FullText) > len(entry.Summary) {
-			entry.Status |= feed.Feed_content_ready
-		}
-		if entry.Words > backend_config().SummaryThreshold {
-			entry.Status |= feed.Feed_content_summary
-		}
-		entry.Status |= feed.Feed_status_fulltext_ready
+func feed_entries_clean_summary(entries []feed.FeedEntry) []feed.FeedEntry {
+	wg := &sync.WaitGroup{}
+	for i := 0; i < len(entries); i++ {
+		wg.Add(1)
+		go feed_entry_summary_clean(&entries[i], wg)
 	}
-}
-
-func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	frag, _ := html_create_fragment(entry.Summary)
-	frag, score, _ := cleaner.MakeFragmentReadable(frag)
-	entry.Summary = html_encode_fragment(frag)
-	entry.Words = uint(score.WordCount)
-	entry.Images = append(entry.Images, feed_medias_from_docsummary(score)...)
+	wg.Wait()
+	return entries
 }
 
 func feed_entries_clean_fulltext(entries []feed.FeedEntry) []feed.FeedEntry {
@@ -67,16 +51,6 @@ func feed_entries_clean_fulltext(entries []feed.FeedEntry) []feed.FeedEntry {
 	for i := 0; i < len(entries); i++ {
 		wg.Add(1)
 		go feed_entry_content_clean(&entries[i], wg)
-	}
-	wg.Wait()
-	return entries
-}
-
-func feed_entries_clean_summary(entries []feed.FeedEntry) []feed.FeedEntry {
-	wg := &sync.WaitGroup{}
-	for i := 0; i < len(entries); i++ {
-		wg.Add(1)
-		go feed_entry_summary_clean(&entries[i], wg)
 	}
 	wg.Wait()
 	return entries
@@ -92,11 +66,88 @@ func feed_entries_backup(entries []feed.FeedEntry) []feed.FeedEntry {
 	return entries
 }
 
-func feed_entries_clean(entries []feed.FeedEntry) []feed.FeedEntry {
-	return entries
+func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if (entry.Status & (feed.Feed_content_ready | feed.Feed_status_fulltext_ready)) != 0 {
+		return
+	}
+	frag, _ := html_create_fragment(entry.Summary)
+	frag, score, _ := cleaner.MakeFragmentReadable(frag)
+	entry.Summary = html_encode_fragment(frag)
+	entry.Words = uint(score.WordCount)
+	entry.Images = append(entry.Images, feed_medias_from_docsummary(score)...)
+	if score.WordCount < config.SummaryMinWords {
+		entry.Status |= feed.Feed_content_summary_empty
+	}
+}
+
+func feed_entry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if entry.Content != nil && entry.Content.FullText != "" {
+		entry.Status |= feed.Feed_status_fulltext_inline
+		frag, _ := html_create_fragment(entry.Content.FullText)
+		frag, score, _ := cleaner.MakeFragmentReadable(frag)
+		entry.Summary = html_encode_fragment(frag)
+		entry.Density = uint(score.WordCount)
+
+		entry.Images = append(entry.Images, feed_medias_from_docsummary(score)...)
+		entry.Status |= feed.Feed_content_ready
+		entry.Status |= feed.Feed_status_fulltext_ready
+		log.Println("from-fulltext", entry.Title)
+	}
+}
+
+func extract_imgsrc_attr(attrs []html.Attribute) []html.Attribute {
+	for _, attr := range attrs {
+		if attr.Key == "src" {
+			return []html.Attribute{html.Attribute{Key: "Source", Val: attr.Val}}
+		}
+	}
+	return nil
+}
+
+func extract_ahref_attr(attrs []html.Attribute) []html.Attribute {
+	for _, attr := range attrs {
+		if attr.Key == "href" {
+			return []html.Attribute{html.Attribute{Key: "NavigateUri", Val: attr.Val}}
+		}
+	}
+	return nil
+}
+
+const (
+	fdocns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+)
+
+//p, img, a, text
+func html_to_flowdoc(frag *html.Node) {
+	if frag == nil || frag.Type != html.ElementNode {
+		return
+	}
+	switch frag.Data {
+	case "img":
+		frag.Data = "Image"
+		frag.Attr = extract_imgsrc_attr(frag.Attr)
+	case "a":
+		frag.Data = "Hyperlink"
+		frag.Attr = extract_ahref_attr(frag.Attr)
+	case "article":
+		frag.Data = "FlowDocument"
+		//		frag.Namespace = fdocns
+		frag.Attr = []html.Attribute{html.Attribute{Key: "xmlns", Val: fdocns}}
+	case "p":
+		fallthrough
+	default:
+		frag.Data = "Paragraph"
+		frag.Attr = nil
+	}
+	for child := frag.FirstChild; child != nil; child = child.NextSibling {
+		html_to_flowdoc(child)
+	}
 }
 
 func html_encode_fragment(frag *html.Node) string {
+	html_to_flowdoc(frag)
 	var buffer bytes.Buffer
 	html.Render(&buffer, frag) // ignore return error
 	return buffer.String()
@@ -155,26 +206,4 @@ func feed_medias_from_docsummary(score *cleaner.DocSummary) []feed.FeedMedia {
 		v[idx].Uri = ms
 	}
 	return v
-	/*	img_url_chan := make(chan string)
-
-		img_chan := make(chan feed.FeedMedia, len(score.Images))
-
-		worker_count := desc_image_worker_count
-		if count < worker_count {
-			worker_count = count
-		}
-		for i := 0; i < worker_count; i++ {
-			go describe_image(img_url_chan, img_chan)
-		}
-
-		for _, link := range score.Images {
-			img_url_chan <- link
-		}
-		close(img_url_chan)
-		for i := 0; i < count; i++ {
-			x := <-img_chan
-			v[i] = x
-		}
-		return v
-	*/
 }
