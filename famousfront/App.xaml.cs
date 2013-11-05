@@ -17,17 +17,20 @@ namespace famousfront
     public partial class App : Application
     {
         private static readonly ILogger Log;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             //Elysium.Manager.Apply(this, Elysium.Theme.Dark, Elysium.AccentBrushes.Blue, System.Windows.Media.Brushes.White);
             WireUnhandledExceptionHandlers();
+            ServiceLocator.Startup();
             base.OnStartup(e);
             var fvi = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-            Log.Info("MishraReader {0} Startup", fvi.ProductVersion);
+            Log.Info("famousfront {0} Startup", fvi.ProductVersion);
         }
 
         static App()
         {
+            GalaSoft.MvvmLight.Threading.DispatcherHelper.Initialize();
             var fst = new StreamingFileTarget { PathUnderAppData = "famous" };
 
             LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
@@ -35,8 +38,7 @@ namespace famousfront
         }
         protected override void OnExit(ExitEventArgs e)
         {
-            ServiceLocator.ClearMain();
-            ServiceLocator.ClearSettings();
+            ServiceLocator.Shutdown();
             base.OnExit(e);
         }
         [Conditional("RELEASE")]
