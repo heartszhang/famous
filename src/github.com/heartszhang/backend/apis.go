@@ -18,9 +18,7 @@ func feeds_entries_since(since_unixtime int64, category string, count uint, page
 
 func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, error) {
 	c := curl.NewCurl(backend_config().FeedEntryDir)
-	fmt.Println("before-get", source)
 	cache, err := c.GetUtf8(source, curl.CurlProxyPolicyUseProxy)
-	fmt.Println(cache, err)
 	if err != nil || cache.LocalUtf8 == "" {
 		return nil, err
 	}
@@ -30,12 +28,12 @@ func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, e
 		return nil, fmt.Errorf("unsupported mime: %v", cache.Mime)
 	}
 	v, err := feed.MakeFeedEntries(cache.LocalUtf8)
-	fmt.Println(v, err)
-	v = feed_entries_unreaded(v)
+
+	v = feed_entries_unreaded(v) // clean readed entries
 	v = feed_entries_clean(v)
 	v = feed_entries_statis(v)
-	v = feed_entries_clean_summary(v)
 	v = feed_entries_clean_fulltext(v)
+	v = feed_entries_clean_summary(v)
 	v = feed_entries_autotag(v)
 	v = feed_entries_backup(v)
 	return v, err
