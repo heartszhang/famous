@@ -135,4 +135,5 @@ func (this *boilerpiper) classify(prev *boilerpipe_score,
 	if current.forms > 0 && current.words == 0 {
 		current.is_content = false
 	}
+	//	fmt.Println(current.is_content, current.inner_text, current.img_score)
 }
