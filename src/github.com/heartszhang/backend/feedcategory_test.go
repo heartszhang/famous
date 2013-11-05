@@ -6,16 +6,16 @@ import (
 
 func TestFeedCategory(t *testing.T) {
 	fco := new_feedcategory_operator()
-	id, err := fco.Save("what")
+	id, err := fco.save("what")
 	if id != nil {
 		t.Log(id)
 	}
-	fc, err := fco.All()
+	fc, err := fco.all()
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(fc)
-	fco.Drop("what")
+	fco.drop("what")
 	if err != nil {
 		t.Error(err)
 	}

@@ -23,8 +23,8 @@ func TestFeedSoruceImport(t *testing.T) {
 */
 
 func TestFeedSourceOps(t *testing.T) {
-	dbo := NewFeedSourceOperator()
-	fs, err := dbo.AllSources()
+	dbo := new_feedsource_operator()
+	fs, err := dbo.all()
 	if err != nil {
 		t.Error(err)
 	}
