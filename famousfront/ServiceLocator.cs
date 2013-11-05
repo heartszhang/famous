@@ -29,7 +29,7 @@ namespace famousfront
         {
         }
 
-        internal static Flags Flags
+        public static Flags Flags
         {
             get { return _flags; }
         }
@@ -93,13 +93,6 @@ namespace famousfront
             }
         }
 
-        internal Flags FlagsViewModel
-        {
-            get
-            {
-                return Flags;
-            }
-        }
         /// <summary>
         /// Provides a deterministic way to delete the Main property.
         /// </summary>
