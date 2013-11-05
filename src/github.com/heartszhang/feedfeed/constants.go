@@ -41,7 +41,7 @@ const (
 	Feed_content_failed
 	Feed_content_unavail
 	Feed_content_summary
-	Feed_content_summary_replaced_by_fulltext
+	Feed_content_summary_empty
 )
 
 const (
