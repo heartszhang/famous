@@ -3,6 +3,8 @@ package cleaner
 import (
 	"code.google.com/p/go.net/html"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 type boilerpipe_score struct {
@@ -17,8 +19,8 @@ type boilerpipe_score struct {
 	anchors      int
 	commas       int
 	inner_text   string
-
-	is_content bool
+	img_score    int
+	is_content   bool
 }
 
 func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) boilerpipe_score {
@@ -39,7 +41,11 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 		})
 		p.anchors++
 	case n.Data == "img":
-		p.imgs++
+		width, height := get_image_dim(n)
+		if width > 320 || height > 320 || (width < 0 && height < 0) {
+			p.imgs++
+			p.img_score = int_min(p.img_score+int((width/21)*(height/21)/30), 140)
+		}
 	case omit_form && n.Data == "form":
 		p.forms++
 	case n.Data == "input" || n.Data == "textarea":
@@ -53,7 +59,24 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 			p.add(np)
 		})
 	}
+	p.words += int_min(p.img_score, 40)
 	return p
+}
+
+func get_image_dim(img *html.Node) (w, h int64) {
+	ws := node_get_attribute(img, "width")
+	ws = strings.TrimSuffix(ws, "px")
+	hs := node_get_attribute(img, "height")
+	hs = strings.TrimSuffix(hs, "px")
+	var err error
+	if w, err = strconv.ParseInt(ws, 0, 0); err != nil {
+		w = -1
+	}
+	if h, err = strconv.ParseInt(hs, 0, 0); err != nil {
+		h = -1
+	}
+
+	return
 }
 
 //包含n的子孙的评分
@@ -69,8 +92,16 @@ func (this *boilerpipe_score) add(rhs boilerpipe_score) {
 	this.words += rhs.words
 	this.anchor_imgs += rhs.anchor_imgs
 	this.imgs += rhs.imgs
+	this.img_score = int_min(this.img_score+rhs.img_score, 140)
 	this.objects += rhs.objects
 	//  this.forms += rhs.forms
+}
+
+func int_min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 //有链接链接文字的情况，认为全部是图片链接
