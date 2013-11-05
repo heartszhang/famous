@@ -5,7 +5,7 @@
         <ResourceDictionary Source="views/OfflineView.xaml"/>
         <ResourceDictionary Source="views/FeedEntriesView.xaml"/>
         <ResourceDictionary Source="views/FeedEntryView.xaml"/>
-        <ResourceDictionary Source="views/ConnectingView.xaml"/>
+        <ResourceDictionary Source="views/BootstrapView.xaml"/>
         <ResourceDictionary Source="views/ContentView.xaml"/>
         <ResourceDictionary Source="views/FeedSourceView.xaml"/>
         <ResourceDictionary Source="views/FeedSourcesView.xaml"/>

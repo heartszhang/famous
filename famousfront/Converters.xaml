@@ -2,8 +2,11 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:famousfront"
+                    xmlns:ff="clr-namespace:famousfront"
+                    xmlns:cv="clr-namespace:famousfront.converters"
                     mc:Ignorable="d">
-    <vm:ServiceLocator x:Key="_locator" d:IsDataSource="True" />
+    <ff:ServiceLocator x:Key="_locator" d:IsDataSource="True" />
+    <cv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <cv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
 
 </ResourceDictionary>
