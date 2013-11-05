@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 )
 
@@ -32,6 +33,7 @@ func init() {
 	http.HandleFunc("/api/feed_entry/drop.json", webapi_feedentry_drop)
 	//	http.HandleFunc("/api/meta/categories.json", webapi_meta_categories)
 
+	http.HandleFunc("/exit", webapi_exit)
 	http.HandleFunc("/", webapi_home)
 }
 
@@ -58,28 +60,10 @@ func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
-// uri: /api/feed_source/entries_since.json/{since_unixtime:[0-9]+}/{source}/{count:[0-9]+}/{page:[0-9]+}
-/*
-func webapi_feedsource_entries_since(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.RequestURI()())
-	since, _ := strconv.ParseInt(r.URL.Query().Get("since_unixtime"), 0, uint64_bits)
-	source, _ := url.QueryUnescape(r.URL.Query().Get("source"))
-
-	count, _ := strconv.ParseInt(r.URL.Query().Get("count"), 0, 0)
-	page, _ := strconv.ParseInt(r.URL.Query().Get("page"), 0, 0)
-	log.Println("feedsource:", source)
-	fe, err := feedsource_entries_since(since, source, uint(count), uint(page))
-	if err != nil {
-		webapi_write_error(w, err)
-	} else {
-		webapi_write_as_json(w, fe)
-	}
-	log.Println("feedsource-return:", len(fe))
-}
-*/
 // uri: /api/feed_entry/unread.json/{uri}/{count}/{page}
 func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
 	//	category, err := strconv.ParseUint(r.URL.Query().Get("category"), 0, uint64_bits)
+	log.Println(r.URL.RequestURI())
 	uri, _ := url.QueryUnescape(r.URL.Query().Get("uri"))
 	count, _ := strconv.ParseUint(r.URL.Query().Get("count"), 0, 0)
 	page, _ := strconv.ParseUint(r.URL.Query().Get("page"), 0, 0)
@@ -89,7 +73,6 @@ func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
 	default:
 		webapi_write_error(w, err)
 	}
-	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_source/subscribe.json/{uri}/{source_type}/{category}
@@ -272,9 +255,30 @@ func webapi_write_error(w http.ResponseWriter, err error) {
 	case nil:
 		webapi_write_as_json(w, BackendError{})
 	default:
+		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadGateway)
-		webapi_write_as_json(w, BackendError{Reason: err.Error(), Code: -1})
+		enc := json.NewEncoder(w)
+		enc.Encode(BackendError{Reason: err.Error(), Code: -1})
 	}
+}
+
+func webapi_exit(w http.ResponseWriter, r *http.Request) {
+	webapi_write_as_json(w, r.URL)
+
+	f, canflush := w.(http.Flusher)
+	if canflush {
+		f.Flush()
+	}
+
+	conn, _, err := w.(http.Hijacker).Hijack()
+	if err != nil {
+		log.Fatalf("error while shutting down: %v", err)
+	}
+
+	conn.Close()
+
+	log.Println("Shutting down")
+	os.Exit(0)
 }
 
 // uri: /
