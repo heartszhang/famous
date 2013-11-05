@@ -97,7 +97,7 @@ func do_get_timeo(uri string, useproxy int, timeo int) (*http.Response, error) {
 	client := &http.Client{Transport: trans}
 	resp, err := client_do_get(client, uri)
 	if err != nil && noretry == false {
-		log.Println("try again with proxy", uri, err)
+		fmt.Println("try again with proxy", uri, err)
 		trans.Proxy = http.ProxyFromEnvironment
 		resp, err = client_do_get(client, uri)
 	}
@@ -227,7 +227,6 @@ func (this *curler) GetUtf8(uri string, proxypolicy int) (Cache, error) {
 	if err != nil {
 		return v, err
 	}
-	fmt.Println(v.Local, err)
 	// text or application/*+xml
 	if !mime_should_convert(v.Mime, v.Charset, true) {
 		return v, err
@@ -292,9 +291,11 @@ func (this *curler) Get(uri string, useproxy int) (Cache, error) {
 	if err != nil {
 		return v, err
 	}
-	//	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return v, fmt.Errorf("%v", resp.Status)
+	}
 	mime, cs, err := extract_charset(resp.Header.Get("content-type"))
-	fmt.Println("do-get", mime, cs, err)
 	if err == nil {
 		v.Mime = strings.ToLower(mime)
 		v.Charset = strings.ToLower(cs)
@@ -334,6 +335,14 @@ func mime_to_ext(typesubtype, dispose string) string {
 	switch len(types) {
 	case 2:
 		return types[1] + "."
+	}
+	return ""
+}
+func MimeToExt(typesubtype string) string {
+	types := strings.Split(typesubtype, "/")
+	switch len(types) {
+	case 2:
+		return types[1]
 	}
 	return ""
 }
