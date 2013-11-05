@@ -3,11 +3,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
 
-  <System:Double x:Key="TinyTextSize">11</System:Double>
+  <System:Double x:Key="TinyTextSize">12</System:Double>
   <System:Double x:Key="SmallTextSize">13.333</System:Double>
   <System:Double x:Key="NormalTextSize">16</System:Double>
-  <System:Double x:Key="LargeTextSize">18.666</System:Double>
-  <System:Double x:Key="VeryLargeTextSize">21.333</System:Double>
+  <System:Double x:Key="LargeTextSize">17</System:Double>
+  <System:Double x:Key="VeryLargeTextSize">18.666</System:Double>
 
   <FontFamily x:Key="DefaultFont">Microsoft YaHei UI, Segoe UI</FontFamily>
   <FontFamily x:Key="LightFont">Microsoft YaHei UI Light, Segoe UI Light</FontFamily>
