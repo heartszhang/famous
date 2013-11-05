@@ -104,6 +104,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="controls\FlowTextBlock.cs" />
     <Compile Include="converters\BoolToVisibilityConverter.cs" />
     <Compile Include="core\DialogViewModel.cs" />
     <Compile Include="core\Flags.cs" />
