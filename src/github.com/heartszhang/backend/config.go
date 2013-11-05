@@ -56,7 +56,7 @@ func (this FeedsBackendConfig) Address() string {
 type FeedsStatus struct {
 	startat time.Time `json:"-"`
 	Runned  int64     `json:"runned"` // seconds
-	Error   error     `json:"error,omitempty"`
+	Error   string    `json:"error,omitempty"`
 }
 
 func (this FeedsStatus) runned_nano() int64 {
