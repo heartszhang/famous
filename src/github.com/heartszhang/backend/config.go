@@ -24,6 +24,7 @@ type FeedsBackendConfig struct {
 	Proxy         string              `json:"proxy, omitempty"` // "127.0.0.1:8087"
 
 	SummaryThreshold uint `json:"summary_threshold" bson:"summary_threshuld"`
+	SummaryMinWords  int  `json:"summary_minwords" bson:"summary_minwords"`
 	ThumbnailWidth   uint `json:"thumbnail_width"`
 }
 
@@ -39,6 +40,7 @@ func init() {
 	config.FeedSourceDir = config.DataDir + "sources/"
 	config.FeedEntryDir = config.DataDir + "entries/"
 	config.SummaryThreshold = 250
+	config.SummaryMinWords = 25
 	//	config.Categories = make([]feed.FeedCategory, 0)
 	config.ThumbnailWidth = 320
 	os.MkdirAll(config.ImageDir, 0644)
