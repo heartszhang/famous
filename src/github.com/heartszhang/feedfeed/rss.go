@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+/*
 func CreateFeedSourceRss2(rss2file string) (FeedSource, error) {
 	return feed_source_create_rss2(rss2file)
 }
@@ -15,6 +16,7 @@ func CreateFeedSourceRss2(rss2file string) (FeedSource, error) {
 func CreateFeedEntriesRss2(rss2file string) ([]FeedEntry, error) {
 	return feed_entries_create_rss2(rss2file)
 }
+*/
 
 type rss_channel struct {
 	Title           string     `xml:"title,omityempty"` // required  unique?
@@ -74,7 +76,7 @@ type rss struct {
 }
 
 // file has already converted to utf-8
-func feed_source_create_rss2(filepath string) (FeedSource, error) {
+func feedsource_from_rss(filepath string) (FeedSource, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
 		return FeedSource{}, err
@@ -93,29 +95,7 @@ func feed_source_create_rss2(filepath string) (FeedSource, error) {
 	return fs, err
 }
 
-type feed_sketch struct {
-	XMLName xml.Name
-	XML     string `xml:",innerxml"`
-}
-
-func DetectFeedSourceType(filepath string) uint {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return Feed_type_unknown
-	}
-	defer f.Close()
-
-	decoder := xml.NewDecoder(f)
-	decoder.CharsetReader = charset_reader_passthrough
-
-	var (
-		v feed_sketch
-	)
-	err = decoder.Decode(&v)
-	return FeedSourceTypes[v.XMLName.Local]
-}
-
-func feed_entries_create_rss2(filepath string) ([]FeedEntry, error) {
+func feedentries_from_rss(filepath string) ([]FeedEntry, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
 		return []FeedEntry{}, err
@@ -130,7 +110,9 @@ func feed_entries_create_rss2(filepath string) ([]FeedEntry, error) {
 		fes []FeedEntry
 	)
 	err = decoder.Decode(&v)
-	fes = v.Channel.to_entries()
+	if err == nil {
+		fes = v.Channel.to_entries()
+	}
 	return fes, err
 }
 

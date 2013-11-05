@@ -62,11 +62,16 @@ type atom_feed struct { // to feed_source
 	Categories []atom_category `xml:"category"`
 }
 
+/*
 func CreateFeedSourceAtom(filepath string) (FeedSource, error) {
 	return feed_source_create_atom(filepath)
 }
 
-func feed_source_create_atom(filepath string) (FeedSource, error) {
+func CreateFeedEntriesAtom(filepath string) ([]FeedEntry, error) {
+	return feed_entries_create_atom(filepath)
+}
+*/
+func feedsource_from_atom(filepath string) (FeedSource, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
 		return FeedSource{}, err
@@ -90,7 +95,6 @@ func (this atom_feed) link() string {
 	}
 	return ""
 }
-
 func (this atom_feed) to_feed_soruce() FeedSource {
 	f := FeedSource{
 		Name:        this.Title,
@@ -113,17 +117,42 @@ func (this atom_feed) to_feed_soruce() FeedSource {
 	return f
 }
 
+func feedentries_from_atom(filepath string) ([]FeedEntry, error) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return []FeedEntry{}, err
+	}
+	defer f.Close()
+	decoder := xml.NewDecoder(f)
+	decoder.CharsetReader = charset_reader_passthrough
+	var (
+		v   atom_feed
+		fes []FeedEntry
+	)
+	err = decoder.Decode(&v)
+	if err == nil {
+		fes = v.extract_entries()
+	}
+	return fes, err
+}
+
+func (this atom_feed) extract_entries() []FeedEntry {
+	v := make([]FeedEntry, len(this.Entries))
+	for idx, e := range this.Entries {
+		v[idx] = e.to_feed_entry()
+	}
+	return v
+}
+
 func (this atom_entry) to_feed_entry() FeedEntry {
 	e := FeedEntry{
-		Flags:  0,
-		Source: "",
-		Type:   Feed_type_atom,
-		Uri:    this.link(),
-		Title:  FeedTitle{Main: this.Title},
-		//		Author:   this.Authors[0].to_feedauthor(),
+		Flags:   0,
+		Source:  "",
+		Type:    Feed_type_atom,
+		Uri:     this.link(),
+		Title:   FeedTitle{Main: this.Title},
 		PubDate: unixtime_nano_rfc822(this.Updated),
 		Summary: this.Summary.Body,
-		//		Content:  FeedContent{FullText: this.Content.Body},
 	}
 	if this.Content.Body != "" {
 		e.Content = &FeedContent{FullText: this.Content.Body}
@@ -152,24 +181,7 @@ func (this atom_entry) link() string { // rel = alternate
 	}
 	return ""
 }
-func mime_to_ext(mime string) string {
-	return "html" // tbe
-}
 
-/*
-func (this atom_entry) save_content() FeedContent {
-	ext := mime_to_ext(this.Content.Type)
-	dir := feedsprofile().content_dir()
-	f, err := ioutil.TempFile(dir, ext+".")
-	if err != nil {
-		return FeedContent{}
-	}
-	defer f.Close()
-	_, err = f.Write([]byte(this.Content.Body))
-	return FeedContent{Uri: this.link(),
-		Local: f.Name()}
-}
-*/
 func (this atom_person) to_feedauthor() FeedAuthor {
 	return FeedAuthor{Name: this.Name, Email: this.Email}
 }
