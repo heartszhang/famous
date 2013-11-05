@@ -18,11 +18,11 @@
         <KeyBinding Key="P" Command="{Binding PreviousSourceCommand}" Modifiers="Control"/>
       </Grid.InputBindings>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="10*" MinWidth="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
-        <ColumnDefinition Width="80*"/>
-        <ColumnDefinition Width="10*" MinWidth="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
+        <ColumnDefinition Width="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
       </Grid.ColumnDefinitions>
-      <Grid Background="AliceBlue" Grid.Column="1" x:Name="_left">
+      <Grid Background="AliceBlue" Grid.Column="1" x:Name="_left" >
         <Grid.RenderTransform>
           <TransformGroup>
             <ScaleTransform/>
