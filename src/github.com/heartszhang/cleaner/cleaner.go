@@ -259,22 +259,19 @@ func (this *html_cleaner) try_update_article(candi *html.Node) {
 }
 
 const (
-	small_image_t = 180 // pixels
+	small_image_t = 190 // pixels
 )
 
 func trim_small_image(img *html.Node) (drop bool) {
-	width, werr := strconv.ParseInt(node_get_attribute(img, "width"), 0, 32)
-	height, herr := strconv.ParseInt(node_get_attribute(img, "height"), 0, 32)
+	width, height := get_image_dim(img)
 
-	// sina weibo use the wrong attribute
-	if herr != nil {
-		height, herr = strconv.ParseInt(node_get_attribute(img, "heigh"), 0, 32)
-	}
-
-	if werr != nil || herr != nil || img.Parent == nil {
+	if img.Parent == nil {
 		return
 	}
-	if width*height < small_image_t*small_image_t && img.Parent.Data == "a" {
+	if width > 0 && height > 0 && width*height < small_image_t*small_image_t && img.Parent.Data == "a" {
+		img.Data = "input"
+		drop = true
+	} else if width == 1 && height == 1 {
 		img.Data = "input"
 		drop = true
 	}
@@ -321,7 +318,7 @@ func (this *html_cleaner) clean_attributes(n *html.Node) {
 	}
 	attrs := []html.Attribute{}
 	for _, attr := range n.Attr {
-		if attr.Key == "id" || attr.Key == "class" || attr.Key == "href" || attr.Key == "src" {
+		if attr.Key == "id" || attr.Key == "class" || attr.Key == "href" || attr.Key == "src" || attr.Key == "width" || attr.Key == "height" {
 			attrs = append(attrs, attr)
 		}
 	}
@@ -543,6 +540,9 @@ func (this *html_cleaner) fix_a_href(a *html.Node) {
 	href := node_get_attribute(a, "href")
 	uri, err := url.Parse(href)
 	if err != nil {
+		return
+	}
+	if this.current_url == nil {
 		return
 	}
 	abs := this.current_url.ResolveReference(uri)
