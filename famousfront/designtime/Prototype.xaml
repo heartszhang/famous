@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="famousfront.designtime.Prototype"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ff="clr-namespace:famousfront"
+             xmlns:vm="clr-namespace:famousfront.viewmodels" d:DesignWidth="400"
+             xmlns:metro="http://schemas.codeplex.com/elysium"
+             xmlns:params="http://schemas.codeplex.com/elysium/params" 
+  params:General.ContentFontSize="{StaticResource NormalTextSize}"
+  params:General.HeaderFontSize="{StaticResource LargeTextSize}"
+  params:General.TitleFontSize="{StaticResource VeryLargeTextSize}"             
+             TextElement.FontFamily="{StaticResource LightFont}"
+             d:DesignHeight="300" 
+             mc:Ignorable="d" Background="White" d:DataContext="{d:DesignData /SampleData/ContentViewModelSampleData.xaml}">
+  <Grid x:Name="LayoutRoot" >
+    <ContentControl Content="{Binding Mode=OneWay}" ContentTemplate="{StaticResource {x:Type vm:ContentViewModel}}"/>
+
+    <Grid >
+      <DockPanel  x:Name="label" HorizontalAlignment="Right"
+                    TextElement.FontSize="{Binding (params:General.ContentFontSize), RelativeSource={RelativeSource self}}">
+        <TextBlock Text="SDASDsss" DockPanel.Dock="Right" />
+        <TextBlock DockPanel.Dock="Left" Text="中翁显示中翁显示时候惨阿嘎" TextWrapping="Wrap"/>
+      </DockPanel>
+      <Rectangle Height="16" VerticalAlignment="Bottom" >
+        <Rectangle.Fill>
+          <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="Transparent" Offset="0.0" />
+            <GradientStop Color="White" Offset="1.0" />
+          </LinearGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+    </Grid>
+  </Grid>
+</UserControl>

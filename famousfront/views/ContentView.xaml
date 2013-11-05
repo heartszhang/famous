@@ -1,20 +1,42 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:metro="http://schemas.codeplex.com/elysium"
+                    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                    xmlns:cmd="http://www.galasoft.ch/mvvmlight"
                     xmlns:vm="clr-namespace:famousfront.viewmodels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
-    <DataTemplate DataType="{x:Type vm:ContentViewModel}" d:IsDesignTimeCreatable="false">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="10*"/>
-                <ColumnDefinition Width="80*"/>
-                <ColumnDefinition Width="10*"/>
-            </Grid.ColumnDefinitions>
-            <Grid Panel.ZIndex="100" Width="300" HorizontalAlignment="Left" Grid.ColumnSpan="3" Background="BurlyWood" Visibility="Collapsed">
-                <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
-            </Grid>
-            <Grid Background="AliceBlue" Grid.Column="1" >
-                <ContentPresenter Content="{Binding FeedEntriesViewModel}"/>
-            </Grid>
-        </Grid>
-    </DataTemplate>
+  <DataTemplate DataType="{x:Type vm:ContentViewModel}" d:IsDesignTimeCreatable="false">
+    <Grid Background="Transparent" d:DesignWidth="500" d:DesignHeight="300">
+      <i:Interaction.Triggers>
+        <i:EventTrigger EventName="MouseRightButtonUp">
+          <cmd:EventToCommand Command="{Binding ToggleFeedSourcesCommand,Mode=OneWay}" MustToggleIsEnabledValue="True"/>
+        </i:EventTrigger>
+      </i:Interaction.Triggers>
+      <Grid.InputBindings>
+        <KeyBinding Key="N" Command="{Binding NextEntryCommand}" />
+        <KeyBinding Key="P" Command="{Binding PreviousEntryCommand}"/>
+        <KeyBinding Key="N" Command="{Binding NextSourceCommand}" Modifiers="Control"/>
+        <KeyBinding Key="P" Command="{Binding PreviousSourceCommand}" Modifiers="Control"/>
+      </Grid.InputBindings>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="10*"/>
+        <ColumnDefinition Width="80*"/>
+        <ColumnDefinition Width="10*"/>
+      </Grid.ColumnDefinitions>
+      <Grid Background="AliceBlue" Grid.Column="1" >
+        <ContentPresenter Content="{Binding FeedEntriesViewModel}"/>
+      </Grid>
+      <Grid Width="360" HorizontalAlignment="Left" Grid.ColumnSpan="3" 
+            Visibility="{Binding ShowFeedSources, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+        <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
+      </Grid>
+      <Rectangle Height="16" VerticalAlignment="Bottom" Grid.ColumnSpan="3">
+        <Rectangle.Fill>
+          <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="Transparent" Offset="0.0" />
+            <GradientStop Color="White" Offset="1.0" />
+          </LinearGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+    </Grid>
+  </DataTemplate>
 </ResourceDictionary>

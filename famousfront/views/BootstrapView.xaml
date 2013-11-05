@@ -1,0 +1,27 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:metro="http://schemas.codeplex.com/elysium"
+                    xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:ff="clr-namespace:famousfront"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels"
+                    mc:Ignorable="d">
+  <DataTemplate DataType="{x:Type vm:BootstrapViewModel}" d:IsDesignTimeCreatable="false">
+    <Grid Background="White">
+      <Grid Background="{DynamicResource SemitransparentBrush}"/>
+      <StackPanel VerticalAlignment="Center">
+        <metro:ProgressRing x:Name="_indicator" Width="64" Height="64" State="Normal" HorizontalAlignment="Center"/>
+        <TextBlock Foreground="{DynamicResource HighlightBrush}" 
+                   Text="{Binding Reason}" HorizontalAlignment="Center"
+                   FontSize="{Binding (params:General.HeaderFontSize), RelativeSource={RelativeSource self}}"/>
+      </StackPanel>
+    </Grid>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding IsBusying}" Value="True">
+        <Setter Property="State" TargetName="_indicator" Value="Indeterminate"/>
+      </DataTrigger>
+
+    </DataTemplate.Triggers>
+  </DataTemplate>
+</ResourceDictionary>

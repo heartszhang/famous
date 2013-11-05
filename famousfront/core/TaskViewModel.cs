@@ -8,5 +8,11 @@ namespace famousfront.core
 {
     class TaskViewModel : ViewModelBase
     {
+        bool _is_busying;
+        public bool IsBusying
+        {
+            get { return _is_busying; }
+            set { Set(ref _is_busying, value);  }
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace famousfront.utils
             {
                 var str = location.ToString();
 
-                Process.Start(str);
+                using (var p = Process.Start(str)) { }
             }
         }
     }

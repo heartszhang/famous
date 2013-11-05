@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using famousfront.core;
+using famousfront.messages;
+using GalaSoft.MvvmLight.Command;
 
 namespace famousfront.viewmodels
 {
@@ -11,15 +13,26 @@ namespace famousfront.viewmodels
     {
         OFFLINE,
         READY,
+        BOOTSTRAP,
         CONNECTING,
     }
     internal class MainViewModel : TaskViewModel
     {
         internal MainViewModel()
         {
+            MessengerInstance.Register<BackendInitialized>(this, OnBackendInitialized);
             _content = new ContentViewModel();
             _offline = new OfflineViewModel();
+            _booting = new BootstrapViewModel();
         }
+        public override void Cleanup()
+        {
+            _content.Cleanup();
+            _offline.Cleanup();
+            _booting.Cleanup();
+            base.Cleanup();
+        }
+
         ContentViewModel _content;
         public ContentViewModel ContentViewModel
         {
@@ -30,13 +43,13 @@ namespace famousfront.viewmodels
             }
         }
 
-        ConnectingViewModel _connecting;
-        public ConnectingViewModel ConnectingViewModel
+        BootstrapViewModel _booting;
+        public BootstrapViewModel BootstrapViewModel
         {
-            get { return _connecting; }
+            get { return _booting; }
             internal set
             {
-                Set(ref _connecting, value);
+                Set(ref _booting, value);
             }
         }
 
@@ -69,7 +82,7 @@ namespace famousfront.viewmodels
             }
         }
 
-        MainViewStatus _status = MainViewStatus.READY;
+        MainViewStatus _status = MainViewStatus.BOOTSTRAP;
         public MainViewStatus Status
         {
             get { return _status; }
@@ -77,6 +90,12 @@ namespace famousfront.viewmodels
             {
                 Set(ref _status, value);
             }
+        }
+
+        void OnBackendInitialized(BackendInitialized msg)
+        {
+            Status = MainViewStatus.READY;
+            _content.ReloadFeedSources();
         }
     }
 }

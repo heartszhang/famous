@@ -7,12 +7,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:vm="clr-namespace:famousfront.viewmodels"
     mc:Ignorable="d" x:Class="famousfront.MainWindow"
+  Icon="gnote.ico"
+             TextOptions.TextHintingMode="Animated"
+   TextElement.FontFamily="{StaticResource LightFont}"
               Background="{DynamicResource BackgroundBrush}"
               WindowStartupLocation="CenterScreen"              
               DataContext="{StaticResource _locator}"
-        Title="FamousFront" Height="550" Width="800" x:Name="root">
-	<Grid d:DataContext="{d:DesignData /SampleData/FeedSourcesViewModelSampleData.xaml}">
-		<ContentPresenter x:Name="_content"/>
-		<!-- a event stack should be here-->
-	</Grid>
+  FocusManager.FocusedElement="{Binding ElementName=_content}"
+  params:General.ContentFontSize="{StaticResource NormalTextSize}"
+  params:General.HeaderFontSize="{StaticResource LargeTextSize}"
+  params:General.TitleFontSize="{StaticResource VeryLargeTextSize}"
+       Title="FamousFront" Height="750" Width="1024" x:Name="root">
+  <Grid>
+    <ContentPresenter x:Name="_content"/>
+    <!-- a event stack should be here-->
+  </Grid>
 </metro:Window>

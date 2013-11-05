@@ -77,6 +77,12 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.0.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\MvvmLightLibs.4.2.30.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
@@ -98,13 +104,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="converters\BoolToVisibilityConverter.cs" />
     <Compile Include="core\DialogViewModel.cs" />
     <Compile Include="core\Flags.cs" />
+    <Compile Include="utils\HttpClientUtils.cs" />
     <Compile Include="core\TaskViewModel.cs" />
     <Compile Include="core\ViewModelBase.cs" />
     <Compile Include="datamodels\datamodels.cs" />
-    <Compile Include="designtime\DesignWindow.xaml.cs">
-      <DependentUpon>DesignWindow.xaml</DependentUpon>
+    <Compile Include="designtime\Prototype.xaml.cs">
+      <DependentUpon>Prototype.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="messages\messages.cs" />
+    <Compile Include="Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="utils\Notifier.cs" />
     <Compile Include="core\WeakEventHandler.cs" />
@@ -112,7 +126,7 @@
     <Compile Include="utils\NotificationExtensions.cs" />
     <Compile Include="utils\UrlLauncher.cs" />
     <Compile Include="ServiceLocator.cs" />
-    <Compile Include="viewmodels\ConnectingViewModel.cs" />
+    <Compile Include="viewmodels\BootstrapViewModel.cs" />
     <Compile Include="viewmodels\ContentViewModel.cs" />
     <Compile Include="viewmodels\FeedEntriesViewModel.cs" />
     <Compile Include="viewmodels\FeedEntryViewModel.cs" />
@@ -133,9 +147,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="designtime\DesignWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="designtime\Prototype.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -150,7 +164,15 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="views\ConnectingView.xaml">
+    <Page Include="themes\generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="themes\textblocks.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\BootstrapView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -205,6 +227,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -234,11 +260,14 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\" />
+    <Folder Include="themes\light\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="gnote.ico" />
   </ItemGroup>
   <ItemGroup>
+    <DesignData Include="SampleData\BootstrapViewModelSampleData.xaml" />
+    <DesignData Include="SampleData\ContentViewModelSampleData.xaml" />
     <DesignData Include="SampleData\FeedSourcesViewModelSampleData.xaml" />
     <DesignData Include="SampleData\FeedSourceViewModelSampleData.xaml" />
   </ItemGroup>
