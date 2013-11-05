@@ -39,7 +39,9 @@ $RECYCLE.BIN/
 _obj
 _test
 _sample
-
+packages/
+frontprototype/
+mongodb-win32-x86_64-*/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
