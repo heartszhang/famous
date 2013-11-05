@@ -29,7 +29,6 @@ namespace famousfront.utils
                     var sc = resp.StatusCode;
                     if (sc != System.Net.HttpStatusCode.OK)
                     {
-                        //var s = await resp.Content.ReadAsStringAsync();
                         var r = await resp.Content.ReadAsAsync<BackendError>();
                         return new ResultWithError<DataType> { code = r.code, reason = r.reason };
                     }

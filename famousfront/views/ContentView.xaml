@@ -18,25 +18,37 @@
         <KeyBinding Key="P" Command="{Binding PreviousSourceCommand}" Modifiers="Control"/>
       </Grid.InputBindings>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="10*"/>
+        <ColumnDefinition Width="10*" MinWidth="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
         <ColumnDefinition Width="80*"/>
-        <ColumnDefinition Width="10*"/>
+        <ColumnDefinition Width="10*" MinWidth="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
       </Grid.ColumnDefinitions>
-      <Grid Background="AliceBlue" Grid.Column="1" >
+      <Grid Background="AliceBlue" Grid.Column="1" x:Name="_left">
+        <Grid.RenderTransform>
+          <TransformGroup>
+            <ScaleTransform/>
+            <SkewTransform/>
+            <RotateTransform/>
+            <TranslateTransform x:Name="_entries_trans" />
+          </TransformGroup>
+        </Grid.RenderTransform>
         <ContentPresenter Content="{Binding FeedEntriesViewModel}"/>
       </Grid>
-      <Grid Width="360" HorizontalAlignment="Left" Grid.ColumnSpan="3" 
+      <Grid Width="{Binding Flags.FeedSourceWidth, Source={StaticResource _locator}}" 
+            HorizontalAlignment="Left" Grid.ColumnSpan="3" 
             Visibility="{Binding ShowFeedSources, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
-      <Rectangle Height="16" VerticalAlignment="Bottom" Grid.ColumnSpan="3">
-        <Rectangle.Fill>
-          <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="Transparent" Offset="0.0" />
-            <GradientStop Color="White" Offset="1.0" />
-          </LinearGradientBrush>
-        </Rectangle.Fill>
-      </Rectangle>
+      <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Fill="{StaticResource FadeOutBottomBrush}"/>
+
     </Grid>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding ShowFeedSources}" Value="True">
+        <Setter TargetName="_left" Property="RenderTransform">
+          <Setter.Value>
+            <TranslateTransform X="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}" />
+          </Setter.Value>
+        </Setter>
+      </DataTrigger>
+    </DataTemplate.Triggers>
   </DataTemplate>
 </ResourceDictionary>
