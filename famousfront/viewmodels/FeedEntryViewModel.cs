@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using famousfront.datamodels;
+using System.Windows.Documents;
+using System.Windows.Markup;
+using System.Xml;
 namespace famousfront.viewmodels
 {
     class FeedEntryViewModel : famousfront.core.ViewModelBase
@@ -27,5 +30,16 @@ namespace famousfront.viewmodels
             var p = utime.AddMilliseconds(_.pubdate / 1000000);
             return p.ToString("D");
         }
+        /*
+        FlowDocument _doc;
+        public FlowDocument document
+        {
+            get { return _doc ?? (_doc = load_flowdoc()); }
+        }
+        FlowDocument load_flowdoc()
+        {
+            return XamlReader.Load(new XmlTextReader(new System.IO.StringReader(_.summary))) as FlowDocument;
+        }
+         * */
     }
 }
