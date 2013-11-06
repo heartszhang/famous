@@ -8,8 +8,13 @@
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" d:IsDesignTimeCreatable="false">
     <DataTemplate.Resources>
-      <Style TargetType="{x:Type FlowDocument}" x:Key="{x:Type FlowDocument}">
-        <Setter Property="OverridesDefaultStyle" Value="True"/>
+      <Style TargetType="{x:Type FlowDocument}" x:Key="FeedEntryFlowDocumentStyle">
+        <Style.Resources>
+          <Style TargetType="{x:Type Image}">
+            <Setter Property="MaxWidth" Value="320"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+          </Style>
+        </Style.Resources>
       </Style>
     </DataTemplate.Resources>
     <StackPanel >
