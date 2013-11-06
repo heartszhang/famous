@@ -3,7 +3,9 @@ package curl
 import (
 	"github.com/nfnt/resize"
 	"image"
+	_ "image/gif"
 	"image/jpeg"
+	_ "image/png"
 	"io/ioutil"
 	"os"
 )
@@ -22,8 +24,8 @@ func NewThumbnail(localfile, tmp string, width, height uint) (filepath, mediatyp
 	h = img.Bounds().Max.Y
 
 	imgnew := resize.Resize(width, height, img, resize.MitchellNetravali)
-	ext := mime_to_ext(mediatype, "")
-	of, err := ioutil.TempFile(tmp, ext)
+	mediatype = "image/jpeg"
+	of, err := ioutil.TempFile(tmp, "jpeg.")
 	if err != nil {
 		return
 	}
