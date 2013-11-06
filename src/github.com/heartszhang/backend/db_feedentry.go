@@ -4,6 +4,7 @@ import (
 	feed "github.com/heartszhang/feedfeed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	"log"
 	"time"
 )
 
@@ -85,12 +86,16 @@ func insert_entry(coll *mgo.Collection, entry feed.FeedEntry) (interface{}, erro
 		feed.FeedEntry `bson:",inline"`
 		TTL            time.Time `bson:"ttl"`
 	}{entry, time.Now()}
-	ci, err := coll.Upsert(bson.M{"uri": entry.Uri}, bson.M{"$setOnInsert": xe})
+	ci, err := coll.Upsert(bson.M{"uri": entry.Uri}, bson.M{"$setOnInsert": &xe})
+	if ci == nil {
+		log.Println(err)
+		return nil, err
+	}
 	return ci.UpsertedId, err
 }
 
 func (this feedentry_op) setcontent(uri, filepath string, words int, imgs []feed.FeedMedia) error {
-	status := feed.Feed_content_failed
+	status := feed.Feed_content_unresolved
 	imgc := len(imgs)
 	if len(filepath) > 0 && (words+imgc*128) > 192 {
 		status = feed.Feed_content_ready
