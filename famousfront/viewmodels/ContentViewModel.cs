@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace famousfront.viewmodels
 {
@@ -19,7 +20,7 @@ namespace famousfront.viewmodels
         }
         internal ContentViewModel()
         {
-            _toggle_feedsources_command = new RelayCommand(ExecuteToggleFeedSources);
+            _toggle_feedsources_command = new RelayCommand<MouseButtonEventArgs>(ExecuteToggleFeedSources);
             _previous_entry_command = new RelayCommand(ExecutePreviousEntryCommand);
             _previous_source_command = new RelayCommand(ExecutePreviousSourceCommand);
             _next_entry_command = new RelayCommand(ExecuteNextEntryCommand);
@@ -36,12 +37,12 @@ namespace famousfront.viewmodels
         {
             get { return _sources; }
         }
-        RelayCommand _toggle_feedsources_command;
-        public RelayCommand ToggleFeedSourcesCommand
+        RelayCommand<MouseButtonEventArgs> _toggle_feedsources_command;
+        public ICommand ToggleFeedSourcesCommand
         {
             get { return _toggle_feedsources_command; }
         }
-        void ExecuteToggleFeedSources()
+        void ExecuteToggleFeedSources(MouseButtonEventArgs args)
         {
             ShowFeedSources = !ShowFeedSources;
         }
