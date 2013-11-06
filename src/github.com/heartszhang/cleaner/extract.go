@@ -3,20 +3,25 @@ package cleaner
 import (
 	"code.google.com/p/go.net/html"
 	"io/ioutil"
+	//	"log"
 )
 
 func MakeFragmentReadable(doc *html.Node) (*html.Node, *DocSummary, error) {
 	article := html_clean_fragment(doc)
 	//	of, err := write_file(doc)
+	//	log.Println("clean-fragment", of, err)
 
 	doc1, article := readabilitier_make_readable(article)
 	//	of, err = write_file(doc1)
+	//	log.Println("make-readable", of, err)
 
 	article = boiler_clean_by_link_density(article)
 	//	of, err = write_file(doc1)
+	//	log.Println("clean-by-density", of, err)
 
 	article = boiler_clean_form_prefix(article)
 	//	of, err = write_file(doc1)
+	//	log.Println("clean-form", of, err)
 	return article, new_docsummary(doc1), nil
 }
 
