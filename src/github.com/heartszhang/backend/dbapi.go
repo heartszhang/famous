@@ -37,3 +37,7 @@ type feedsource_operator interface {
 	disable(uri string, dis bool) error
 	update(f *feed.FeedSource) error
 }
+
+type feedcontent_operator interface {
+	touch(hash uint64) (uint, error)
+}
