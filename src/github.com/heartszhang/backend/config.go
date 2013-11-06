@@ -4,6 +4,7 @@ import (
 	"fmt"
 	feed "github.com/heartszhang/feedfeed"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 )
@@ -28,17 +29,21 @@ type FeedsBackendConfig struct {
 	ThumbnailWidth   uint `json:"thumbnail_width"`
 }
 
+func pwd() string {
+	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	return dir
+}
 func init() {
 	config.Ip = "127.0.0.1"
 	config.Port = 8002
 	config.DbAddress = "127.0.0.1"
 	config.DbName = "backend"
-	config.DataDir = "data/"
-	config.ImageDir = config.DataDir + "images/"
-	config.ThumbnailDir = config.DataDir + "thumbnails/"
-	config.DocumentDir = config.DataDir + "fulltext/"
-	config.FeedSourceDir = config.DataDir + "sources/"
-	config.FeedEntryDir = config.DataDir + "entries/"
+	config.DataDir = filepath.Join(pwd(), "data/")
+	config.ImageDir = filepath.Join(config.DataDir, "images/")
+	config.ThumbnailDir = filepath.Join(config.DataDir, "thumbnails/")
+	config.DocumentDir = filepath.Join(config.DataDir, "fulltext/")
+	config.FeedSourceDir = filepath.Join(config.DataDir, "sources/")
+	config.FeedEntryDir = filepath.Join(config.DataDir, "entries/")
 	config.SummaryThreshold = 250
 	config.SummaryMinWords = 25
 	//	config.Categories = make([]feed.FeedCategory, 0)
