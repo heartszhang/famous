@@ -20,7 +20,8 @@ namespace famousfront
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            //Elysium.Manager.Apply(this, Elysium.Theme.Dark, Elysium.AccentBrushes.Blue, System.Windows.Media.Brushes.White);
+            Elysium.Manager.Apply(this, Elysium.Theme.Light);
+            //this.Apply(Elysium.Theme.Light);
             WireUnhandledExceptionHandlers();
             ServiceLocator.Startup();
             base.OnStartup(e);
