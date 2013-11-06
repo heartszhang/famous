@@ -38,3 +38,7 @@ func do_in_session(collection string, act func(*mgo.Collection) error) error {
 	c := sess.DB(config.DbName).C(collection)
 	return act(c)
 }
+
+type coll_op struct {
+	coll string
+}
