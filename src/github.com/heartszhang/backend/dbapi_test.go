@@ -21,7 +21,7 @@ func TestFeedSoruceImport(t *testing.T) {
 	t.Log(fs)
 }
 */
-
+/*
 func TestFeedSourceOps(t *testing.T) {
 	dbo := new_feedsource_operator()
 	fs, err := dbo.all()
@@ -34,4 +34,17 @@ func TestFeedSourceOps(t *testing.T) {
 func TestFeedEntryMark(t *testing.T) {
 	//	dbo := NewFeedEntryOperator()
 
+}
+*/
+func TestFeedContentTouch(t *testing.T) {
+	dbo := new_feedcontent_operator()
+	x, err := dbo.touch(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	x, err = dbo.touch(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(x)
 }
