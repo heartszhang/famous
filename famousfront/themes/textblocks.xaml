@@ -21,40 +21,40 @@
 
   <Style x:Key="MetroHeaderBold" TargetType="{x:Type TextBlock}">
     <Setter Property="FontSize" Value="{StaticResource VeryLargeTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource LightFont}"/>
+    <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
   </Style>
 
 
 
   <Style x:Key="MetroHeader2" TargetType="{x:Type TextBlock}">
     <Setter Property="FontSize" Value="{StaticResource LargeTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource SemiBoldFont}"/>
+    <Setter Property="FontFamily" Value="{StaticResource SemiBoldFont}"/>
   </Style>
 
   <Style x:Key="MetroHeader3" TargetType="{x:Type TextBlock}">
     <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}"/>
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
   </Style>
 
   <Style x:Key="MetroNormalText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{DynamicResource NormalTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}"/>
+    <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
   </Style>
 
   <Style x:Key="MetroSmallBoldText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{DynamicResource SmallTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}"/>
+    <Setter Property="FontSize" Value="{StaticResource SmallTextSize}"/>
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
     <Setter Property="FontWeight" Value="Bold"/>
   </Style>
 
   <Style x:Key="MetroSmallText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{DynamicResource SmallTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}"/>
+    <Setter Property="FontSize" Value="{StaticResource SmallTextSize}"/>
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
   </Style>
 
   <Style x:Key="MetroSubText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{DynamicResource NormalTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}"/>
+    <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
   </Style>
 
   <Style x:Key="WaterMarkerTextBlock"  TargetType="{x:Type TextBlock}">
@@ -70,11 +70,11 @@
   <Style x:Key="ItemDate" TargetType="{x:Type TextBlock}">
     <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
     <Setter Property="FontStyle" Value="Italic" />
-    <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}"/>
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
   </Style>
 
   <Style x:Key="ItemDescription" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{DynamicResource SmallTextSize}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}"/>
+    <Setter Property="FontSize" Value="{StaticResource SmallTextSize}"/>
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
   </Style>
 </ResourceDictionary>
