@@ -21,6 +21,19 @@ namespace famousfront.core
             ContentMarginHeight = 16.0;
             FeedSourceWidth = 360.0;
             ContentMarginMinWidth = 180.0;
+            TinyFontSize = 12.0;
+            SmallFontSize = 13.333;
+            NormalFontSize = 16.0;
+            LargeFontSize = 17.0;
+            HugeFontSize = 18.666;
+
+            DefaultFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI, Segoe UI");
+            SemiBoldFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI, Segoe UI Semibold");
+            LightFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI Light, Segoe UI Light");
+
+            Theme = Elysium.Theme.Light;
+            ThemeAccent = Elysium.AccentBrushes.Blue.Color;
+            ThemeContrast = System.Windows.Media.Colors.White;
         }
         [DataMember(Name="backend")]
         public string Backend
@@ -42,6 +55,31 @@ namespace famousfront.core
 
         [DataMember(Name = "contentmargin_minwidth")]
         public double ContentMarginMinWidth { get; set; }
+
+        [DataMember(Name = "tiny_fontsize")]
+        public double TinyFontSize { get; set; }
+        [DataMember(Name = "small_fontsize")]
+        public double SmallFontSize { get; set; }
+        [DataMember(Name = "normal_fontsize")]
+        public double NormalFontSize { get; set; }
+        [DataMember(Name = "large_fontsize")]
+        public double LargeFontSize { get; set; }
+        [DataMember(Name = "huge_fontsize")]
+        public double HugeFontSize { get; set; }
+
+        [DataMember(Name = "default_font")]
+        public System.Windows.Media.FontFamily DefaultFont { get; set; }
+        [DataMember(Name = "light_font")]
+        public System.Windows.Media.FontFamily LightFont { get; set; }
+        [DataMember(Name = "semibold_font")]
+        public System.Windows.Media.FontFamily SemiBoldFont { get; set; }
+
+        [DataMember(Name = "theme")]
+        public Elysium.Theme Theme { get; set; }
+        [DataMember(Name = "theme_accent")]
+        public System.Windows.Media.Color ThemeAccent { get; set; }
+        [DataMember(Name = "theme_contrast")]
+        public System.Windows.Media.Color ThemeContrast { get; set; }
     }
 
 }
