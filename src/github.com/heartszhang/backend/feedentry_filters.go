@@ -100,7 +100,7 @@ func feed_entry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 func extract_imgsrc_attr(attrs []html.Attribute) []html.Attribute {
 	for _, attr := range attrs {
 		if attr.Key == "src" {
-			return []html.Attribute{html.Attribute{Key: "Source", Val: attr.Val}}
+			return []html.Attribute{html.Attribute{Key: "Source", Val: redirect_thumbnail(attr.Val)}}
 		}
 	}
 	return nil
@@ -109,7 +109,7 @@ func extract_imgsrc_attr(attrs []html.Attribute) []html.Attribute {
 func extract_ahref_attr(attrs []html.Attribute) []html.Attribute {
 	for _, attr := range attrs {
 		if attr.Key == "href" {
-			return []html.Attribute{html.Attribute{Key: "NavigateUri", Val: attr.Val}}
+			return []html.Attribute{html.Attribute{Key: "NavigateUri", Val: redirect_link(attr.Val)}}
 		}
 	}
 	return nil
@@ -119,6 +119,14 @@ const (
 	fdocns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 )
 
+func make_image_node(n *html.Node) *html.Node {
+	c := &html.Node{Type: html.ElementNode, Data: "BlockUIContainer", DataAtom: n.DataAtom}
+	v := &html.Node{Type: html.ElementNode, Data: "Image", DataAtom: n.DataAtom}
+	v.Attr = extract_imgsrc_attr(n.Attr)
+	c.AppendChild(v)
+	return c
+}
+
 //p, img, a, text
 func html_to_flowdoc(frag *html.Node) {
 	if frag == nil || frag.Type != html.ElementNode {
@@ -126,14 +134,18 @@ func html_to_flowdoc(frag *html.Node) {
 	}
 	switch frag.Data {
 	case "img":
-		frag.Data = "Image"
-		frag.Attr = extract_imgsrc_attr(frag.Attr)
+		frag.Data = "Figure"
+		frag.AppendChild(make_image_node(frag))
+		frag.Attr = nil
+		return
+		//		frag.Data = "Image"
+		//		frag.Attr = extract_imgsrc_attr(frag.Attr)
 	case "a":
 		frag.Data = "Hyperlink"
 		frag.Attr = extract_ahref_attr(frag.Attr)
 	case "article":
 		frag.Data = "FlowDocument"
-		//		frag.Namespace = fdocns
+		// set namespace dont work
 		frag.Attr = []html.Attribute{html.Attribute{Key: "xmlns", Val: fdocns}}
 	case "p":
 		fallthrough
