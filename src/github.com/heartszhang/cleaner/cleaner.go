@@ -399,19 +399,19 @@ func (this *html_cleaner) clean_inline_node(n *html.Node) {
 func (this *html_cleaner) flatten_inline_node(n *html.Node) []*html.Node {
 	inlines := []*html.Node{}
 	for i := n.FirstChild; i != nil; i = i.NextSibling {
-		if i.Type == html.TextNode {
+		switch {
+		case i.Type == html.TextNode:
+			fallthrough
+		case i.Data == "img":
+			fallthrough
+		case i.Data == "object" || i.Data == "video" || i.Data == "audio" || i.Data == "embed":
 			inlines = append(inlines, i)
-		} else if i.Data == "img" || i.Data == "object" || i.Data == "video" || i.Data == "audio" {
-			inlines = append(inlines, i)
-
-			// may be div
-		} else if node_is_block(i) {
+		case node_is_block(i) == true:
+			fallthrough
+		case i.Type == html.ElementNode && i.Data == "a":
 			this.clean_inline_node(i)
 			inlines = append(inlines, i)
-		} else if i.Type == html.ElementNode && i.Data == "a" {
-			this.clean_inline_node(i)
-			inlines = append(inlines, i)
-		} else if i.Type == html.ElementNode {
+		case i.Type == html.ElementNode:
 			x := this.flatten_inline_node(i)
 			t := make([]*html.Node, len(inlines)+len(x))
 			copy(t, inlines)
