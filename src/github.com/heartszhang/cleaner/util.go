@@ -3,6 +3,7 @@ package cleaner
 import (
 	"code.google.com/p/go.net/html"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -75,6 +76,10 @@ func node_is_object(n *html.Node) bool {
 	case "img", "embed", "object", "video", "audio":
 		return true
 	}
+}
+
+func node_is_media(n *html.Node) bool {
+	return n.Data == "embed" || n.Data == "audio" || n.Data == "video"
 }
 
 // ignorable: form
@@ -252,7 +257,7 @@ func find_article_via_header_i(h *html.Node) *html.Node {
 }
 
 func node_is_unflatten(b *html.Node) bool {
-	return b.Data == "form" || b.Data == "textarea" || b.Data == "input"
+	return b.Data == "form" || b.Data == "textarea" || b.Data == "input" || b.Data == "embed" || b.Data == "audio" || b.Data == "video"
 }
 
 func deep_clone_element(n *html.Node) (inline *html.Node) {
@@ -385,4 +390,20 @@ func node_update_attribute(n *html.Node, key string, val string) {
 			n.Attr[idx].Val = val
 		}
 	}
+}
+
+func get_image_dim(img *html.Node) (w, h int64) {
+	ws := node_get_attribute(img, "width")
+	ws = strings.TrimSuffix(ws, "px")
+	hs := node_get_attribute(img, "height")
+	hs = strings.TrimSuffix(hs, "px")
+	var err error
+	if w, err = strconv.ParseInt(ws, 0, 0); err != nil {
+		w = -1
+	}
+	if h, err = strconv.ParseInt(hs, 0, 0); err != nil {
+		h = -1
+	}
+
+	return
 }
