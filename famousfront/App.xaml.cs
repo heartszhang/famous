@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using famousfront.core;
+using Elysium;
 namespace famousfront
 {
     /// <summary>
@@ -20,8 +21,7 @@ namespace famousfront
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            Elysium.Manager.Apply(this, Elysium.Theme.Light);
-            //this.Apply(Elysium.Theme.Light);
+            this.Apply(Elysium.Theme.Light);
             WireUnhandledExceptionHandlers();
             ServiceLocator.Startup();
             base.OnStartup(e);
