@@ -137,7 +137,7 @@ func (this *readabilitier) make_readability_score(n *html.Node) *readability_sco
 
 func (this *readabilitier) extract_paragraphs(n *html.Node) {
 	switch {
-	case n.Data == "form" || n.Data == "input" || n.Data == "textarea":
+	case node_is_unflatten(n):
 		// has only inlines here
 	case node_has_inline_children(n):
 		this.content = append(this.content, *this.make_readability_score(n))
@@ -155,12 +155,15 @@ func (this *readabilitier) extract_paragraphs(n *html.Node) {
 func flatten_block_node(b *html.Node, article *html.Node, flatt bool, class string) {
 	cur_class := node_cat_class(b, class)
 	switch {
-	case b.Data == "form" || b.Data == "inputbox" || b.Data == "textarea":
-	case flatt && node_is_unflatten(b):
+	case node_is_media(b):
+		mp := create_p_with_child(b)
+		article.AppendChild(mp)
+	case flatt && node_is_unflatten(b): // make unflatten nodes flatted
 		nb := create_element(b.Data)
 		//		try_update_class_attr(nb, cur_class)
 		flatten_block_node(b, nb, false, class)
 		article.AppendChild(nb)
+	case node_is_unflatten(b):
 	case node_has_inline_children(b):
 		p := create_p_with_child(b)
 		//		try_update_class_attr(p, cur_class)
