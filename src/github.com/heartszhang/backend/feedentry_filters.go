@@ -8,7 +8,6 @@ import (
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"sync"
@@ -63,12 +62,17 @@ func feed_entries_autotag(entries []feed.FeedEntry) []feed.FeedEntry {
 
 // save to mongo
 func feed_entries_backup(entries []feed.FeedEntry) []feed.FeedEntry {
+	if entries == nil || len(entries) == 0 {
+		return entries
+	}
+	feo := new_feedentry_operator()
+	feo.save(entries)
 	return entries
 }
 
 func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
-	if (entry.Status & (feed.Feed_content_ready | feed.Feed_status_fulltext_ready)) != 0 {
+	if (entry.Status & (feed.Feed_content_ready | feed.Feed_content_external_ready)) != 0 {
 		return
 	}
 	frag, _ := html_create_fragment(entry.Summary)
@@ -76,43 +80,57 @@ func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	entry.Summary = html_encode_fragment(frag)
 	entry.Words = uint(score.WordCount)
 	entry.Images = append(entry.Images, feed_medias_from_docsummary(score)...)
+	if feedentry_content_exists(score.Hash) {
+		entry.Summary = empty_flowdocument
+	}
 	if score.WordCount < config.SummaryMinWords {
-		entry.Status |= feed.Feed_content_summary_empty
+		entry.Status |= feed.Feed_summary_empty
+	} else {
+		entry.Status |= feed.Feed_summary_ready
 	}
 }
 
+const (
+	empty_flowdocument = `<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"/>`
+)
+
+func feedentry_content_exists(hash uint64) bool {
+	co := new_feedcontent_operator()
+	cnt, _ := co.touch(hash)
+	return cnt > config.SummaryDuplicateCount
+}
 func feed_entry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if entry.Content != nil && entry.Content.FullText != "" {
-		entry.Status |= feed.Feed_status_fulltext_inline
+		entry.Status |= feed.Feed_content_inline
 		frag, _ := html_create_fragment(entry.Content.FullText)
 		frag, score, _ := cleaner.MakeFragmentReadable(frag)
 		entry.Summary = html_encode_fragment(frag)
 		entry.Density = uint(score.WordCount)
 
 		entry.Images = append(entry.Images, feed_medias_from_docsummary(score)...)
-		entry.Status |= feed.Feed_content_ready
-		entry.Status |= feed.Feed_status_fulltext_ready
-		log.Println("from-fulltext", entry.Title)
+		if score.WordCount < config.SummaryMinWords {
+			entry.Status |= feed.Feed_content_empty
+		} else {
+			entry.Status |= feed.Feed_content_ready
+		}
 	}
 }
 
-func extract_imgsrc_attr(attrs []html.Attribute) []html.Attribute {
+func node_convert_attr(attrs []html.Attribute, origin, updated string, converter func(string) string) []html.Attribute {
 	for _, attr := range attrs {
-		if attr.Key == "src" {
-			return []html.Attribute{html.Attribute{Key: "Source", Val: redirect_thumbnail(attr.Val)}}
+		if attr.Key == origin {
+			return []html.Attribute{html.Attribute{Key: updated, Val: converter(attr.Val)}}
 		}
 	}
 	return nil
+}
+func extract_imgsrc_attr(attrs []html.Attribute) []html.Attribute {
+	return node_convert_attr(attrs, "src", "Source", redirect_thumbnail)
 }
 
 func extract_ahref_attr(attrs []html.Attribute) []html.Attribute {
-	for _, attr := range attrs {
-		if attr.Key == "href" {
-			return []html.Attribute{html.Attribute{Key: "NavigateUri", Val: redirect_link(attr.Val)}}
-		}
-	}
-	return nil
+	return node_convert_attr(attrs, "href", "NavigateUri", redirect_link)
 }
 
 const (
@@ -126,6 +144,17 @@ func make_image_node(n *html.Node) *html.Node {
 	c.AppendChild(v)
 	return c
 }
+func make_run_node(n *html.Node) *html.Node {
+	v := &html.Node{Type: html.TextNode, Data: "VIDEO", DataAtom: n.DataAtom}
+	return v
+}
+func node_clear_children(frag *html.Node) {
+	for child := frag.FirstChild; child != nil; {
+		next := child.NextSibling
+		frag.RemoveChild(child)
+		child = next
+	}
+}
 
 //p, img, a, text
 func html_to_flowdoc(frag *html.Node) {
@@ -135,6 +164,7 @@ func html_to_flowdoc(frag *html.Node) {
 	switch frag.Data {
 	case "img":
 		frag.Data = "Figure"
+		node_clear_children(frag)
 		frag.AppendChild(make_image_node(frag))
 		frag.Attr = nil
 		return
@@ -147,6 +177,18 @@ func html_to_flowdoc(frag *html.Node) {
 		frag.Data = "FlowDocument"
 		// set namespace dont work
 		frag.Attr = []html.Attribute{html.Attribute{Key: "xmlns", Val: fdocns}}
+	case "object":
+		fallthrough
+	case "video":
+		fallthrough
+	case "audio":
+		fallthrough
+	case "embed":
+		frag.Data = "Hyperlink"
+		node_clear_children(frag)
+		frag.AppendChild(make_run_node(frag))
+		frag.Attr = node_convert_attr(frag.Attr, "src", "NavigateUri", func(v string) string { return v })
+		return
 	case "p":
 		fallthrough
 	default:
