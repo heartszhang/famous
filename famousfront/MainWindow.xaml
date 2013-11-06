@@ -18,7 +18,7 @@
   params:General.ContentFontSize="{StaticResource NormalTextSize}"
   params:General.HeaderFontSize="{StaticResource LargeTextSize}"
   params:General.TitleFontSize="{StaticResource VeryLargeTextSize}"
-       Title="FamousFront" Height="750" Width="1024" x:Name="root">
+       Title="FamousFront" Height="864" Width="1152" x:Name="root">
   <metro:Window.ApplicationBar>
     <metro:ApplicationBar>
 
