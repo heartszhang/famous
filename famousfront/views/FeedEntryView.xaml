@@ -15,6 +15,7 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
           </Style>
         </Style.Resources>
+        <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
       </Style>
     </DataTemplate.Resources>
     <StackPanel >
