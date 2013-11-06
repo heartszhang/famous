@@ -2,6 +2,7 @@ package backend
 
 import (
 	"encoding/json"
+	"fmt"
 	feed "github.com/heartszhang/feedfeed"
 	"log"
 	"net/http"
@@ -32,6 +33,9 @@ func init() {
 	http.HandleFunc("/api/feed_entry/media.json", webapi_feedentry_media)
 	http.HandleFunc("/api/feed_entry/drop.json", webapi_feedentry_drop)
 	//	http.HandleFunc("/api/meta/categories.json", webapi_meta_categories)
+	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail) // ?uri=
+	http.HandleFunc("/api/image/origin.json", webapi_image_origin)       // ?uri=
+	http.HandleFunc("/api/link/origin.json", webapi_link_origin)         // ?uri=
 
 	http.HandleFunc("/exit", webapi_exit)
 	http.HandleFunc("/", webapi_home)
@@ -244,22 +248,65 @@ func webapi_meta_cleanup(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
+func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Query().Get("uri")
+	switch cache, err := image_get_or_cache(url); err {
+	case nil:
+		w.Header().Set("content-type", cache.Mime)
+		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
+		w.Header().Set("x-image-meta-property-width", strconv.Itoa(cache.Width))
+		w.Header().Set("x-image-meta-property-alter", cache.OriginLocal)
+
+		http.ServeFile(w, r, cache.ThumbnailLocal)
+	default:
+		webapi_write_error_code(w, err, cache.Code)
+	}
+	log.Println(r.URL.RequestURI())
+}
+
+func webapi_image_origin(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Query().Get("uri")
+	switch cache, err := image_get_or_cache(url); err {
+	case nil:
+		w.Header().Set("content-type", cache.Mime)
+		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
+		w.Header().Set("x-image-meta-property-width", strconv.Itoa(cache.Width))
+		w.Header().Set("x-image-meta-property-alter", cache.ThumbnailLocal)
+		http.ServeFile(w, r, cache.OriginLocal)
+	default:
+		webapi_write_error_code(w, err, cache.Code)
+	}
+	log.Println(r.URL.RequestURI())
+}
+
+func webapi_link_origin(w http.ResponseWriter, r *http.Request) {
+	webapi_write_error(w, nil)
+	log.Println(r.URL.RequestURI())
+}
+
 func webapi_write_as_json(w http.ResponseWriter, body interface{}) {
 	w.Header().Set("content-type", "application/json")
 	enc := json.NewEncoder(w)
 	enc.Encode(body)
 }
 
-func webapi_write_error(w http.ResponseWriter, err error) {
+func webapi_write_error_code(w http.ResponseWriter, err error, statuscode int) {
+	if statuscode == 0 {
+		statuscode = http.StatusBadGateway
+	}
 	switch err {
 	case nil:
 		webapi_write_as_json(w, BackendError{})
 	default:
 		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusBadGateway)
+		w.WriteHeader(statuscode)
 		enc := json.NewEncoder(w)
-		enc.Encode(BackendError{Reason: err.Error(), Code: -1})
+		enc.Encode(BackendError{Reason: err.Error(), Code: statuscode})
 	}
+}
+
+func webapi_write_error(w http.ResponseWriter, err error) {
+	webapi_write_error_code(w, err, http.StatusBadGateway)
 }
 
 func webapi_exit(w http.ResponseWriter, r *http.Request) {
@@ -284,4 +331,16 @@ func webapi_exit(w http.ResponseWriter, r *http.Request) {
 // uri: /
 func webapi_home(w http.ResponseWriter, r *http.Request) {
 	webapi_write_as_json(w, r.URL)
+}
+
+//http://address/api/image/thumbnail.json?uri=
+func redirect_thumbnail(uri string) string {
+	return fmt.Sprintf("http://%v/api/image/thumbnail.json?uri=%v", config.Address(), url.QueryEscape(uri))
+	//	return "http://" + config.Address() + "/api/image/thumbnail.json?uri=" + url.QueryEscape(uri)
+}
+
+//server/api/link/origin.json?uri=
+func redirect_link(uri string) string {
+	return fmt.Sprintf("http://%v/api/link/origin.json?uri=%v", config.Address(), url.QueryEscape(uri))
+	//	return "http://" + config.Address() + "/api/link/origin.json?uri=" + url.QueryEscape(uri)
 }
