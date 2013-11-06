@@ -3,8 +3,6 @@ package cleaner
 import (
 	"code.google.com/p/go.net/html"
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 type boilerpipe_score struct {
@@ -46,12 +44,16 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 			p.imgs++
 			p.img_score = int_min(p.img_score+int((width/21)*(height/21)/30), 140)
 		}
+	case node_is_media(n):
+		mw, wh := get_image_dim(n)
+		if mw > 400 {
+			p.objects++
+			p.img_score = int_min(p.img_score+int((mw/21)*(wh/21)/11), 140)
+		}
 	case omit_form && n.Data == "form":
 		p.forms++
 	case n.Data == "input" || n.Data == "textarea":
 		p.forms++
-	case node_is_object(n):
-		p.objects++
 	case omit && n.Data == "table":
 	default:
 		foreach_child(n, func(child *html.Node) {
@@ -61,22 +63,6 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 	}
 	p.words += int_min(p.img_score, 40)
 	return p
-}
-
-func get_image_dim(img *html.Node) (w, h int64) {
-	ws := node_get_attribute(img, "width")
-	ws = strings.TrimSuffix(ws, "px")
-	hs := node_get_attribute(img, "height")
-	hs = strings.TrimSuffix(hs, "px")
-	var err error
-	if w, err = strconv.ParseInt(ws, 0, 0); err != nil {
-		w = -1
-	}
-	if h, err = strconv.ParseInt(hs, 0, 0); err != nil {
-		h = -1
-	}
-
-	return
 }
 
 //包含n的子孙的评分
