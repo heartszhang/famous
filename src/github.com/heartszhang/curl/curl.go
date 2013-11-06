@@ -26,6 +26,7 @@ type Cache struct {
 	Disposition string
 	LocalUtf8   string
 	LengthUtf8  int64
+	StatusCode  int
 }
 
 const (
@@ -291,6 +292,7 @@ func (this *curler) Get(uri string, useproxy int) (Cache, error) {
 	if err != nil {
 		return v, err
 	}
+	v.StatusCode = resp.StatusCode
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
 		return v, fmt.Errorf("%v", resp.Status)
@@ -332,19 +334,19 @@ func mime_to_ext(typesubtype, dispose string) string {
 	}
 
 	types := strings.Split(typesubtype, "/")
-	switch len(types) {
-	case 2:
+	switch len(types) > 1 {
+	case true:
 		return types[1] + "."
 	}
-	return ""
+	return typesubtype
 }
 func MimeToExt(typesubtype string) string {
 	types := strings.Split(typesubtype, "/")
-	switch len(types) {
-	case 2:
+	switch len(types) > 1 {
+	case true:
 		return types[1]
 	}
-	return ""
+	return typesubtype
 }
 
 // process gzip/deflate
