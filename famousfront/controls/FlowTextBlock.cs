@@ -36,6 +36,8 @@ namespace famousfront.controls
         {
             RichTextBox rtb = (RichTextBox)obj;
             var fdoc = XamlReader.Load(new XmlTextReader(new System.IO.StringReader((string)args.NewValue))) as FlowDocument;
+            var s = rtb.FindResource("FeedEntryFlowDocumentStyle") as Style;
+            fdoc.Style = s;
             rtb.Document = fdoc;
         }
     }
