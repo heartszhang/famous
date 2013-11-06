@@ -21,13 +21,15 @@ const (
 )
 
 const (
-	Feed_status_fulltext_ready uint64 = 1 << iota
-	Feed_status_fulltext_inline
-	Feed_status_thumbnail_ready
-	Feed_status_has_image
+	Feed_content_ready uint64 = 1 << iota
+	Feed_content_empty
+	Feed_content_inline
+	Feed_content_external_ready
+	Feed_content_external_empty
 	Feed_status_has_audio
 	Feed_status_has_video
 	Feed_status_has_url
+	Feed_status_has_image
 	Feed_status_invisible
 	Feed_status_text_only
 	Feed_status_image_only
@@ -37,11 +39,9 @@ const (
 	Feed_status_mp4
 	Feed_status_flv
 	Feed_content_unresolved
-	Feed_content_ready
-	Feed_content_failed
+	Feed_summary_ready
+	Feed_summary_empty
 	Feed_content_unavail
-	Feed_content_summary
-	Feed_content_summary_empty
 )
 
 const (
@@ -119,11 +119,11 @@ type FeedContent struct {
 }
 
 type FeedEntry struct {
-	Id         string       `bson:"_id" json:"id"`
+	Id         string       `bson:"_id,omitempty" json:"id,omitempty"`
 	Flags      uint         `json:"flags" bson:"flags"`
 	Source     string       `json:"src,omitempty" bson:"src,omitempty"` // source's uri
 	Type       uint         `json:"type" bson:"type"`                   // feed_type...
-	Uri        string       `json:"uri, omitempty" bson:"uri, omitempty"`
+	Uri        string       `json:"uri,omitempty" bson:"uri,omitempty"`
 	Title      FeedTitle    `json:"title,omitempty" bson:"title,omitempty"`
 	Author     *FeedAuthor  `json:"author,omitempty" bson:"author,omitempty"`
 	PubDate    int64        `json:"pubdate" bson:"pubdate"` // unix time
@@ -175,12 +175,14 @@ type FeedTag struct {
 
 var (
 	FeedSourceTypes = map[string]uint{
-		"":        Feed_type_unknown,
-		"rss":     Feed_type_rss,
-		"atom":    Feed_type_atom,
-		"feed":    Feed_type_atom,
-		"blog":    Feed_type_blog,
-		"tweet":   Feed_type_tweet,
-		"weibo":   Feed_type_sina_weibo,
-		"qqweibo": Feed_type_qq_weibo}
+		"":         Feed_type_unknown,
+		"rss":      Feed_type_rss,
+		"atom":     Feed_type_atom,
+		"rss+xml":  Feed_type_rss,
+		"atom+xml": Feed_type_atom,
+		"feed":     Feed_type_atom,
+		"blog":     Feed_type_blog,
+		"tweet":    Feed_type_tweet,
+		"weibo":    Feed_type_sina_weibo,
+		"qqweibo":  Feed_type_qq_weibo}
 )
