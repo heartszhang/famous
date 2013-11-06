@@ -19,6 +19,11 @@
   params:General.HeaderFontSize="{StaticResource LargeTextSize}"
   params:General.TitleFontSize="{StaticResource VeryLargeTextSize}"
        Title="FamousFront" Height="750" Width="1024" x:Name="root">
+  <metro:Window.ApplicationBar>
+    <metro:ApplicationBar>
+
+    </metro:ApplicationBar>
+  </metro:Window.ApplicationBar>
   <Grid>
     <ContentPresenter x:Name="_content"/>
     <!-- a event stack should be here-->
