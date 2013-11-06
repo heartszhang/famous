@@ -162,8 +162,8 @@
   <Grid x:Name="LayoutRoot" >
     <ContentControl Content="{Binding Mode=OneWay}" ContentTemplate="{StaticResource {x:Type vm:ContentViewModel}}"/>
     <Grid>
-    <RichTextBox Style="{DynamicResource RichTextBoxStyle1}" Background="Transparent">
-      <FlowDocument>
+    <RichTextBox Style="{DynamicResource RichTextBoxStyle1}" Background="Transparent" Padding="0">
+      <FlowDocument >
         <Paragraph>
           ssadfasdf
         </Paragraph>
