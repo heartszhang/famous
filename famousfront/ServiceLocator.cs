@@ -3,6 +3,7 @@ using famousfront.datamodels;
 using famousfront.utils;
 using famousfront.viewmodels;
 using GalaSoft.MvvmLight.Messaging;
+using MetroLog;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,18 +18,22 @@ namespace famousfront
 {       
     internal class ServiceLocator
     {
+        private static ILogger _log;
         private static MainViewModel _main;
 
         private static SettingsViewModel _settings;
         static Flags _flags = new Flags();
         static FeedsBackendConfig _backend;
-        /// <summary>
-        /// Initializes a new instance of the ViewModelLocator class.
-        /// </summary>
-        public ServiceLocator()
-        {
-        }
 
+        public static ILogger Log
+        {
+            get
+            {
+                if (_log == null)
+                    CreateLog();
+                return _log; 
+            }
+        }
         public static Flags Flags
         {
             get { return _flags; }
@@ -224,6 +229,14 @@ namespace famousfront
         internal static string BackendPath(string rel)
         {
             return "http://" + _flags.Backend + rel;
+        }
+
+        static void CreateLog()
+        {
+            var fst = new StreamingFileTarget { PathUnderAppData = "famous" };
+            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
+            _log = LogManagerFactory.DefaultLogManager.GetLogger<ServiceLocator>();
+            // how to close this _log gracefully
         }
     }
 }
