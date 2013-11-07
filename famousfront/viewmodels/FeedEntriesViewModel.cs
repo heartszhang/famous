@@ -13,7 +13,7 @@ namespace famousfront.viewmodels
     using System.Net;
     using System.Windows.Data;
     using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntryViewModel>;
-    class FeedEntriesViewModel : famousfront.core.ViewModelBase
+    class FeedEntriesViewModel : famousfront.core.TaskViewModel
     {
         FeedSourceViewModel _parent;
         FeedEntries _entries = new FeedEntries();
@@ -33,14 +33,18 @@ namespace famousfront.viewmodels
         }
         async void Reload()
         {
+            IsBusying = true;
             //http://localhost:8002//api/feed_entry/unread.json?uri=http://feed.feedsky.com/leica
             var rel = "/api/feed_entry/unread.json?uri=" + WebUtility.UrlEncode(_parent.Uri);
             var v = await HttpClientUtils.Get<FeedEntry[]>(ServiceLocator.BackendPath(rel));
+            IsBusying = false;
             if (v.code != 0)
             {
+                Reason = v.reason;
                 MessengerInstance.Send(new BackendError() { code = v.code, reason = v.reason });
                 return;
             }
+            IsReady = true;
             await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() => 
             {
                 _entries.Clear();
