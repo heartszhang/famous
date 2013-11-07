@@ -9,12 +9,6 @@ namespace famousfront.viewmodels
 {
     class BootstrapViewModel: famousfront.core.TaskViewModel
     {
-        string _reason;
-        public string Reason
-        {
-            get{return _reason;}
-            set{Set(ref _reason, value);}
-        }
         internal BootstrapViewModel()
         {
             MessengerInstance.Register<BackendInitializing>(this, OnBackendInitializing);
