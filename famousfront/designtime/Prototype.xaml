@@ -176,5 +176,9 @@
       </FlowDocument>
     </RichTextBox>
     </Grid>
+    <StackPanel Background="White" VerticalAlignment="Top">
+      <metro:ProgressBar State="Normal" Value="100"/>
+      <TextBlock Text="some test yu see here" HorizontalAlignment="Center"/>
+    </StackPanel>
   </Grid>
 </UserControl>
