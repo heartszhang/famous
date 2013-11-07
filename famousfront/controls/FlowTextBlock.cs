@@ -34,11 +34,12 @@ namespace famousfront.controls
         public static void OnDocumentChanged(DependencyObject obj,
             DependencyPropertyChangedEventArgs args)
         {
-            RichTextBox rtb = (RichTextBox)obj;
+            RichTextBox rtb = (RichTextBox)obj ;
             var fdoc = XamlReader.Load(new XmlTextReader(new System.IO.StringReader((string)args.NewValue))) as FlowDocument;
             var s = rtb.FindResource("FeedEntryFlowDocumentStyle") as Style;
             fdoc.Style = s;
             rtb.Document = fdoc;
+            System.Diagnostics.Debug.Write(args.NewValue);
         }
     }
 }
