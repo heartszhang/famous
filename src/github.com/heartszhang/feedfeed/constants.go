@@ -31,11 +31,20 @@ const (
 	Feed_status_has_url
 	Feed_status_has_image
 	Feed_status_invisible
-	Feed_status_text_only
-	Feed_status_image_only
-	Feed_status_image_gallery_only
-	Feed_status_video_only
-	Feed_status_audio_only
+	Feed_status_text_empty
+	Feed_status_text_little
+	Feed_status_text_many
+	Feed_status_image_empty
+	Feed_status_image_one
+	Feed_status_image_many
+	Feed_status_media_empty // image, audio , video
+	Feed_status_media_one
+	Feed_status_media_many
+	Feed_status_media_inline
+	Feed_status_linkdensity_low
+	Feed_status_linkdensity_high
+	Feed_status_format_flowdocument
+	Feed_status_format_text
 	Feed_status_mp4
 	Feed_status_flv
 	Feed_content_unresolved

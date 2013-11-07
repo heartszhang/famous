@@ -6,7 +6,7 @@ import (
 	//	"log"
 )
 
-func MakeFragmentReadable(doc *html.Node) (*html.Node, *DocSummary, error) {
+func MakeFragmentReadable(doc *html.Node) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_fragment(doc)
 	//	of, err := write_file(doc)
 	//	log.Println("clean-fragment", of, err)
@@ -25,7 +25,7 @@ func MakeFragmentReadable(doc *html.Node) (*html.Node, *DocSummary, error) {
 	return article, new_docsummary(doc1), nil
 }
 
-func CleanFragment(doc *html.Node) (*html.Node, *DocSummary, error) {
+func CleanFragment(doc *html.Node) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_fragment(doc)
 	doc1, article := readabilitier_make_readable(article)
 	return article, new_docsummary(doc1), nil
@@ -33,7 +33,7 @@ func CleanFragment(doc *html.Node) (*html.Node, *DocSummary, error) {
 
 // cleaned html
 // return filepath, *SummaryScore, error
-func MakeHtmlReadable(doc *html.Node, url string) (*html.Node, *DocSummary, error) {
+func MakeHtmlReadable(doc *html.Node, url string) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_root(doc, url)
 
 	//	s2, _ := WriteHtmlFile2(doc)

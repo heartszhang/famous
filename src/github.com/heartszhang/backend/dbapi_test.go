@@ -38,13 +38,13 @@ func TestFeedEntryMark(t *testing.T) {
 */
 func TestFeedContentTouch(t *testing.T) {
 	dbo := new_feedcontent_operator()
-	x, err := dbo.touch(0)
+	x, err := dbo.touch(111101)
 	if err != nil {
 		t.Fatal(err)
 	}
-	x, err = dbo.touch(0)
+	x, err = dbo.touch(111101)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(x)
+	t.Log("current touch", x)
 }

@@ -39,13 +39,13 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 		})
 		p.anchors++
 	case n.Data == "img":
-		width, height := get_image_dim(n)
+		width, height := media_get_dim(n)
 		if width > 320 || height > 320 || (width < 0 && height < 0) {
 			p.imgs++
 			p.img_score = int_min(p.img_score+int((width/21)*(height/21)/30), 140)
 		}
 	case node_is_media(n):
-		mw, wh := get_image_dim(n)
+		mw, wh := media_get_dim(n)
 		if mw > 400 {
 			p.objects++
 			p.img_score = int_min(p.img_score+int((mw/21)*(wh/21)/11), 140)

@@ -2,55 +2,76 @@ package cleaner
 
 import (
 	"code.google.com/p/go.net/html"
+	"hash"
 	"hash/fnv"
-	"io"
 )
 
-type DocSummary struct {
-	WordCount int      `json:"word_count" bson:"word_count"`
-	LinkCount int      `json:"link_count" bson:"link_count"`
-	Images    []string `json:"images,omitempty" bson:"images,omitempty"`
-	Medias    []string `json:"medias,omitempty" bson:"images,omitempty"`
-	Hash      uint64   `json:"hash" bson:"hash"`
+type MediaSummary struct {
+	Uri    string
+	Alt    string
+	Width  int64
+	Height int64
+}
+type DocumentSummary struct {
+	WordCount     int
+	LinkCount     int
+	LinkWordCount int
+	Images        []MediaSummary
+	Medias        []MediaSummary
+	Hash          uint64
 }
 
-func new_docsummary(n *html.Node) *DocSummary {
-	rtn := &DocSummary{Images: []string{}}
+func make_mediasummary(m *html.Node) MediaSummary {
+	v := MediaSummary{
+		Uri: node_get_attribute(m, "src"),
+		Alt: node_get_attribute(m, "alt"),
+	}
+	v.Width, v.Height = media_get_dim(m)
+	return v
+}
+func new_docsummary_internal(n *html.Node, f hash.Hash64) *DocumentSummary {
+	rtn := &DocumentSummary{}
 	if n == nil {
 		return rtn
 	}
-	f := fnv.New64()
 	foreach_child(n, func(child *html.Node) {
 		switch {
 		case child.Type == html.CommentNode:
 		case child.Type == html.DoctypeNode:
 		case child.Type == html.TextNode:
-			c, _ := io.WriteString(f, child.Data)
-			//_, c, _ := string_count_words(child.Data)
+			c, _ := f.Write([]byte(child.Data))
 			rtn.WordCount += c
+			if node_is_in_a(child) {
+				rtn.LinkWordCount += c
+			}
 		case child.Data == "img":
-			rtn.Images = append(rtn.Images, node_get_attribute(child, "src"))
+			rtn.Images = append(rtn.Images, make_mediasummary(child))
+			//			rtn.Images = append(rtn.Images, node_get_attribute(child, "src"))
 		case node_is_media(child):
-			rtn.Medias = append(rtn.Medias, node_get_attribute(child, "src"))
+			rtn.Medias = append(rtn.Medias, make_mediasummary(child))
+			//			rtn.Medias = append(rtn.Medias, node_get_attribute(child, "src"))
 		case child.Data == "a":
 			rtn.LinkCount++
 		default:
-			sc := new_docsummary(child)
+			sc := new_docsummary_internal(child, f)
 			rtn.add(sc)
 		}
 	})
+	return rtn
+}
+func new_docsummary(n *html.Node) *DocumentSummary {
+	f := fnv.New64()
+	rtn := new_docsummary_internal(n, f)
 	rtn.Hash = f.Sum64()
 	return rtn
 }
 
-func (this *DocSummary) add(l *DocSummary) {
+func (this *DocumentSummary) add(l *DocumentSummary) {
 	if l == nil {
 		return
 	}
 	this.WordCount += l.WordCount
 	this.LinkCount += l.LinkCount
-	imgs := make([]string, len(this.Images)+len(l.Images))
-	copy(imgs, this.Images)
-	copy(imgs[len(this.Images):], l.Images)
-	this.Images = imgs
+	this.LinkWordCount += l.LinkWordCount
+	this.Images = append(this.Images, l.Images...)
 }

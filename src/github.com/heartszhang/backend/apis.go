@@ -16,16 +16,17 @@ func feeds_entries_since(since_unixtime int64, category string, count uint, page
 	return []feed.FeedEntry{}, nil
 }
 
-func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, error) {
+func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, error, int) {
 	c := curl.NewCurl(backend_config().FeedEntryDir)
 	cache, err := c.GetUtf8(source, curl.CurlProxyPolicyUseProxy)
+
 	if err != nil || cache.LocalUtf8 == "" {
-		return nil, err
+		return nil, err, cache.StatusCode
 	}
 	//atom+xml;xml;html
 	ext := curl.MimeToExt(cache.Mime)
 	if ext != "xml" && ext != "atom+xml" {
-		return nil, fmt.Errorf("unsupported mime: %v", cache.Mime)
+		return nil, fmt.Errorf("unsupported mime: %v", cache.Mime), 0
 	}
 	v, err := feed.MakeFeedEntries(cache.LocalUtf8)
 
@@ -36,7 +37,7 @@ func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, e
 	v = feed_entries_clean_summary(v)
 	v = feed_entries_autotag(v)
 	v = feed_entries_backup(v)
-	return v, err
+	return v, err, cache.StatusCode
 }
 
 func feedsource_all() ([]feed.FeedSource, error) {
@@ -77,8 +78,11 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err erro
 	}
 	article, sum, err := cleaner.MakeHtmlReadable(doc, uri)
 	v.Images = make([]feed.FeedMedia, len(sum.Images))
-	for idx, imguri := range sum.Images {
-		v.Images[idx].Uri = imguri
+	for idx, img := range sum.Images {
+		v.Images[idx].Uri = img.Uri
+		v.Images[idx].Width = int(img.Width)
+		v.Images[idx].Height = int(img.Height)
+		v.Images[idx].Description = img.Alt
 	}
 	v.Words = sum.WordCount
 	v.Links = sum.LinkCount

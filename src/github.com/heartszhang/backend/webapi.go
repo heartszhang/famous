@@ -37,7 +37,7 @@ func init() {
 	http.HandleFunc("/api/image/origin.json", webapi_image_origin)       // ?uri=
 	http.HandleFunc("/api/link/origin.json", webapi_link_origin)         // ?uri=
 
-	http.HandleFunc("/exit", webapi_exit)
+	http.HandleFunc("/exit.json", webapi_exit)
 	http.HandleFunc("/", webapi_home)
 }
 
@@ -71,11 +71,11 @@ func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
 	uri, _ := url.QueryUnescape(r.URL.Query().Get("uri"))
 	count, _ := strconv.ParseUint(r.URL.Query().Get("count"), 0, 0)
 	page, _ := strconv.ParseUint(r.URL.Query().Get("page"), 0, 0)
-	switch fe, err := feedentry_unread(uri, uint(count), uint(page)); err {
+	switch fe, err, sc := feedentry_unread(uri, uint(count), uint(page)); err {
 	case nil:
 		webapi_write_as_json(w, fe)
 	default:
-		webapi_write_error(w, err)
+		webapi_write_error_code(w, err, sc)
 	}
 }
 
@@ -248,6 +248,7 @@ func webapi_meta_cleanup(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
+// /api/image/thumbnail.json?uri=
 func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("uri")
 	switch cache, err := image_get_or_cache(url); err {
@@ -264,6 +265,7 @@ func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
+// /api/image/origin.json?uri=
 func webapi_image_origin(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("uri")
 	switch cache, err := image_get_or_cache(url); err {
@@ -290,12 +292,13 @@ func webapi_write_as_json(w http.ResponseWriter, body interface{}) {
 	enc.Encode(body)
 }
 
+// sc may be ok, if err == nil, sc would be ignored
 func webapi_write_error_code(w http.ResponseWriter, err error, statuscode int) {
-	if statuscode == 0 {
+	if statuscode == 0 || statuscode == http.StatusOK {
 		statuscode = http.StatusBadGateway
 	}
 	switch err {
-	case nil:
+	case nil:  // ignore statuscode
 		webapi_write_as_json(w, BackendError{})
 	default:
 		w.Header().Set("content-type", "application/json")
@@ -309,6 +312,7 @@ func webapi_write_error(w http.ResponseWriter, err error) {
 	webapi_write_error_code(w, err, http.StatusBadGateway)
 }
 
+// uri: /exit.json
 func webapi_exit(w http.ResponseWriter, r *http.Request) {
 	webapi_write_as_json(w, r.URL)
 
@@ -336,11 +340,9 @@ func webapi_home(w http.ResponseWriter, r *http.Request) {
 //http://address/api/image/thumbnail.json?uri=
 func redirect_thumbnail(uri string) string {
 	return fmt.Sprintf("http://%v/api/image/thumbnail.json?uri=%v", config.Address(), url.QueryEscape(uri))
-	//	return "http://" + config.Address() + "/api/image/thumbnail.json?uri=" + url.QueryEscape(uri)
 }
 
 //server/api/link/origin.json?uri=
 func redirect_link(uri string) string {
 	return fmt.Sprintf("http://%v/api/link/origin.json?uri=%v", config.Address(), url.QueryEscape(uri))
-	//	return "http://" + config.Address() + "/api/link/origin.json?uri=" + url.QueryEscape(uri)
 }

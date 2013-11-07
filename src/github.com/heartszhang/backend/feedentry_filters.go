@@ -8,6 +8,7 @@ import (
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -25,11 +26,31 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 	count := len(entries)
 	for i := 0; i < count; i++ {
 		entry := &entries[i]
-		if entry.Content != nil && entry.Content.FullText != "" {
-			entry.Status |= feed.Feed_content_ready
+		switch entry.Words < uint(config.SummaryMinWords) {
+		case true:
+			entry.Status |= feed.Feed_status_text_empty
+		default:
+			entry.Status |= feed.Feed_status_text_many
 		}
-		if len(entry.Images) > 0 {
-			entry.Status |= feed.Feed_status_has_image
+		switch len(entry.Audios) + len(entry.Videos) + len(entry.Images) {
+		case 0:
+			entry.Status |= feed.Feed_status_media_empty
+		case 1:
+			entry.Status |= feed.Feed_status_media_one
+		default:
+			entry.Status |= feed.Feed_status_media_many
+		}
+		switch entry.Density == 0 {
+		case true:
+			entry.Status |= feed.Feed_status_linkdensity_low
+		default:
+			d := entry.Density * 100 / entry.Words
+			switch d < 33 {
+			case true:
+				entry.Status |= feed.Feed_status_linkdensity_low
+			default:
+				entry.Status |= feed.Feed_status_linkdensity_high
+			}
 		}
 	}
 	return entries
@@ -49,7 +70,7 @@ func feed_entries_clean_fulltext(entries []feed.FeedEntry) []feed.FeedEntry {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < len(entries); i++ {
 		wg.Add(1)
-		go feed_entry_content_clean(&entries[i], wg)
+		go feedentry_content_clean(&entries[i], wg)
 	}
 	wg.Wait()
 	return entries
@@ -75,14 +96,8 @@ func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	if (entry.Status & (feed.Feed_content_ready | feed.Feed_content_external_ready)) != 0 {
 		return
 	}
-	frag, _ := html_create_fragment(entry.Summary)
-	frag, score, _ := cleaner.MakeFragmentReadable(frag)
-	entry.Summary = html_encode_fragment(frag)
-	entry.Words = uint(score.WordCount)
-	entry.Images = append(entry.Images, feed_medias_from_docsummary(score)...)
-	if feedentry_content_exists(score.Hash) {
-		entry.Summary = empty_flowdocument
-	}
+	score := feedentry_fill_summary(entry, entry.Summary)
+
 	if score.WordCount < config.SummaryMinWords {
 		entry.Status |= feed.Feed_summary_empty
 	} else {
@@ -96,19 +111,33 @@ const (
 
 func feedentry_content_exists(hash uint64) bool {
 	co := new_feedcontent_operator()
-	cnt, _ := co.touch(hash)
+	cnt, err := co.touch(int64(hash))
+	log.Println("touch-hash", cnt, hash, err)
 	return cnt > config.SummaryDuplicateCount
 }
-func feed_entry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
+
+func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.DocumentSummary {
+	frag, _ := html_create_fragment(text)
+	frag, score, _ := cleaner.MakeFragmentReadable(frag)
+	entry.Words = uint(score.WordCount)
+	entry.Density = uint(score.LinkWordCount)
+
+	entry.Images = append(entry.Images, feedmedias_from_docsummary(score.Images)...)
+	entry.Videos = append(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
+	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
+	ext := feedentry_content_exists(score.Hash)
+	summary, s := feedentry_make_summary(frag, entry.Words, entry.Density, mc, ext)
+	entry.Summary = summary
+	entry.Status |= s
+	return score
+}
+
+func feedentry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if entry.Content != nil && entry.Content.FullText != "" {
 		entry.Status |= feed.Feed_content_inline
-		frag, _ := html_create_fragment(entry.Content.FullText)
-		frag, score, _ := cleaner.MakeFragmentReadable(frag)
-		entry.Summary = html_encode_fragment(frag)
-		entry.Density = uint(score.WordCount)
+		score := feedentry_fill_summary(entry, entry.Content.FullText)
 
-		entry.Images = append(entry.Images, feed_medias_from_docsummary(score)...)
 		if score.WordCount < config.SummaryMinWords {
 			entry.Status |= feed.Feed_content_empty
 		} else {
@@ -156,18 +185,24 @@ func node_clear_children(frag *html.Node) {
 	}
 }
 
-//p, img, a, text
-func html_to_flowdoc(frag *html.Node) {
-	if frag == nil || frag.Type != html.ElementNode {
+func node_convert_flowdocument(frag *html.Node, excludeimg bool) {
+	if frag.Type == html.TextNode {
 		return
 	}
+	ignore_children := false
 	switch frag.Data {
 	case "img":
-		frag.Data = "Figure"
-		node_clear_children(frag)
-		frag.AppendChild(make_image_node(frag))
-		frag.Attr = nil
-		return
+		if excludeimg == true {
+			frag.Type = html.CommentNode
+			node_clear_children(frag)
+			frag.Attr = nil
+		} else {
+			frag.Data = "Figure"
+			node_clear_children(frag)
+			frag.AppendChild(make_image_node(frag))
+			frag.Attr = nil
+		}
+		ignore_children = true
 		//		frag.Data = "Image"
 		//		frag.Attr = extract_imgsrc_attr(frag.Attr)
 	case "a":
@@ -184,27 +219,75 @@ func html_to_flowdoc(frag *html.Node) {
 	case "audio":
 		fallthrough
 	case "embed":
-		frag.Data = "Hyperlink"
+		frag.Type = html.CommentNode
 		node_clear_children(frag)
-		frag.AppendChild(make_run_node(frag))
-		frag.Attr = node_convert_attr(frag.Attr, "src", "NavigateUri", func(v string) string { return v })
-		return
+		frag.Attr = nil
+		ignore_children = true
 	case "p":
 		fallthrough
 	default:
 		frag.Data = "Paragraph"
 		frag.Attr = nil
 	}
-	for child := frag.FirstChild; child != nil; child = child.NextSibling {
-		html_to_flowdoc(child)
+	for child := frag.FirstChild; ignore_children == false && child != nil; child = child.NextSibling {
+		node_convert_flowdocument(child, excludeimg)
+	}
+}
+func node_is_empty(n *html.Node) bool {
+	return n.Type == html.CommentNode ||
+		(n.Type == html.ElementNode && (n.Data == "Paragraph" || n.Data == "Hyperlink") && n.FirstChild == nil) ||
+		(n.Type == html.TextNode && n.Data == "")
+}
+
+func node_clean_empty(n *html.Node) {
+	child := n.FirstChild
+	for child != nil {
+		next := child.NextSibling
+		node_clean_empty(child)
+		child = next
+	}
+
+	if node_is_empty(n) && n.Parent != nil {
+		parent := n.Parent
+		parent.RemoveChild(n)
 	}
 }
 
-func html_encode_fragment(frag *html.Node) string {
-	html_to_flowdoc(frag)
+//p, img, a, text
+func make_flowdocument(frag *html.Node, excludeimg bool) string {
+	if frag == nil || frag.Type != html.ElementNode {
+		return empty_flowdocument
+	}
+	node_convert_flowdocument(frag, excludeimg)
+	node_clean_empty(frag)
 	var buffer bytes.Buffer
 	html.Render(&buffer, frag) // ignore return error
 	return buffer.String()
+}
+
+func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias int, dup bool) (v string, s uint64) {
+	s = feed.Feed_status_format_flowdocument
+	dh := words > 0 && linkwords*100/words > 50
+	wm := words < uint(config.SummaryMinWords)
+	switch {
+	case dup == true:
+		v = empty_flowdocument
+	case medias == 0 && wm == true:
+		//v = node_extract_text(frag)
+		v = empty_flowdocument
+	case medias == 0 && wm == false:
+		v = make_flowdocument(frag, true)
+	case medias == 1:
+		v = make_flowdocument(frag, true)
+	case medias > 1 && wm == false && dh == true:
+		v = make_flowdocument(frag, true)
+	case medias > 1 && wm == false && dh == false:
+		v = make_flowdocument(frag, false)
+		s |= feed.Feed_status_media_inline
+	case medias > 1 && wm == true:
+		v = make_flowdocument(frag, true)
+	}
+	return
 }
 
 func html_create_fragment(fulltext string) (*html.Node, error) {
@@ -242,7 +325,7 @@ func html_write_file(article *html.Node, dir string) (string, error) {
 }
 
 const (
-	desc_image_worker_count = 16
+	desc_image_worker_count = 4
 )
 
 func describe_image(img_url_chan <-chan string, img_chan chan<- feed.FeedMedia) {
@@ -253,11 +336,14 @@ func describe_image(img_url_chan <-chan string, img_chan chan<- feed.FeedMedia) 
 	}
 }
 
-func feed_medias_from_docsummary(score *cleaner.DocSummary) []feed.FeedMedia {
-	count := len(score.Images)
+func feedmedias_from_docsummary(medias []cleaner.MediaSummary) []feed.FeedMedia {
+	count := len(medias)
 	v := make([]feed.FeedMedia, count)
-	for idx, ms := range score.Images {
-		v[idx].Uri = ms
+	for idx, ms := range medias {
+		v[idx].Uri = ms.Uri
+		v[idx].Width = int(ms.Width)
+		v[idx].Height = int(ms.Height)
+		v[idx].Description = ms.Alt
 	}
 	return v
 }

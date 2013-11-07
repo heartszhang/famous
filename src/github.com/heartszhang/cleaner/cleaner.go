@@ -263,7 +263,7 @@ const (
 )
 
 func trim_small_image(img *html.Node) (drop bool) {
-	width, height := get_image_dim(img)
+	width, height := media_get_dim(img)
 
 	if img.Parent == nil {
 		return
@@ -550,10 +550,10 @@ func (this *html_cleaner) fix_a_href(a *html.Node) {
 }
 
 //return local_filepath, words, images
-func clean_fragment(cont, uri string) (string, *DocSummary) {
+func clean_fragment(cont, uri string) (string, *DocumentSummary) {
 	doc, err := html.Parse(strings.NewReader(cont))
 	if err != nil {
-		return cont, &DocSummary{}
+		return cont, &DocumentSummary{}
 	}
 
 	article := html_clean_root(doc, uri)

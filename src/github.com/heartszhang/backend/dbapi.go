@@ -39,5 +39,5 @@ type feedsource_operator interface {
 }
 
 type feedcontent_operator interface {
-	touch(hash uint64) (uint, error)
+	touch(hash int64) (uint, error)
 }

@@ -392,7 +392,7 @@ func node_update_attribute(n *html.Node, key string, val string) {
 	}
 }
 
-func get_image_dim(img *html.Node) (w, h int64) {
+func media_get_dim(img *html.Node) (w, h int64) {
 	ws := node_get_attribute(img, "width")
 	ws = strings.TrimSuffix(ws, "px")
 	hs := node_get_attribute(img, "height")
@@ -406,4 +406,13 @@ func get_image_dim(img *html.Node) (w, h int64) {
 	}
 
 	return
+}
+
+func node_is_in_a(n *html.Node) bool {
+	for p := n.Parent; p != nil; p = p.Parent {
+		if p.Data == "a" {
+			return true
+		}
+	}
+	return false
 }
