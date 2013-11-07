@@ -14,5 +14,18 @@ namespace famousfront.core
             get { return _is_busying; }
             set { Set(ref _is_busying, value);  }
         }
+        bool _is_ready;
+        public bool IsReady
+        {
+            get { return _is_ready; }
+            set { Set(ref _is_ready, value); }
+        }
+
+        string _reason;
+        public string Reason
+        {
+            get { return _reason; }
+            set { Set(ref _reason, value); }
+        }
     }
 }
