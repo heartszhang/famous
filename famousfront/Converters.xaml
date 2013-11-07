@@ -9,5 +9,6 @@
     <ff:ServiceLocator x:Key="_locator" d:IsDataSource="True" />
     <cv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <cv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+  <cv:BoolToBusyIndicatorConverter x:Key="BoolToBusyIndicatorConverter"/>
     <metro:IsGreaterThanConverter x:Key="IsGreaterThanConverter"/>
 </ResourceDictionary>
