@@ -17,7 +17,6 @@ namespace famousfront
     /// </summary>
     public partial class App : Application
     {
-        private static readonly ILogger Log;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -26,16 +25,12 @@ namespace famousfront
             ServiceLocator.Startup();
             base.OnStartup(e);
             var fvi = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-            Log.Info("famousfront {0} Startup", fvi.ProductVersion);
+            ServiceLocator.Log.Info("famousfront {0} Startup", fvi.ProductVersion);
         }
 
         static App()
         {
             GalaSoft.MvvmLight.Threading.DispatcherHelper.Initialize();
-            var fst = new StreamingFileTarget { PathUnderAppData = "famous" };
-
-            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
-            Log = LogManagerFactory.DefaultLogManager.GetLogger<App>();
         }
         protected override void OnExit(ExitEventArgs e)
         {
@@ -56,17 +51,17 @@ namespace famousfront
         }
         static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Log.Fatal("Unhandled TaskScheduler Exception", e.Exception);
+            ServiceLocator.Log.Fatal("Unhandled TaskScheduler Exception", e.Exception);
         }
 
         static void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            Log.Fatal("Unhandled Dispatcher Exception", e.Exception);
+            ServiceLocator.Log.Fatal("Unhandled Dispatcher Exception", e.Exception);
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Log.Fatal("Unhandled AppDomain Exception", e.ExceptionObject as Exception);
+            ServiceLocator.Log.Fatal("Unhandled AppDomain Exception", e.ExceptionObject as Exception);
         }
     }
 }
