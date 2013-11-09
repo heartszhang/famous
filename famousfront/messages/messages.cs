@@ -24,4 +24,9 @@ namespace famousfront.messages
     }
     internal class BackendInitializing : GenericMessage { }
     internal class BackendError : GenericMessage { }
+
+    internal class VideoPlayRequest : GenericMessage
+    {
+        internal string source = null;
+    }
 }
