@@ -25,17 +25,17 @@ func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, e
 	}
 	//atom+xml;xml;html
 	ext := curl.MimeToExt(cache.Mime)
-	if ext != "xml" && ext != "atom+xml" {
+	if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
 		return nil, fmt.Errorf("unsupported mime: %v", cache.Mime), 0
 	}
 	v, err := feed.MakeFeedEntries(cache.LocalUtf8)
 
 	v = feed_entries_unreaded(v) // clean readed entries
 	v = feed_entries_clean(v)
-	v = feed_entries_statis(v)
 	v = feed_entries_clean_fulltext(v)
 	v = feed_entries_clean_summary(v)
 	v = feed_entries_autotag(v)
+	v = feed_entries_statis(v)
 	v = feed_entries_backup(v)
 	return v, err, cache.StatusCode
 }
@@ -88,33 +88,6 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err erro
 	v.Links = sum.LinkCount
 	v.CleanedLocal, err = html_write_file(article, config.DocumentDir)
 	return v, err
-}
-
-// /feed/entry/image.json/{url}/{entry_id}
-func feedentry_image(url string, entry_id string) (feed.FeedMedia, error) {
-	v := image_from_cache(url)
-	if v.Local != "" {
-		return v, nil
-	}
-	//	v := feed.FeedMedia{Uri: url}
-	c := curl.NewCurl(config.ImageDir)
-	cache, err := c.Get(url, 0)
-	if err != nil {
-		return v, err
-	}
-	v.Local = cache.Local
-	v.Mime = cache.Mime
-	v.Length = cache.Length
-	v.Thumbnail, _, v.Width, v.Height, err = curl.NewThumbnail(cache.Local, config.ThumbnailDir, config.ThumbnailWidth, 0)
-	go image_to_cache(v)
-	return v, err
-}
-
-func image_from_cache(url string) feed.FeedMedia {
-	return feed.FeedMedia{Uri: url}
-}
-
-func image_to_cache(img feed.FeedMedia) {
 }
 
 // /feed/entry/media.json/{url}/{entry_id}/{media_type:[0-9]+}
