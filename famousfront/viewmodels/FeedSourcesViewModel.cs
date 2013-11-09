@@ -6,13 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Windows.Data;
+    using famousfront.core;
+    using GalaSoft.MvvmLight.Threading;
+    using famousfront.utils;
 
 namespace famousfront.viewmodels
 {
     using FeedSources = ObservableCollection<FeedSourceViewModel>;
-    using famousfront.core;
-    using GalaSoft.MvvmLight.Threading;
-    using famousfront.utils;
     
     class FeedSourcesViewModel : famousfront.core.ViewModelBase
     {
