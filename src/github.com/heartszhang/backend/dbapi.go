@@ -16,8 +16,8 @@ type feedentry_operator interface {
 }
 
 type imagecache_operator interface {
-	find(uri string) (ImageCache, error)
-	save(uri string, v ImageCache) error
+	find(uri string) (feed.FeedImage, error)
+	save(uri string, v feed.FeedImage) error
 }
 type feedcategory_operator interface {
 	save(cate string) (interface{}, error)
