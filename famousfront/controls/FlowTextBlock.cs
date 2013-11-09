@@ -39,7 +39,7 @@ namespace famousfront.controls
             var s = rtb.FindResource("FeedEntryFlowDocumentStyle") as Style;
             fdoc.Style = s;
             rtb.Document = fdoc;
-            System.Diagnostics.Debug.Write(args.NewValue);
+            //System.Diagnostics.Debug.Write(args.NewValue);
         }
     }
 }
