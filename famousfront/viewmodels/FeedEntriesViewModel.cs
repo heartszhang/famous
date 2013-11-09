@@ -25,6 +25,11 @@ namespace famousfront.viewmodels
         ICollectionView _grouped_entries = null;
         public ICollectionView Entries { get { return _grouped_entries??(_grouped_entries = grouped_entries()); } }
 
+        VideoElementViewModel _video_service = new VideoElementViewModel();
+        public famousfront.core.TaskViewModel VideoService
+        {
+            get { return _video_service ; }
+        }
         ICollectionView grouped_entries()
         {
             var v = CollectionViewSource.GetDefaultView(_entries);
@@ -35,7 +40,7 @@ namespace famousfront.viewmodels
         {
             IsBusying = true;
             //http://localhost:8002//api/feed_entry/unread.json?uri=http://feed.feedsky.com/leica
-            var rel = "/api/feed_entry/unread.json?uri=" + WebUtility.UrlEncode(_parent.Uri);
+            var rel = "/api/feed_entry/unread.json?uri=" + Uri.EscapeDataString(_parent.Uri);//WebUtility.UrlEncode(_parent.Uri);
             var v = await HttpClientUtils.Get<FeedEntry[]>(ServiceLocator.BackendPath(rel));
             IsBusying = false;
             if (v.code != 0)
