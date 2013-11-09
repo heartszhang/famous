@@ -195,3 +195,12 @@ var (
 		"weibo":    Feed_type_sina_weibo,
 		"qqweibo":  Feed_type_qq_weibo}
 )
+
+type FeedImage struct {
+	Mime           string `json:"mime,omitempty" bson:"mime,omitempty"`
+	ThumbnailLocal string `json:"thumbnail,omitempty" bson:"thumbnail,omitempty"`
+	OriginLocal    string `json:"origin,omitempty" bson:"origin,omitempty"`
+	Code           int    `json:"code" bson:"code"`
+	Width          int    `json:"width" bson:"width"`
+	Height         int    `json:"height" bson:"height"`
+}
