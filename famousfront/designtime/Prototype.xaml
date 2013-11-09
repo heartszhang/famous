@@ -4,181 +4,28 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ff="clr-namespace:famousfront"
-             xmlns:vm="clr-namespace:famousfront.viewmodels" d:DesignWidth="400"
+             xmlns:ctrl="clr-namespace:famousfront.controls"
+             xmlns:utils="clr-namespace:famousfront.utils"
+             xmlns:vm="clr-namespace:famousfront.viewmodels" d:DesignWidth="600"
              xmlns:metro="http://schemas.codeplex.com/elysium"
              xmlns:params="http://schemas.codeplex.com/elysium/params" 
   params:General.ContentFontSize="{StaticResource NormalTextSize}"
   params:General.HeaderFontSize="{StaticResource LargeTextSize}"
   params:General.TitleFontSize="{StaticResource VeryLargeTextSize}"             
-             TextElement.FontFamily="{StaticResource LightFont}"
-             d:DesignHeight="300" 
-             mc:Ignorable="d" Background="White" d:DataContext="{d:DesignData /SampleData/ContentViewModelSampleData.xaml}">
+             TextElement.FontFamily="{StaticResource LightFont}"      
+             d:DesignHeight="454" 
+             mc:Ignorable="d" Background="White">
   <UserControl.Resources>
-    <Style x:Key="RichTextBoxStyle1" TargetType="{x:Type RichTextBox}">
-      <Style.Resources>
-        <Style x:Key="{x:Type FlowDocument}" TargetType="{x:Type FlowDocument}">
-          <Setter Property="OverridesDefaultStyle" Value="True"/>
-          <Setter Property="Background" Value="Transparent"/>
-        </Style>
-      </Style.Resources>
-      <Style.BasedOn>
-        <Style TargetType="{x:Type TextBoxBase}">
-          <Setter Property="CaretBrush" Value="Black"/>
-          <Setter Property="SelectionBrush" Value="#FF777777"/>
-          <Style.BasedOn>
-            <Style TargetType="{x:Type Control}">
-              <Setter Property="BorderBrush" Value="#FF777777"/>
-              <Setter Property="BorderThickness" Value="{Binding (params:General.SemiBoldThickness), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-              <Setter Property="Foreground" Value="Black"/>
-              <Setter Property="FontSize" Value="{Binding (params:General.TextFontSize), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-              <Setter Property="FontStretch" Value="Normal"/>
-              <Setter Property="FontStyle" Value="Normal"/>
-              <Setter Property="FontWeight" Value="Normal"/>
-              <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
-              <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
-              <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled"/>
-              <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-              <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
-              <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
-              <Setter Property="HorizontalContentAlignment" Value="Left"/>
-              <Setter Property="VerticalContentAlignment" Value="Center"/>
-              <Setter Property="Padding" Value="{Binding (params:General.DefaultPadding), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-              <Setter Property="ContextMenu">
-                <Setter.Value>
-                  <ContextMenu>
-                    <ContextMenu.Style>
-                      <Style TargetType="{x:Type ContextMenu}">
-                        <Setter Property="Background" Value="White"/>
-                        <Setter Property="BorderBrush" Value="#FF4D4D4D"/>
-                        <Setter Property="BorderThickness" Value="{Binding (params:General.DefaultThickness), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-                        <Setter Property="params:MenuBase.SubmenuBackground" Value="{Binding Background, Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-                        <Setter Property="params:MenuBase.SubmenuBorderBrush" Value="{Binding BorderBrush, Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-                        <Setter Property="params:MenuBase.SubmenuBorderThickness" Value="{Binding BorderThickness, Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-                        <Setter Property="Foreground" Value="Black"/>
-                        <Setter Property="FontSize" Value="{Binding (params:General.ContentFontSize), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-                        <Setter Property="FontStretch" Value="Normal"/>
-                        <Setter Property="FontStyle" Value="Normal"/>
-                        <Setter Property="FontWeight" Value="Normal"/>
-                        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
-                        <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
-                        <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled"/>
-                        <Setter Property="HasDropShadow" Value="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"/>
-                        <Setter Property="params:General.ShadowBrush" Value="Black"/>
-                        <Setter Property="Focusable" Value="False"/>
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                        <Setter Property="Grid.IsSharedSizeScope" Value="True"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Padding" Value="{Binding (params:General.BoldPadding), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-                        <Setter Property="SnapsToDevicePixels" Value="True"/>
-                        <Setter Property="Template">
-                          <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ContextMenu}">
-                              <Border x:Name="LayoutRoot">
-                                <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" RenderOptions.ClearTypeHint="{TemplateBinding RenderOptions.ClearTypeHint}" TextElement.Foreground="{TemplateBinding Foreground}" TextElement.FontWeight="{TemplateBinding FontWeight}" TextElement.FontStyle="{TemplateBinding FontStyle}" TextElement.FontStretch="{TemplateBinding FontStretch}" TextElement.FontSize="{TemplateBinding FontSize}" TextElement.FontFamily="{TemplateBinding FontFamily}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" TextOptions.TextRenderingMode="{TemplateBinding TextOptions.TextRenderingMode}" TextOptions.TextFormattingMode="{TemplateBinding TextOptions.TextFormattingMode}">
-                                  <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
-                                </Border>
-                              </Border>
-                              <ControlTemplate.Triggers>
-                                <Trigger Property="HasDropShadow" Value="True">
-                                  <Setter Property="Effect" TargetName="LayoutRoot">
-                                    <Setter.Value>
-                                      <DropShadowEffect BlurRadius="4" Color="{Binding (params:General.ShadowBrush).(SolidColorBrush.Color), RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ContextMenu}}}" Direction="315" Opacity="0.3" ShadowDepth="2"/>
-                                    </Setter.Value>
-                                  </Setter>
-                                  <Setter Property="Background" TargetName="LayoutRoot" Value="Transparent"/>
-                                  <Setter Property="Padding" TargetName="LayoutRoot" Value="0,0,6,6"/>
-                                </Trigger>
-                              </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                          </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                          <DataTrigger>
-                            <DataTrigger.Binding>
-                              <Binding ConverterParameter="18" Mode="OneWay" Path="FontSize" RelativeSource="{RelativeSource Self}">
-                                <Binding.Converter>
-                                  <metro:IsGreaterThanConverter/>
-                                </Binding.Converter>
-                              </Binding>
-                            </DataTrigger.Binding>
-                            <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </ContextMenu.Style>
-                    <MenuItem Command="ApplicationCommands.Cut" Header="Cut"/>
-                    <MenuItem Command="ApplicationCommands.Copy" Header="Copy"/>
-                    <MenuItem Command="ApplicationCommands.Paste" Header="Paste"/>
-                  </ContextMenu>
-                </Setter.Value>
-              </Setter>
-              <Setter Property="SnapsToDevicePixels" Value="True"/>
-              <Setter Property="Template">
-                <Setter.Value>
-                  <ControlTemplate TargetType="{x:Type Control}">
-                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
-                      <ScrollViewer x:Name="PART_ContentHost" Background="Transparent" RenderOptions.ClearTypeHint="{TemplateBinding RenderOptions.ClearTypeHint}" Foreground="{TemplateBinding Foreground}" FontWeight="{TemplateBinding FontWeight}" FontStyle="{TemplateBinding FontStyle}" FontStretch="{TemplateBinding FontStretch}" FontSize="{TemplateBinding FontSize}" Margin="{TemplateBinding Padding}" TextOptions.TextRenderingMode="{TemplateBinding TextOptions.TextRenderingMode}" TextOptions.TextFormattingMode="{TemplateBinding TextOptions.TextFormattingMode}"/>
-                    </Border>
-                  </ControlTemplate>
-                </Setter.Value>
-              </Setter>
-              <Style.Triggers>
-                <DataTrigger>
-                  <DataTrigger.Binding>
-                    <Binding ConverterParameter="18" Mode="OneWay" Path="FontSize" RelativeSource="{RelativeSource Self}">
-                      <Binding.Converter>
-                        <metro:IsGreaterThanConverter/>
-                      </Binding.Converter>
-                    </Binding>
-                  </DataTrigger.Binding>
-                  <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
-                </DataTrigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter Property="BorderBrush" Value="#FF017BCD"/>
-                  <Setter Property="Foreground" Value="Black"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                  <Setter Property="BorderBrush" Value="#FFB8B5B2"/>
-                  <Setter Property="Foreground" Value="#FFB8B5B2"/>
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </Style.BasedOn>
-          <Style.Triggers>
-            <MultiTrigger>
-              <MultiTrigger.Conditions>
-                <Condition Property="IsKeyboardFocusWithin" Value="True"/>
-                <Condition Property="IsReadOnly" Value="False"/>
-              </MultiTrigger.Conditions>
-              <Setter Property="BorderBrush" Value="#FF017BCD"/>
-              <Setter Property="Foreground" Value="Black"/>
-            </MultiTrigger>
-          </Style.Triggers>
-        </Style>
-      </Style.BasedOn>
-    </Style>
   </UserControl.Resources>
   <Grid x:Name="LayoutRoot" >
-    <ContentControl Content="{Binding Mode=OneWay}" ContentTemplate="{StaticResource {x:Type vm:ContentViewModel}}"/>
-    <Grid>
-    <RichTextBox Style="{DynamicResource RichTextBoxStyle1}" Background="Transparent" Padding="0">
-      <FlowDocument >
-        <Paragraph>
-          ssadfasdf
-        </Paragraph>
-        <Paragraph>
-          ssadfasdf
-        </Paragraph>
-        <Paragraph>
-          ssadfasdf
-        </Paragraph>
-      </FlowDocument>
-    </RichTextBox>
-    </Grid>
-    <StackPanel Background="White" VerticalAlignment="Top">
-      <metro:ProgressBar State="Normal" Value="100"/>
-      <TextBlock Text="some test yu see here" HorizontalAlignment="Center"/>
+    <StackPanel>
+      <Button Margin="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}">
+        <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="F1 M 24.4815,12.6728L 9.98462,19.9692L 9.98462,5.37634L 24.4815,12.6728 Z M 3.02417,0C 1.03207,-0.119995 0.0240173,0.888062 0,3.0242L 0,22.2734C 0.0240173,24.2895 1.03207,25.2975 3.02417,25.2975L 29.4738,25.2975C 31.5779,25.2975 32.602,24.2895 32.546,22.2734L 32.546,3.0242C 32.602,0.960083 31.5779,-0.0480042 29.4738,0L 3.02417,0 Z "/>
+      </Button>
+      <Button HorizontalAlignment="Right">
+        <Path Height="24.42" Stretch="Uniform" Fill="White" Data="F1 M 2.54416,0L 0,2.47098L 4.41626,6.84344L 1.63214,9.60001L 9.69662,9.60001L 9.69662,1.61548L 6.91245,4.41956L 2.54416,0 Z M 2.54416,24.42L 6.91245,20.0475L 9.69662,22.8041L 9.69662,14.82L 1.63214,14.82L 4.41626,17.5761L 0,21.9011L 2.54416,24.42 Z M 22.117,0L 17.7008,4.37204L 14.9166,1.61548L 14.9166,9.60001L 22.9811,9.60001L 20.197,6.84344L 24.6132,2.47098L 22.117,0 Z M 17.7008,20.0475L 22.117,24.42L 24.6132,21.9011L 20.197,17.5761L 22.9811,14.82L 14.9166,14.82L 14.9166,22.8041L 17.7008,20.0475 Z "/>
+      </Button>
     </StackPanel>
+
   </Grid>
 </UserControl>
