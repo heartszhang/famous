@@ -117,8 +117,10 @@ namespace famousfront.converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var str = value as string;
-
-            return string.IsNullOrEmpty(str) ? Visibility.Collapsed : Visibility.Visible;
+            var en = string.IsNullOrEmpty(str);
+            if (parameter != null)
+                en = !en;
+            return en ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -140,6 +142,20 @@ namespace famousfront.converters
                 boolean = !boolean;
 
             return boolean ? Elysium.Controls.ProgressState.Indeterminate : Elysium.Controls.ProgressState.Normal;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class NullImageConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null || (value is string && string.IsNullOrEmpty((string)value)))
+                return DependencyProperty.UnsetValue;
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
