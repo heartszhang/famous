@@ -10,5 +10,8 @@
     <cv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <cv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
   <cv:BoolToBusyIndicatorConverter x:Key="BoolToBusyIndicatorConverter"/>
+  <cv:NullImageConverter x:Key="NullImageConverter"/>
+  <cv:StringIsNullOrEmptyToVisibilityConverter x:Key="StringIsNullOrEmptyToVisibilityConverter"/>
     <metro:IsGreaterThanConverter x:Key="IsGreaterThanConverter"/>
+  
 </ResourceDictionary>
