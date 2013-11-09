@@ -30,7 +30,7 @@ func NewThumbnail(localfile, tmp string, width, height uint) (filepath, mediatyp
 		return
 	}
 	defer of.Close()
-	err = jpeg.Encode(of, imgnew, &jpeg.Options{90})
+	err = jpeg.Encode(of, imgnew, &jpeg.Options{100})
 	if err != nil {
 		return
 	}
