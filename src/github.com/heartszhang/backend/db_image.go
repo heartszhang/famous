@@ -1,6 +1,7 @@
 package backend
 
 import (
+	feed "github.com/heartszhang/feedfeed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -11,7 +12,7 @@ func new_imagecache_operator() imagecache_operator {
 	return image_op{coll: "image_cache"}
 }
 
-func (this image_op) find(uri string) (v ImageCache, err error) {
+func (this image_op) find(uri string) (v feed.FeedImage, err error) {
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
 		err := coll.Find(bson.M{"uri": uri}).One(&v)
 		return err
@@ -19,7 +20,7 @@ func (this image_op) find(uri string) (v ImageCache, err error) {
 	return
 }
 
-func (this image_op) save(uri string, v ImageCache) error {
+func (this image_op) save(uri string, v feed.FeedImage) error {
 	//	wv := ImageCacheW{v, uri}
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		_, err := coll.Upsert(bson.M{"uri": uri}, bson.M{"$setOnInsert": &v})
