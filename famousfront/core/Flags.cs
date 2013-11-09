@@ -34,6 +34,10 @@ namespace famousfront.core
             Theme = Elysium.Theme.Light;
             ThemeAccent = Elysium.AccentBrushes.Blue.Color;
             ThemeContrast = System.Windows.Media.Colors.White;
+            MarginTopDown = new Thickness(0, 8, 0, 8);
+            MarginAllBounds = new Thickness(4);
+            ImageMaxHeight = 640.0;
+            VideoElementHeight = 331.0;
         }
         [DataMember(Name="backend")]
         public string Backend
@@ -80,6 +84,15 @@ namespace famousfront.core
         public System.Windows.Media.Color ThemeAccent { get; set; }
         [DataMember(Name = "theme_contrast")]
         public System.Windows.Media.Color ThemeContrast { get; set; }
+
+        [DataMember(Name = "margin_topdown")]
+        public Thickness MarginTopDown { get; set; }
+        [DataMember(Name = "margin_allbounds")]
+        public Thickness MarginAllBounds { get; set; }
+        [DataMember(Name = "image_maxheight")]
+        public double ImageMaxHeight{get;set;}
+        [DataMember(Name="video_elementheight")]
+        public double VideoElementHeight { get; set; }
     }
 
 }
