@@ -29,10 +29,10 @@ func init() {
 	http.HandleFunc("/api/feed_entry/mark.json", webapi_feedentry_mark)
 	http.HandleFunc("/api/feed_entry/umark.json", webapi_feedentry_umark)
 	http.HandleFunc("/api/feed_entry/full_text.json", webapi_feedentry_fulltext)
-	http.HandleFunc("/api/feed_entry/image.json", webapi_feedentry_image)
 	http.HandleFunc("/api/feed_entry/media.json", webapi_feedentry_media)
 	http.HandleFunc("/api/feed_entry/drop.json", webapi_feedentry_drop)
 	//	http.HandleFunc("/api/meta/categories.json", webapi_meta_categories)
+	http.HandleFunc("/api/image/description.json", webapi_image_description)
 	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail) // ?uri=
 	http.HandleFunc("/api/image/origin.json", webapi_image_origin)       // ?uri=
 	http.HandleFunc("/api/link/origin.json", webapi_link_origin)         // ?uri=
@@ -150,19 +150,6 @@ func webapi_feedentry_fulltext(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
-// uri: /feed_entry/image.json/{entry_id}/{url}
-func webapi_feedentry_image(w http.ResponseWriter, r *http.Request) {
-	url := r.URL.Query().Get("uri")
-	entry_uri := r.URL.Query().Get("entry_uri")
-	v, err := feedentry_image(url, entry_uri)
-	if err != nil {
-		webapi_write_error(w, err)
-	} else {
-		webapi_write_as_json(w, v)
-	}
-	log.Println(r.URL.RequestURI())
-}
-
 // uri: /feed_entry/media.json/{entry_id}/{url}/{media_type:[0-9]+}
 
 func webapi_feedentry_media(w http.ResponseWriter, r *http.Request) {
@@ -248,10 +235,22 @@ func webapi_meta_cleanup(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
+// uri: /image/description.json?uri=
+func webapi_image_description(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Query().Get("uri")
+	v, err := image_description(url)
+	if err != nil {
+		webapi_write_error(w, err)
+	} else {
+		webapi_write_as_json(w, v)
+	}
+	log.Println(r.URL.RequestURI())
+}
+
 // /api/image/thumbnail.json?uri=
 func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("uri")
-	switch cache, err := image_get_or_cache(url); err {
+	switch cache, err := image_description(url); err {
 	case nil:
 		w.Header().Set("content-type", cache.Mime)
 		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
@@ -268,7 +267,7 @@ func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
 // /api/image/origin.json?uri=
 func webapi_image_origin(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("uri")
-	switch cache, err := image_get_or_cache(url); err {
+	switch cache, err := image_description(url); err {
 	case nil:
 		w.Header().Set("content-type", cache.Mime)
 		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
@@ -298,7 +297,7 @@ func webapi_write_error_code(w http.ResponseWriter, err error, statuscode int) {
 		statuscode = http.StatusBadGateway
 	}
 	switch err {
-	case nil:  // ignore statuscode
+	case nil: // ignore statuscode
 		webapi_write_as_json(w, BackendError{})
 	default:
 		w.Header().Set("content-type", "application/json")
