@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <LinearGradientBrush x:Key="FadeOutBottomBrush" EndPoint="0,1" StartPoint="0,0" >
     <GradientStop Color="Transparent"/>
-    <GradientStop Color="White" Offset="1"/>
+    <GradientStop Color="#80FFFFFF" Offset="1"/>
   </LinearGradientBrush>
 
 </ResourceDictionary>
