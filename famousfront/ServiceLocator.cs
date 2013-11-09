@@ -235,8 +235,8 @@ namespace famousfront
         {
             var fst = new StreamingFileTarget { PathUnderAppData = "famous" };
             LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
-            _log = LogManagerFactory.DefaultLogManager.GetLogger<ServiceLocator>();
-            // how to close this _log gracefully
+            _log = LogManagerFactory.DefaultLogManager.GetLogger("service-locator");
+            // how to close this _log gracefully            
         }
     }
 }
