@@ -7,13 +7,19 @@
       <Grid x:Name="_content_wrap" TextElement.FontSize="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.ContentFontSize)}">
         <TextBlock x:Name="news" Text="{Binding Description}" TextWrapping="Wrap"/>
       </Grid>
-      <Grid x:Name="_label_wrap">
+      <Grid x:Name="_label_wrap" Background="Transparent">
         <DockPanel HorizontalAlignment="Right"
                     TextElement.FontSize="{Binding (params:General.ContentFontSize), RelativeSource={RelativeSource self}}">
           <TextBlock x:Name="_label" Text="{Binding UnreadsCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
                      Visibility="{Binding UnreadsCount, Converter={StaticResource IntToVisibilityConverter}, Mode=OneWay}"/>
           <TextBlock x:Name="_name" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
         </DockPanel>
+        <Grid.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Subscribe..."/>
+            <MenuItem Header="Unsubscribe this"/>
+          </ContextMenu>
+        </Grid.ContextMenu>
       </Grid>
 
     </StackPanel>

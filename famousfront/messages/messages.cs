@@ -29,4 +29,8 @@ namespace famousfront.messages
     {
         internal string source = null;
     }
+    internal class ToggleFeedSource : GenericMessage
+    {
+
+    }
 }

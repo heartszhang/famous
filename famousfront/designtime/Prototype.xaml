@@ -18,14 +18,25 @@
   <UserControl.Resources>
   </UserControl.Resources>
   <Grid x:Name="LayoutRoot" >
-    <StackPanel>
-      <Button Margin="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}">
-        <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="F1 M 24.4815,12.6728L 9.98462,19.9692L 9.98462,5.37634L 24.4815,12.6728 Z M 3.02417,0C 1.03207,-0.119995 0.0240173,0.888062 0,3.0242L 0,22.2734C 0.0240173,24.2895 1.03207,25.2975 3.02417,25.2975L 29.4738,25.2975C 31.5779,25.2975 32.602,24.2895 32.546,22.2734L 32.546,3.0242C 32.602,0.960083 31.5779,-0.0480042 29.4738,0L 3.02417,0 Z "/>
-      </Button>
-      <Button HorizontalAlignment="Right">
+    <StackPanel Margin="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Background="LightGray" 
+              TextElement.FontSize="{Binding (params:General.TitleFontSize), RelativeSource={RelativeSource self}}"
+              TextElement.Foreground="{DynamicResource SemitransparentContrastBrush}">
+          <TextBlock Text="{Binding Description}"/>
+        </Grid>
+        <Button Height="70" Grid.Column="1"            >
+          <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="F1 M 24.4815,12.6728L 9.98462,19.9692L 9.98462,5.37634L 24.4815,12.6728 Z M 3.02417,0C 1.03207,-0.119995 0.0240173,0.888062 0,3.0242L 0,22.2734C 0.0240173,24.2895 1.03207,25.2975 3.02417,25.2975L 29.4738,25.2975C 31.5779,25.2975 32.602,24.2895 32.546,22.2734L 32.546,3.0242C 32.602,0.960083 31.5779,-0.0480042 29.4738,0L 3.02417,0 Z "/>
+        </Button>
+      </Grid>
+    </StackPanel>
+      <Button HorizontalAlignment="Right" Visibility="Collapsed">
         <Path Height="24.42" Stretch="Uniform" Fill="White" Data="F1 M 2.54416,0L 0,2.47098L 4.41626,6.84344L 1.63214,9.60001L 9.69662,9.60001L 9.69662,1.61548L 6.91245,4.41956L 2.54416,0 Z M 2.54416,24.42L 6.91245,20.0475L 9.69662,22.8041L 9.69662,14.82L 1.63214,14.82L 4.41626,17.5761L 0,21.9011L 2.54416,24.42 Z M 22.117,0L 17.7008,4.37204L 14.9166,1.61548L 14.9166,9.60001L 22.9811,9.60001L 20.197,6.84344L 24.6132,2.47098L 22.117,0 Z M 17.7008,20.0475L 22.117,24.42L 24.6132,21.9011L 20.197,17.5761L 22.9811,14.82L 14.9166,14.82L 14.9166,22.8041L 17.7008,20.0475 Z "/>
       </Button>
-    </StackPanel>
 
   </Grid>
 </UserControl>

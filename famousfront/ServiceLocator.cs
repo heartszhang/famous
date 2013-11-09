@@ -1,7 +1,9 @@
 ﻿using famousfront.core;
 using famousfront.datamodels;
+using famousfront.messages;
 using famousfront.utils;
 using famousfront.viewmodels;
+using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using MetroLog;
 using Newtonsoft.Json;
@@ -13,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace famousfront
 {       
@@ -237,6 +240,19 @@ namespace famousfront
             LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
             _log = LogManagerFactory.DefaultLogManager.GetLogger("service-locator");
             // how to close this _log gracefully            
+        }
+        ICommand _toggle_feedsources_command;
+        public ICommand ToggleFeedSourcesCommand
+        {
+            get { return _toggle_feedsources_command ?? (_toggle_feedsources_command = toggle_feedsource_command()); }
+        }
+        ICommand toggle_feedsource_command()
+        {
+            return new RelayCommand(ExecuteToggleFeedSource);
+        }
+        void ExecuteToggleFeedSource()
+        {
+            Messenger.Default.Send(new ToggleFeedSource());
         }
     }
 }

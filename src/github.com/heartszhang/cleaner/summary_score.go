@@ -19,6 +19,7 @@ type DocumentSummary struct {
 	Images        []MediaSummary
 	Medias        []MediaSummary
 	Hash          uint64
+	Text          string
 }
 
 func make_mediasummary(m *html.Node) MediaSummary {
@@ -44,6 +45,7 @@ func new_docsummary_internal(n *html.Node, f hash.Hash64) *DocumentSummary {
 			if node_is_in_a(child) {
 				rtn.LinkWordCount += c
 			}
+			rtn.Text += child.Data
 		case child.Data == "img":
 			rtn.Images = append(rtn.Images, make_mediasummary(child))
 			//			rtn.Images = append(rtn.Images, node_get_attribute(child, "src"))
@@ -75,4 +77,5 @@ func (this *DocumentSummary) add(l *DocumentSummary) {
 	this.LinkWordCount += l.LinkWordCount
 	this.Images = append(this.Images, l.Images...)
 	this.Medias = append(this.Medias, l.Medias...)
+	this.Text += l.Text
 }

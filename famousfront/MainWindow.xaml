@@ -6,6 +6,7 @@
               xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:vm="clr-namespace:famousfront.viewmodels"
+  xmlns:ctrl="clr-namespace:famousfront.controls"
     mc:Ignorable="d" x:Class="famousfront.MainWindow"
   Icon="title-32.png"
              TextOptions.TextHintingMode="Animated"
@@ -19,6 +20,17 @@
   params:General.HeaderFontSize="{StaticResource LargeTextSize}"
   params:General.TitleFontSize="{StaticResource VeryLargeTextSize}"
        Title="FamousFront" Height="864" Width="1152" x:Name="root">
+  <metro:Window.TitleBar>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="1" Command="{Binding ToggleFeedSourcesCommand}"
+                    Content="T"
+                    Style="{DynamicResource {x:Static metro:Window.MainWindowCaptionButtonStyleKey}}"/>
+    </Grid>
+  </metro:Window.TitleBar>
   <metro:Window.ApplicationBar>
     <metro:ApplicationBar>
 

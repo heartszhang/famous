@@ -22,6 +22,10 @@ namespace famousfront.viewmodels
         {
             get { return _.uri; }
         }
+        public string Description
+        {
+            get { return _.description; }
+        }
         ICommand _videoplay_command = null;
         public ICommand VideoPlayCommand
         {

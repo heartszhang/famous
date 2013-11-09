@@ -93,7 +93,7 @@ type FeedLink struct {
 type FeedMedia struct {
 	media_type  uint
 	Title       string `json:"title,omitempty" bson:"title,omitempty"`
-	Description string `json:"desc,omitempty" bson:"desc,omitempty"`
+	Description string `json:"description,omitempty" bson:"description,omitempty"`
 	Uri         string `json:"uri,omitempty" bson:"uri,omitempty"`     // original url
 	Local       string `json:"local,omitempty" bson:"local,omitempty"` // image : download rel path, video : extraced flv/mp4 url
 	Width       int    `json:"width" bson:"width"`                     // -1 :unknown

@@ -16,7 +16,7 @@
         <TextBlock Text="{Binding Description}" Foreground="{DynamicResource ContrastBrush}" 
                        Margin="{Binding Flags.MarginAllBounds,Source={StaticResource _locator}}"
                      FontSize="{StaticResource NormalTextSize}" TextTrimming="CharacterEllipsis"
-                     FontFamily="{StaticResource LightFont}"/>
+                     TextAlignment="Center"/>
       </Grid>
     </Grid>
   </DataTemplate>

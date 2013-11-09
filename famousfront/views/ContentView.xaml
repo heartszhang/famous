@@ -3,16 +3,19 @@
                     xmlns:metro="http://schemas.codeplex.com/elysium"
                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                     xmlns:cmd="http://www.galasoft.ch/mvvmlight"
-                    xmlns:vm="clr-namespace:famousfront.viewmodels" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+                    xmlns:vm="clr-namespace:famousfront.viewmodels" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:ctrl="clr-namespace:famousfront.controls"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
   <DataTemplate DataType="{x:Type vm:ContentViewModel}" d:IsDesignTimeCreatable="false">
     <Grid Background="Transparent" d:DesignWidth="500" d:DesignHeight="300">
-    
+<!--    
       <i:Interaction.Triggers>
         <i:EventTrigger EventName="MouseRightButtonUp">
           <cmd:EventToCommand Command="{Binding ToggleFeedSourcesCommand,Mode=OneWay}" MustToggleIsEnabledValue="True" PassEventArgsToCommand="True"/>
         </i:EventTrigger>
       </i:Interaction.Triggers>
-
+-->
       <Grid.InputBindings>
         <KeyBinding Key="N" Command="{Binding NextEntryCommand}" />
         <KeyBinding Key="P" Command="{Binding PreviousEntryCommand}"/>

@@ -85,6 +85,20 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 				entry.Status |= feed.Feed_status_linkdensity_high
 			}
 		}
+		if entry.Status&feed.Feed_status_text_empty != 0 {
+			d := entry.Title.Main
+			/*			if len(entry.Title.Others) != 0 && len(entry.Title.Others[0]) != 0 {
+							d = entry.Title.Others[0]
+						}
+			*/
+			log.Println("img-alter", d)
+			if entry.Status&feed.Feed_status_image_one != 0 && len(entry.Images[0].Description) == 0 {
+				entry.Images[0].Description = d
+			}
+			if entry.Status&feed.Feed_status_media_one != 0 && len(entry.Videos[0].Description) == 0 {
+				entry.Videos[0].Description = d
+			}
+		}
 	}
 	return entries
 }
@@ -134,6 +148,10 @@ func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.Documen
 	//	log.Println("text-imgs:", len(entry.Images), len(entry.Videos))
 	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
 	ext := feedentry_content_exists(score.Hash)
+	log.Println(score.Text)
+	if score.WordCount < config.SummaryMinWords {
+		entry.Title.Others = append(entry.Title.Others, score.Text)
+	}
 	summary, s := feedentry_make_summary(frag, entry.Words, entry.Density, mc, ext)
 	entry.Summary = summary
 	entry.Status |= s
@@ -193,6 +211,15 @@ func node_clear_children(frag *html.Node) {
 	}
 }
 
+func node_is_hyperlink_decendant(frag *html.Node) bool {
+	for p := frag.Parent; p != nil; p = p.Parent {
+		if p.Type == html.ElementNode && p.Data == "a" {
+			return true
+		}
+	}
+	return false
+}
+
 func node_convert_flowdocument(frag *html.Node, excludeimg bool) {
 	if frag.Type == html.TextNode {
 		return
@@ -204,15 +231,16 @@ func node_convert_flowdocument(frag *html.Node, excludeimg bool) {
 			frag.Type = html.CommentNode
 			node_clear_children(frag)
 			frag.Attr = nil
-		} else {
+		} else if node_is_hyperlink_decendant(frag) == false {
 			frag.Data = "Figure"
 			node_clear_children(frag)
 			frag.AppendChild(make_image_node(frag))
 			frag.Attr = nil
+		} else {
+			frag.Data = "Image"
+			frag.Attr = extract_imgsrc_attr(frag.Attr)
 		}
 		ignore_children = true
-		//		frag.Data = "Image"
-		//		frag.Attr = extract_imgsrc_attr(frag.Attr)
 	case "a":
 		frag.Data = "Hyperlink"
 		frag.Attr = extract_ahref_attr(frag.Attr)
@@ -280,6 +308,7 @@ func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias int, 
 	switch {
 	case dup == true:
 		v = empty_flowdocument
+		s |= feed.Feed_status_text_empty
 	case medias == 0 && wm == true:
 		//v = node_extract_text(frag)
 		v = empty_flowdocument

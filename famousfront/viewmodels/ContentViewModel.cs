@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight.Command;
+﻿using famousfront.messages;
+using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,7 @@ namespace famousfront.viewmodels
             _next_source_command = new RelayCommand(ExecuteNextSourceCommand);
 
             MessengerInstance.Register<FeedSourceViewModel>(this, OnSelectedFeedSourceChanged);
+            MessengerInstance.Register<ToggleFeedSource>(this,OnToggleFeedSource);
         }
         public FeedEntriesViewModel FeedEntriesViewModel
         {
@@ -44,7 +46,10 @@ namespace famousfront.viewmodels
         }
         void ExecuteToggleFeedSources(MouseButtonEventArgs args)
         {
-            ShowFeedSources = !ShowFeedSources;
+            OnToggleFeedSource(null);
+        }
+        void OnToggleFeedSource(ToggleFeedSource msg){
+            ShowFeedSources = !ShowFeedSources;            
         }
         public override void Cleanup()
         {
