@@ -22,40 +22,6 @@ func feed_entries_clean(entries []feed.FeedEntry) []feed.FeedEntry {
 	return entries
 }
 
-func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
-	count := len(entries)
-	for i := 0; i < count; i++ {
-		entry := &entries[i]
-		switch entry.Words < uint(config.SummaryMinWords) {
-		case true:
-			entry.Status |= feed.Feed_status_text_empty
-		default:
-			entry.Status |= feed.Feed_status_text_many
-		}
-		switch len(entry.Audios) + len(entry.Videos) + len(entry.Images) {
-		case 0:
-			entry.Status |= feed.Feed_status_media_empty
-		case 1:
-			entry.Status |= feed.Feed_status_media_one
-		default:
-			entry.Status |= feed.Feed_status_media_many
-		}
-		switch entry.Density == 0 {
-		case true:
-			entry.Status |= feed.Feed_status_linkdensity_low
-		default:
-			d := entry.Density * 100 / entry.Words
-			switch d < 33 {
-			case true:
-				entry.Status |= feed.Feed_status_linkdensity_low
-			default:
-				entry.Status |= feed.Feed_status_linkdensity_high
-			}
-		}
-	}
-	return entries
-}
-
 func feed_entries_clean_summary(entries []feed.FeedEntry) []feed.FeedEntry {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < len(entries); i++ {
@@ -78,6 +44,48 @@ func feed_entries_clean_fulltext(entries []feed.FeedEntry) []feed.FeedEntry {
 
 // extract tags from summary and fulltext
 func feed_entries_autotag(entries []feed.FeedEntry) []feed.FeedEntry {
+	return entries
+}
+
+func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
+	count := len(entries)
+	for i := 0; i < count; i++ {
+		entry := &entries[i]
+		switch entry.Words < uint(config.SummaryMinWords) {
+		case true:
+			entry.Status |= feed.Feed_status_text_empty
+		default:
+			entry.Status |= feed.Feed_status_text_many
+		}
+		switch len(entry.Audios) + len(entry.Videos) {
+		case 0:
+			entry.Status |= feed.Feed_status_media_empty
+		case 1:
+			entry.Status |= feed.Feed_status_media_one
+		default:
+			entry.Status |= feed.Feed_status_media_many
+		}
+		switch len(entry.Images) {
+		case 0:
+			entry.Status |= feed.Feed_status_image_empty
+		case 1:
+			entry.Status |= feed.Feed_status_image_one
+		default:
+			entry.Status |= feed.Feed_status_image_many
+		}
+		switch entry.Density == 0 {
+		case true:
+			entry.Status |= feed.Feed_status_linkdensity_low
+		default:
+			d := entry.Density * 100 / entry.Words
+			switch d < 33 {
+			case true:
+				entry.Status |= feed.Feed_status_linkdensity_low
+			default:
+				entry.Status |= feed.Feed_status_linkdensity_high
+			}
+		}
+	}
 	return entries
 }
 
@@ -121,9 +129,9 @@ func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.Documen
 	frag, score, _ := cleaner.MakeFragmentReadable(frag)
 	entry.Words = uint(score.WordCount)
 	entry.Density = uint(score.LinkWordCount)
-
 	entry.Images = append(entry.Images, feedmedias_from_docsummary(score.Images)...)
 	entry.Videos = append(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
+	//	log.Println("text-imgs:", len(entry.Images), len(entry.Videos))
 	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
 	ext := feedentry_content_exists(score.Hash)
 	summary, s := feedentry_make_summary(frag, entry.Words, entry.Density, mc, ext)
