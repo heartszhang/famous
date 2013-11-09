@@ -74,4 +74,5 @@ func (this *DocumentSummary) add(l *DocumentSummary) {
 	this.LinkCount += l.LinkCount
 	this.LinkWordCount += l.LinkWordCount
 	this.Images = append(this.Images, l.Images...)
+	this.Medias = append(this.Medias, l.Medias...)
 }
