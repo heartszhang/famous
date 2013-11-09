@@ -105,9 +105,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="controls\FlowTextBlock.cs" />
+    <Compile Include="controls\GooglePlusPanel.cs" />
     <Compile Include="converters\BoolToVisibilityConverter.cs" />
     <Compile Include="core\DialogViewModel.cs" />
     <Compile Include="core\Flags.cs" />
+    <Compile Include="utils\DoubleExtension.cs" />
     <Compile Include="utils\HttpClientUtils.cs" />
     <Compile Include="core\TaskViewModel.cs" />
     <Compile Include="core\ViewModelBase.cs" />
@@ -127,15 +129,21 @@
     <Compile Include="utils\NotificationExtensions.cs" />
     <Compile Include="utils\UrlLauncher.cs" />
     <Compile Include="ServiceLocator.cs" />
+    <Compile Include="utils\WebBrowserUtility.cs" />
     <Compile Include="viewmodels\BootstrapViewModel.cs" />
     <Compile Include="viewmodels\ContentViewModel.cs" />
     <Compile Include="viewmodels\FeedEntriesViewModel.cs" />
     <Compile Include="viewmodels\FeedEntryViewModel.cs" />
     <Compile Include="viewmodels\FeedSourcesViewModel.cs" />
     <Compile Include="viewmodels\FeedSourceViewModel.cs" />
+    <Compile Include="viewmodels\ImageElementViewModel.cs" />
+    <Compile Include="viewmodels\ImageGalleryViewModel.cs" />
+    <Compile Include="viewmodels\ImageUnitViewModel.cs" />
     <Compile Include="viewmodels\MainViewModel.cs" />
+    <Compile Include="viewmodels\MediaElementViewModel.cs" />
     <Compile Include="viewmodels\OfflineViewModel.cs" />
     <Compile Include="viewmodels\SettingsViewModel.cs" />
+    <Compile Include="viewmodels\VideoElementViewModel.cs" />
     <Page Include="Controls.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -197,7 +205,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="views\ImageElementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\ImageGalleryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\ImageUnitView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="views\MainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\MediaElementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -208,6 +232,10 @@
     <Page Include="views\SettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\VideoElementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -268,7 +296,6 @@
   </ItemGroup>
   <ItemGroup>
     <DesignData Include="SampleData\BootstrapViewModelSampleData.xaml" />
-    <DesignData Include="SampleData\ContentViewModelSampleData.xaml" />
     <DesignData Include="SampleData\FeedSourcesViewModelSampleData.xaml" />
     <DesignData Include="SampleData\FeedSourceViewModelSampleData.xaml" />
   </ItemGroup>
