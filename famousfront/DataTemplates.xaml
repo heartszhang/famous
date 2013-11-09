@@ -3,12 +3,17 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="views/SettingsView.xaml"/>
         <ResourceDictionary Source="views/OfflineView.xaml"/>
+    <ResourceDictionary Source="views/ImageElementView.xaml"/>
+    <ResourceDictionary Source="views/ImageUnitView.xaml"/>
+    <ResourceDictionary Source="views/ImageGalleryView.xaml"/>
+    <ResourceDictionary Source="views/VideoElementView.xaml"/>
+    <ResourceDictionary Source="views/MediaElementView.xaml"/>
+    <ResourceDictionary Source="views/FeedEntryView.xaml"/>
         <ResourceDictionary Source="views/FeedEntriesView.xaml"/>
-        <ResourceDictionary Source="views/FeedEntryView.xaml"/>
         <ResourceDictionary Source="views/BootstrapView.xaml"/>
-        <ResourceDictionary Source="views/ContentView.xaml"/>
         <ResourceDictionary Source="views/FeedSourceView.xaml"/>
         <ResourceDictionary Source="views/FeedSourcesView.xaml"/>
-        <ResourceDictionary Source="views/MainView.xaml"/>
+    <ResourceDictionary Source="views/ContentView.xaml"/>
+    <ResourceDictionary Source="views/MainView.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
