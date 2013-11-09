@@ -20,11 +20,17 @@
     </DataTemplate.Resources>
     <StackPanel >
       <TextBlock x:Name="_title" Text="{Binding Title}" FontSize="{Binding (params:General.HeaderFontSize), RelativeSource={RelativeSource self}}" />
-      <!--<TextBlock Text="{Binding Summary}" TextWrapping="Wrap" />-->
-      <ctrl:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
+      <Grid x:Name="_media_room" Margin="0,8" 
+            Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
+        <ContentPresenter Content="{Binding Media}"/>
+      </Grid>
+      <Grid x:Name="_document_room" Margin="0,8" 
+            Visibility="{Binding HasDocument,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
+        <ctrl:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
                           IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}" 
-                          Background="Transparent"
+                          Background="Transparent" IsDocumentEnabled="True" Focusable="False"
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
+      </Grid>
     </StackPanel>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding FontSize, ElementName=_title, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">

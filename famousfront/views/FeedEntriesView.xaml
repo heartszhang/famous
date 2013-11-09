@@ -3,6 +3,7 @@
                     xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                                        xmlns:utils="clr-namespace:famousfront.utils"
                     xmlns:metro="http://schemas.codeplex.com/elysium"
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     mc:Ignorable="d">
@@ -26,9 +27,12 @@
                   Visibility="{Binding IsReady,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},ConverterParameter=true}">        
         <metro:ProgressBar  Value="100" VerticalAlignment="Top"
           State="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToBusyIndicatorConverter}}" />
-        <TextBlock Text="{Binding Reason}" HorizontalAlignment="Center" Margin="4"
+        <TextBlock Text="{Binding Reason}" 
+                   HorizontalAlignment="Center" Margin="{Binding (params:General.SemiBoldPadding), RelativeSource={RelativeSource self}}"
                    FontSize="{Binding (params:General.HeaderFontSize), RelativeSource={RelativeSource self}}"/>
       </Grid>
+
+      <ContentPresenter x:Name="_video_room" Content="{Binding VideoService}" VerticalAlignment="Bottom" />
     </Grid>
 
   </DataTemplate>

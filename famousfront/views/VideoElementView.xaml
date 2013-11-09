@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:utils="clr-namespace:famousfront.utils"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels">
+  <DataTemplate DataType="{x:Type vm:VideoElementViewModel}">
+    <Grid x:Name="_video_room" 
+          Visibility="{Binding CurrentSource, Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}"
+            VerticalAlignment="Bottom" Height="{Binding Flags.VideoElementHeight, Source={StaticResource _locator}}" 
+            Margin="{Binding (params:General.BoldPadding), RelativeSource={RelativeSource self}}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}"/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+      <Grid>
+        <Rectangle  Fill="{StaticResource FadeOutBottomBrush}"/>
+        <Button HorizontalAlignment="Right" Margin="0,-24,0,0" Command="{Binding VideoStopCommand}">
+          <Path Height="24.42" Stretch="Uniform" Fill="White" Data="F1 M 2.54416,0L 0,2.47098L 4.41626,6.84344L 1.63214,9.60001L 9.69662,9.60001L 9.69662,1.61548L 6.91245,4.41956L 2.54416,0 Z M 2.54416,24.42L 6.91245,20.0475L 9.69662,22.8041L 9.69662,14.82L 1.63214,14.82L 4.41626,17.5761L 0,21.9011L 2.54416,24.42 Z M 22.117,0L 17.7008,4.37204L 14.9166,1.61548L 14.9166,9.60001L 22.9811,9.60001L 20.197,6.84344L 24.6132,2.47098L 22.117,0 Z M 17.7008,20.0475L 22.117,24.42L 24.6132,21.9011L 20.197,17.5761L 22.9811,14.82L 14.9166,14.82L 14.9166,22.8041L 17.7008,20.0475 Z "/>
+        </Button>
+      </Grid>
+      <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource AccentBrush}" Grid.Row="1">
+        <WebBrowser utils:WebBrowserUtility.SupressScriptErrors="True" x:Name="_webv"
+                    utils:WebBrowserUtility.OpenLinksExternally="True"
+                    utils:WebBrowserUtility.BindableSource="{Binding CurrentSource}"/>
+      </Border>
+
+    </Grid>
+  </DataTemplate>
+</ResourceDictionary>

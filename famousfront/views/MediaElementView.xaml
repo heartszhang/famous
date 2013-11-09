@@ -1,0 +1,13 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels">
+  <DataTemplate DataType="{x:Type vm:MediaElementViewModel}">
+    <StackPanel>
+      <Button Command="{Binding VideoPlayCommand}" CommandParameter="{Binding Url,Mode=OneWay}">
+        <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="F1 M 24.4815,12.6728L 9.98462,19.9692L 9.98462,5.37634L 24.4815,12.6728 Z M 3.02417,0C 1.03207,-0.119995 0.0240173,0.888062 0,3.0242L 0,22.2734C 0.0240173,24.2895 1.03207,25.2975 3.02417,25.2975L 29.4738,25.2975C 31.5779,25.2975 32.602,24.2895 32.546,22.2734L 32.546,3.0242C 32.602,0.960083 31.5779,-0.0480042 29.4738,0L 3.02417,0 Z "/>
+      </Button>
+    </StackPanel>    
+  </DataTemplate>
+    
+</ResourceDictionary>

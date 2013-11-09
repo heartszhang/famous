@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels">
+  <DataTemplate DataType="{x:Type vm:ImageElementViewModel}">
+    <Grid x:Name="_media_root">
+      <Grid MaxHeight="{Binding Flags.ImageMaxHeight,Mode=OneWay,Source={StaticResource _locator}}">
+        <Grid Background="Gray" Opacity="0.1"/>
+        <Image Source="{Binding Url,Mode=OneWay, IsAsync=True, Converter={StaticResource NullImageConverter}}" 
+               Stretch="UniformToFill" VerticalAlignment="Center" StretchDirection="DownOnly" HorizontalAlignment="Center"/>
+      </Grid>
+      <Grid Background="Gray" Opacity="0.2" MinHeight="32" 
+            Visibility="{Binding IsReady,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},ConverterParameter=true}"/>
+      <!--<MediaElement Source="file:///e:/google/f_002399.jpg"/>-->
+      <Grid VerticalAlignment="Bottom" Visibility="{Binding Description,Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}}">
+        <Grid Background="{DynamicResource AccentBrush}" Opacity="0.6"/>
+        <TextBlock Text="{Binding Description}" Foreground="{DynamicResource ContrastBrush}" 
+                       Margin="{Binding Flags.MarginAllBounds,Source={StaticResource _locator}}"
+                     FontSize="{StaticResource NormalTextSize}" TextTrimming="CharacterEllipsis"
+                     FontFamily="{StaticResource LightFont}"/>
+      </Grid>
+    </Grid>
+  </DataTemplate>
+</ResourceDictionary>

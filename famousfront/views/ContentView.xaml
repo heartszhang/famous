@@ -24,7 +24,7 @@
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
       </Grid.ColumnDefinitions>
-      <Grid Background="AliceBlue" Grid.Column="1" x:Name="_left" >
+      <Grid Grid.Column="1" x:Name="_left" >
         <Grid.RenderTransform>
           <TransformGroup>
             <ScaleTransform/>
@@ -41,8 +41,7 @@
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
       <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Fill="{StaticResource FadeOutBottomBrush}"/>
-
-    </Grid>
+          </Grid>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding ShowFeedSources}" Value="True">
         <Setter TargetName="_left" Property="RenderTransform">

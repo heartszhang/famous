@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels"                    >
+  <DataTemplate DataType="{x:Type vm:ImageUnitViewModel}">
+    <Grid>
+      <Image Source="{Binding Url}" Stretch="Uniform"/>
+    </Grid>
+  </DataTemplate>
+
+</ResourceDictionary>
