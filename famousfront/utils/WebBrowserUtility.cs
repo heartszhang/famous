@@ -127,6 +127,7 @@ namespace famousfront.utils
 
             if (e.NewValue == null|| (e.NewValue is string && ((string)e.NewValue).Length == 0))
             {
+                browser.Source = null;
                 browser.Visibility = Visibility.Collapsed;
                 return;
             }
