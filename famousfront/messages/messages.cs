@@ -1,4 +1,5 @@
-﻿using System;
+﻿using famousfront.viewmodels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,5 +33,8 @@ namespace famousfront.messages
     internal class ToggleFeedSource : GenericMessage
     {
 
+    }
+    internal class DropFeedSource : GenericMessage{
+        internal FeedSourceViewModel model;
     }
 }
