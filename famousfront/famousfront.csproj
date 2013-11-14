@@ -104,6 +104,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="controls\ListBoxScrollToTopBehavior.cs" />
+    <Compile Include="views\FeedEntryTemplateSelector.cs" />
     <Compile Include="controls\FlowTextBlock.cs" />
     <Compile Include="controls\GooglePlusPanel.cs" />
     <Compile Include="converters\BoolToVisibilityConverter.cs" />
