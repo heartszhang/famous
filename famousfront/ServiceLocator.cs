@@ -21,22 +21,13 @@ namespace famousfront
 {       
     internal class ServiceLocator
     {
-        private static ILogger _log;
+        private static ILogger _log = LogManagerFactory.DefaultLogManager.GetLogger<ServiceLocator>();
         private static MainViewModel _main;
 
         private static SettingsViewModel _settings;
         static Flags _flags = new Flags();
         static FeedsBackendConfig _backend;
 
-        public static ILogger Log
-        {
-            get
-            {
-                if (_log == null)
-                    CreateLog();
-                return _log; 
-            }
-        }
         public static Flags Flags
         {
             get { return _flags; }
@@ -234,13 +225,6 @@ namespace famousfront
             return "http://" + _flags.Backend + rel;
         }
 
-        static void CreateLog()
-        {
-            var fst = new StreamingFileTarget { PathUnderAppData = "famous" };
-            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
-            _log = LogManagerFactory.DefaultLogManager.GetLogger("service-locator");
-            // how to close this _log gracefully            
-        }
         ICommand _toggle_feedsources_command;
         public ICommand ToggleFeedSourcesCommand
         {
