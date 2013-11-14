@@ -4,6 +4,7 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:views="clr-namespace:famousfront.views"
                     xmlns:ctrl="clr-namespace:famousfront.controls"
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" d:IsDesignTimeCreatable="false">
@@ -11,12 +12,13 @@
       <Style TargetType="{x:Type FlowDocument}" x:Key="FeedEntryFlowDocumentStyle">
         <Style.Resources>
           <Style TargetType="{x:Type Image}">
-            <Setter Property="MaxWidth" Value="320"/>
+            <Setter Property="MaxWidth" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
           </Style>
         </Style.Resources>
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
       </Style>
+
     </DataTemplate.Resources>
     <StackPanel >
       <TextBlock x:Name="_title" Text="{Binding Title}" FontSize="{Binding (params:General.HeaderFontSize), RelativeSource={RelativeSource self}}" />
@@ -39,4 +41,12 @@
 
     </DataTemplate.Triggers>
   </DataTemplate>
+
+  <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" x:Key="MediaOneTemplate">
+    <Grid x:Name="_media_room" 
+            Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
+      <ContentPresenter Content="{Binding Media}"/>
+    </Grid>
+  </DataTemplate>
+
 </ResourceDictionary>
