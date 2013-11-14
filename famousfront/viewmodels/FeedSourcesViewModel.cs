@@ -13,9 +13,24 @@ using System.Windows.Data;
 namespace famousfront.viewmodels
 {
     using FeedSources = ObservableCollection<FeedSourceViewModel>;
+    using famousfront.messages;
     
     class FeedSourcesViewModel : famousfront.core.ViewModelBase
     {
+        internal FeedSourcesViewModel()
+        {
+            MessengerInstance.Register<DropFeedSource>(this, OnDropFeedSource);
+        }
+
+        private void OnDropFeedSource(DropFeedSource obj)
+        {
+            if (obj.code != 0)
+                return;
+            DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() => 
+            {
+                _sources.Remove(obj.model);
+            }));
+        }
         FeedSources _sources = new FeedSources();
         ICollectionView _grouped_sources = null;
         public ICollectionView Sources
