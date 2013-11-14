@@ -91,7 +91,6 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 							d = entry.Title.Others[0]
 						}
 			*/
-			log.Println("img-alter", d)
 			if entry.Status&feed.Feed_status_image_one != 0 && len(entry.Images[0].Description) == 0 {
 				entry.Images[0].Description = d
 			}
@@ -147,12 +146,13 @@ func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.Documen
 	entry.Videos = append(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
 	//	log.Println("text-imgs:", len(entry.Images), len(entry.Videos))
 	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
+	imgs := len(entry.Images)
 	ext := feedentry_content_exists(score.Hash)
 	log.Println(score.Text)
 	if score.WordCount < config.SummaryMinWords {
 		entry.Title.Others = append(entry.Title.Others, score.Text)
 	}
-	summary, s := feedentry_make_summary(frag, entry.Words, entry.Density, mc, ext)
+	summary, s := feedentry_make_summary(frag, entry.Words, entry.Density, mc, imgs, ext)
 	entry.Summary = summary
 	entry.Status |= s
 	return score
@@ -213,7 +213,7 @@ func node_clear_children(frag *html.Node) {
 
 func node_is_hyperlink_decendant(frag *html.Node) bool {
 	for p := frag.Parent; p != nil; p = p.Parent {
-		if p.Type == html.ElementNode && p.Data == "a" {
+		if p.Type == html.ElementNode && (p.Data == "a" || p.Data == "Hyperlink") {
 			return true
 		}
 	}
@@ -301,7 +301,7 @@ func make_flowdocument(frag *html.Node, excludeimg bool) string {
 	return buffer.String()
 }
 
-func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias int, dup bool) (v string, s uint64) {
+func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias, imgs int, dup bool) (v string, s uint64) {
 	s = feed.Feed_status_format_flowdocument
 	dh := words > 0 && linkwords*100/words > 50
 	wm := words < uint(config.SummaryMinWords)
@@ -314,7 +314,12 @@ func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias int, 
 		v = empty_flowdocument
 	case medias == 0 && wm == false:
 		v = make_flowdocument(frag, true)
+	case medias > 0 && wm == true:
+		v = empty_flowdocument
+		s |= feed.Feed_status_text_empty
 	case medias == 1:
+		v = make_flowdocument(frag, true)
+	case medias > 1 && imgs > 0 && medias > imgs:
 		v = make_flowdocument(frag, true)
 	case medias > 1 && wm == false && dh == true:
 		v = make_flowdocument(frag, true)
@@ -322,6 +327,8 @@ func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias int, 
 		v = make_flowdocument(frag, false)
 		s |= feed.Feed_status_media_inline
 	case medias > 1 && wm == true:
+		v = make_flowdocument(frag, true)
+	default:
 		v = make_flowdocument(frag, true)
 	}
 	return
