@@ -41,16 +41,21 @@ type Curler interface {
 }
 
 type curler struct {
-	data_dir string
+	data_dir    string
+	interceptor func(*http.Request)
 }
 
 func NewCurl(datadir string) Curler {
 	return &curler{data_dir: datadir}
 }
 
+func NewInterceptCurler(datadir string, intercepter func(*http.Request)) Curler {
+	return &curler{data_dir: datadir, interceptor: intercepter}
+}
+
 const (
 	connection_speedup_timeout = 4
-	connection_timeout         = 10 //seconds
+	connection_timeout         = 14 //seconds
 	response_timeout           = 20 // seconds
 )
 
@@ -65,23 +70,26 @@ func timeout_dialer(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, time.Duration(connection_timeout*time.Second))
 }
 */
-func client_do_get(client *http.Client, uri string) (resp *http.Response, err error) {
+func client_do_get(client *http.Client, uri string, interceptor func(*http.Request)) (resp *http.Response, err error) {
 	req, err := http.NewRequest("GET", uri, nil)
 	if err == nil {
 		req.Header.Add("accept-encoding", "gzip,deflate")
+		if interceptor != nil {
+			interceptor(req)
+		}
 		resp, err = client.Do(req)
 	}
 	return
 }
 
-func do_get(uri string, useproxy int) (*http.Response, error) {
-	return do_get_timeo(uri, useproxy, connection_timeout)
+func do_get(uri string, useproxy int, interceptor func(*http.Request)) (*http.Response, error) {
+	return do_get_timeo(uri, useproxy, connection_timeout, interceptor)
 }
 
-func do_get_timeo(uri string, useproxy int, timeo int) (*http.Response, error) {
+func do_get_timeo(uri string, useproxy int, timeo int, interceptor func(*http.Request)) (*http.Response, error) {
 	trans := &http.Transport{
 		Dial: new_timeout_dialer(timeo),
-		ResponseHeaderTimeout: time.Duration(response_timeout * time.Second),
+		ResponseHeaderTimeout: time.Duration(response_timeout) * time.Second,
 	}
 
 	noretry := true
@@ -96,11 +104,11 @@ func do_get_timeo(uri string, useproxy int, timeo int) (*http.Response, error) {
 		noretry = false
 	}
 	client := &http.Client{Transport: trans}
-	resp, err := client_do_get(client, uri)
+	resp, err := client_do_get(client, uri, interceptor)
 	if err != nil && noretry == false {
 		fmt.Println("try again with proxy", uri, err)
 		trans.Proxy = http.ProxyFromEnvironment
-		resp, err = client_do_get(client, uri)
+		resp, err = client_do_get(client, uri, interceptor)
 	}
 	return resp, err
 }
@@ -288,7 +296,7 @@ func (this *curler) GetUtf8(uri string, proxypolicy int) (Cache, error) {
 // use server-site filename as name-prefix
 func (this *curler) Get(uri string, useproxy int) (Cache, error) {
 	v := Cache{}
-	resp, err := do_get(uri, useproxy)
+	resp, err := do_get(uri, useproxy, this.interceptor)
 	if err != nil {
 		return v, err
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 func DescribeImage(uri string) (mediatype string, width, height int, filelength int64, err error) {
-	resp, err := do_get_timeo(uri, 0, connection_speedup_timeout)
+	resp, err := do_get_timeo(uri, 0, connection_speedup_timeout, nil)
 	if err != nil {
 		return
 	}
