@@ -44,7 +44,7 @@
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
       <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Fill="{StaticResource FadeOutBottomBrush}"/>
-          </Grid>
+    </Grid>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding ShowFeedSources}" Value="True">
         <Setter TargetName="_left" Property="RenderTransform">
