@@ -4,5 +4,5 @@
     <GradientStop Color="Transparent"/>
     <GradientStop Color="#80FFFFFF" Offset="1"/>
   </LinearGradientBrush>
-
+  <SolidColorBrush Color="#40000000" x:Key="LowestLightBrush"/>
 </ResourceDictionary>
