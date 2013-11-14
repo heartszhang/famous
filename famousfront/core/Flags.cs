@@ -37,7 +37,9 @@ namespace famousfront.core
             MarginTopDown = new Thickness(0, 8, 0, 8);
             MarginAllBounds = new Thickness(4);
             ImageMaxHeight = 640.0;
+            ImageMaxWidth = 320.0;
             VideoElementHeight = 331.0;
+            BodyMaxWidth = 800.0;
         }
         [DataMember(Name="backend")]
         public string Backend
@@ -91,7 +93,14 @@ namespace famousfront.core
         public Thickness MarginAllBounds { get; set; }
         [DataMember(Name = "image_maxheight")]
         public double ImageMaxHeight{get;set;}
-        [DataMember(Name="video_elementheight")]
+
+        [DataMember(Name = "image_maxwidth")]
+        public double ImageMaxWidth { get; set; }
+
+        [DataMember(Name = "body_maxwidth")]
+        public double BodyMaxWidth { get; set; }
+
+        [DataMember(Name = "video_elementheight")]
         public double VideoElementHeight { get; set; }
     }
 
