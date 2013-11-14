@@ -20,14 +20,14 @@ namespace famousfront.viewmodels
         {
             _ = v;
             _pub_day = publish_day();
-            HasDocument = (_.status & FeedStatuses.Feed_status_text_many) != 0;
+            HasDocument = (_.status & FeedStatuses.Feed_status_text_empty) == 0;
             var inline = _.status & FeedStatuses.Feed_status_media_inline;
             var imgone = _.status & FeedStatuses.Feed_status_image_one;
             var imgmany = _.status & FeedStatuses.Feed_status_image_many;
             var media = _.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many);
             if (media != 0)
             {
-                Media = new MediaElementViewModel(_.videos[0]);
+                Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : null);
                 HasMedia = true;
             }
             if (imgone != 0 && inline == 0) {
@@ -69,16 +69,5 @@ namespace famousfront.viewmodels
             get { return _has_document; }
             private set { Set(ref _has_document, value); }
         }
-        /*
-        FlowDocument _doc;
-        public FlowDocument document
-        {
-            get { return _doc ?? (_doc = load_flowdoc()); }
-        }
-        FlowDocument load_flowdoc()
-        {
-            return XamlReader.Load(new XmlTextReader(new System.IO.StringReader(_.summary))) as FlowDocument;
-        }
-         * */
     }
 }
