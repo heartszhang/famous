@@ -19,7 +19,7 @@
   params:General.ContentFontSize="{StaticResource NormalTextSize}"
   params:General.HeaderFontSize="{StaticResource LargeTextSize}"
   params:General.TitleFontSize="{StaticResource VeryLargeTextSize}"
-       Title="FamousFront" Height="864" Width="1152" x:Name="root">
+       Title="FamousFront" Height="960" Width="1400" x:Name="root">
   <metro:Window.TitleBar>
     <Grid>
       <Grid.ColumnDefinitions>
@@ -33,7 +33,10 @@
   </metro:Window.TitleBar>
   <metro:Window.ApplicationBar>
     <metro:ApplicationBar>
-
+      <metro:CommandButton metro:ApplicationBar.Dock="Right" 
+                           Margin="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}">
+        <Path Width="21.6" Height="21.6149" Stretch="Uniform" UseLayoutRounding="False" Fill="{Binding BorderBrush,RelativeSource={RelativeSource AncestorType={x:Type metro:CommandButton}}}" Data="F1 M 0,16.4775L 0,1.10252C 0,0.712509 0.180008,0.375015 0.539993,0.0900116C 0.930008,-0.124985 1.3125,-0.154984 1.6875,1.52588e-005L 10.8,3.65251L 19.9575,1.52588e-005C 20.3475,-0.154984 20.74,-0.124985 21.135,0.0900116C 21.445,0.340012 21.6,0.677505 21.6,1.10252L 21.6,16.4775C 21.6,16.9925 21.3575,17.36 20.8725,17.58L 11.295,21.42C 11.17,21.45 11.0825,21.4825 11.0325,21.5175L 10.8,21.5175L 10.6125,21.5175L 10.38,21.42L 0.772507,17.58C 0.257507,17.36 0,16.9925 0,16.4775 Z M 1.92,15.9825L 9.60002,19.05L 9.60002,5.62502L 1.92,2.55003L 1.92,15.9825 Z M 3.375,13.1475L 3.375,11.5275L 8.22002,13.455L 8.22002,15.0675L 3.375,13.1475 Z M 3.375,8.15251L 3.375,6.54002L 8.22002,8.46001L 8.22002,10.08L 3.375,8.15251 Z M 12,19.05L 19.68,15.9825L 19.68,2.55003L 12,5.62502L 12,19.05 Z M 13.455,15.0675L 13.455,13.455L 18.3,11.5275L 18.3,13.1475L 13.455,15.0675 Z M 13.455,10.08L 13.455,8.46001L 18.3,6.54002L 18.3,8.15251L 13.455,10.08 Z "/>
+      </metro:CommandButton>
     </metro:ApplicationBar>
   </metro:Window.ApplicationBar>
   <Grid>
