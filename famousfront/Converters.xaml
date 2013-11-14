@@ -4,6 +4,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:metro="http://schemas.codeplex.com/elysium"
                     xmlns:ff="clr-namespace:famousfront"
+                    xmlns:views="clr-namespace:famousfront.views"
                     xmlns:cv="clr-namespace:famousfront.converters"
                     mc:Ignorable="d">
     <ff:ServiceLocator x:Key="_locator" d:IsDataSource="True" />
@@ -13,5 +14,5 @@
   <cv:NullImageConverter x:Key="NullImageConverter"/>
   <cv:StringIsNullOrEmptyToVisibilityConverter x:Key="StringIsNullOrEmptyToVisibilityConverter"/>
     <metro:IsGreaterThanConverter x:Key="IsGreaterThanConverter"/>
-  
+
 </ResourceDictionary>
