@@ -21,7 +21,7 @@
 
     </DataTemplate.Resources>
     <StackPanel >
-      <TextBlock x:Name="_title" Text="{Binding Title}" FontSize="{Binding (params:General.HeaderFontSize), RelativeSource={RelativeSource self}}" />
+      <TextBlock x:Name="_title" Text="{Binding Title}" FontSize="{Binding (params:General.TitleFontSize), RelativeSource={RelativeSource self}}" />
       <Grid x:Name="_media_room" Margin="0,8" 
             Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
         <ContentPresenter Content="{Binding Media}"/>

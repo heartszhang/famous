@@ -38,7 +38,14 @@ namespace famousfront.viewmodels
             {
                 Media = new ImageGalleryViewModel(_.images);
                 HasMedia = true;
+                HasMediaGallery = true;
             }
+        }
+        bool _has_mediagallery;
+        public bool HasMediaGallery
+        {
+          get { return _has_mediagallery; }
+          private set { Set(ref _has_mediagallery, value); }
         }
         bool _has_media = false;
         public bool HasMedia

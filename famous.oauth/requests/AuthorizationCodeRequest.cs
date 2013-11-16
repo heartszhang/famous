@@ -58,6 +58,7 @@ namespace famous.oauth.requests
         public Uri Build(Uri serverurl)
         {
           var b = new RequestBuilder(this){ BaseUri = serverurl};
+ //         b.AddParameter(HttpRequestParameter.ParamType.Query, "x_required_offers", "Bing/Search");
           return b.BuildUri();
         }
     }

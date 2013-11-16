@@ -11,7 +11,7 @@
       </Grid>
       <Grid x:Name="_label_wrap" Background="Transparent" metro:ApplicationBar.PreventsOpen="true">
         <DockPanel HorizontalAlignment="Right"
-                    TextElement.FontSize="{Binding (params:General.ContentFontSize), RelativeSource={RelativeSource self}}">
+                    TextElement.FontSize="{Binding (params:General.TitleFontSize), RelativeSource={RelativeSource self}}">
           <TextBlock x:Name="_label" Text="{Binding UnreadsCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
                      Visibility="{Binding UnreadsCount, Converter={StaticResource IntToVisibilityConverter}, Mode=OneWay}"/>
           <TextBlock x:Name="_name" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>

@@ -37,4 +37,8 @@ namespace famousfront.messages
     internal class DropFeedSource : GenericMessage{
         internal FeedSourceViewModel model;
     }
+    internal class ShowFindFeedSourceView : GenericMessage
+    {
+
+    }
 }

@@ -12,7 +12,7 @@ namespace famous.oauth
   /// <summary>A helper utility to manage the authorization code flow.</summary>
   public class WebAuthorizationBroker
   {
-    private readonly IAuthorizationCodeFlow flow;
+    private readonly AuthorizationCodeFlow flow;
 
     private readonly ICodeReceiver code_receiver = new LocalServerCodeReceiver();
     public async Task<TokenResponse> AuthorizeAsync(string userid_hint, bool force, CancellationToken canceltoken)
@@ -29,7 +29,12 @@ namespace famous.oauth
      
       if (string.IsNullOrEmpty(code_resp.Code))
       {
-        throw new ResponseException<AuthorizationCodeResponse>(code_resp);
+        throw new ResponseException<TokenErrorResponse>(new TokenErrorResponse()
+        { 
+          Error = code_resp.Error,
+          ErrorDescription = code_resp.ErrorDescription,
+          ErrorUri = code_resp.ErrorUri,
+        });
       }
       token =
         await flow.ExchangeCodeForTokenAsync(userid_hint, code_resp.Code, canceltoken)

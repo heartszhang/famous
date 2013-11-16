@@ -1,9 +1,11 @@
 package bingsearchservice
 
 import (
-	"encoding/base64"
 	"github.com/heartszhang/curl"
+	"github.com/heartszhang/oauth2"
+	"log"
 	"net/http"
+	"net/url"
 )
 
 type BingSearchService interface {
@@ -17,57 +19,69 @@ type BingSearchService interface {
 }
 type bing_search struct {
 	temp_folder string
-	inteceptor  func(*http.Request)
+	account_key string
 }
 
+func (this bing_search) RoundTrip(r *http.Request) {
+	r.URL.User = url.UserPassword(this.account_key, this.account_key)
+}
 func NewBingSearchService(temp, acckey string) BingSearchService {
-	e := base64.StdEncoding.EncodeToString([]byte(":" + acckey))
-	auth := "Basic " + e
-	return &bing_search{temp, func(r *http.Request) {
-		r.Header.Add("Authorization", auth)
-	}}
+	return &bing_search{temp, acckey}
 }
 
 func (this bing_search) Web(params BingSearchWebParameters) (curl.Cache, error) {
-	q := HttpQueryEncode(params)
-	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
-	return c.Get(BingSearchServiceRoot+ServiceOperationWeb+"?"+q, curl.CurlProxyPolicyNoProxy)
+	q := oauth2.HttpQueryEncode(params)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	//	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
+	return c.Get(BingSearchServiceRoot + ServiceOperationWeb + "?" + q)
 }
 
 func (this bing_search) News(params BingSearchNewsParameters) (curl.Cache, error) {
-	q := HttpQueryEncode(params)
-	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
-	return c.Get(BingSearchServiceRoot+ServiceOperationWeb+"?"+q, curl.CurlProxyPolicyNoProxy)
+	q := oauth2.HttpQueryEncode(params)
+	//	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	return c.Get(BingSearchServiceRoot + ServiceOperationNews + "?" + q)
 }
 
 func (this bing_search) Image(params BingSearchImageParameters) (curl.Cache, error) {
-	q := HttpQueryEncode(params)
-	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
-	return c.Get(BingSearchServiceRoot+ServiceOperationWeb+"?"+q, curl.CurlProxyPolicyNoProxy)
+	q := oauth2.HttpQueryEncode(params)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	//	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
+	return c.Get(BingSearchServiceRoot + ServiceOperationImage + "?" + q)
 }
 
 func (this bing_search) Video(params BingSearchVideoParameters) (curl.Cache, error) {
-	q := HttpQueryEncode(params)
-	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
-	return c.Get(BingSearchServiceRoot+ServiceOperationWeb+"?"+q, curl.CurlProxyPolicyNoProxy)
+	q := oauth2.HttpQueryEncode(params)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	//	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
+	return c.Get(BingSearchServiceRoot + ServiceOperationVideo + "?" + q)
 }
-
+func new_string(v string) *string {
+	return &v
+}
 func (this bing_search) SpellingSuggestion(params BingSearchParameters) (curl.Cache, error) {
-	q := HttpQueryEncode(params)
-	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
-	return c.Get(BingSearchServiceRoot+ServiceOperationWeb+"?"+q, curl.CurlProxyPolicyNoProxy)
+	params.Format = new_string(SearchResultFormatJson)
+	q := oauth2.HttpQueryEncode(params)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	//	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
+	x := BingSearchServiceRoot + ServiceOperationSpellingSuggestion + "?" + q
+	log.Println(x)
+	return c.Get(x)
 }
 
 func (this bing_search) RelatedSearch(params BingSearchParameters) (curl.Cache, error) {
-	q := HttpQueryEncode(params)
-	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
-	return c.Get(BingSearchServiceRoot+ServiceOperationWeb+"?"+q, curl.CurlProxyPolicyNoProxy)
+	params.Format = new_string(SearchResultFormatJson)
+	q := oauth2.HttpQueryEncode(params)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	//	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
+	return c.Get(BingSearchServiceRoot + ServiceOperationRelatedSearch + "?" + q)
 }
 
 func (this bing_search) Composite(params BingSearchCompositeParameters) (curl.Cache, error) {
-	q := HttpQueryEncode(params)
-	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
-	return c.Get(BingSearchServiceRoot+ServiceOperationWeb+"?"+q, curl.CurlProxyPolicyNoProxy)
+	q := oauth2.HttpQueryEncode(params)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	//	c := curl.NewInterceptCurler(this.temp_folder, this.inteceptor)
+	return c.Get(BingSearchServiceRoot + ServiceOperationComposite + "?" + q)
 }
 
 type BingSearchParameters struct {
@@ -157,17 +171,19 @@ type BingSearchRelatedEntry struct {
 }
 
 const (
-	BingSearchServiceRoot        = "https://api.datamarket.azure.com/Bing/Search/"
-	BingSearchWebOnlyServiceRoot = "https://api.datamarket.azure.com/Bing/SearchWeb/"
+	BingSearchServiceRoot        = "https://api.datamarket.azure.com/Bing/Search/v1/"
+	BingSearchWebOnlyServiceRoot = "https://api.datamarket.azure.com/Bing/SearchWeb/v1/"
 
 	ServiceOperationWeb                = "Web"
 	ServiceOperationImage              = "Image"
 	ServiceOperationVideo              = "Video"
 	ServiceOperationNews               = "News"
-	ServiceOperationSpellingSuggestion = "SpellingSuggestion"
+	ServiceOperationSpellingSuggestion = "SpellingSuggestions"
 	ServiceOperationRelatedSearch      = "RelatedSearch"
 	ServiceOperationComposite          = "Composite"
 
+	SearchResultFormatJson                  = "JSON"
+	SearchResultFormatAtom                  = "Atom"
 	OptionsDisableLocationDetection         = "DisableLocationDetection"
 	OptionsEnableHighlighting               = "EnableHighlighting"
 	WebSearchOptionsDisableHostCollapsing   = "DisableHostCollapsing"

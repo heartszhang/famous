@@ -225,18 +225,32 @@ namespace famousfront
             return "http://" + _flags.Backend + rel;
         }
 
-        ICommand _toggle_feedsources_command;
-        public ICommand ToggleFeedSourcesCommand
+        ICommand _toggle_feedsources_view;
+        public ICommand ToggleFeedSourcesViewCommand
         {
-            get { return _toggle_feedsources_command ?? (_toggle_feedsources_command = toggle_feedsource_command()); }
+          get { return _toggle_feedsources_view ?? (_toggle_feedsources_view = toggle_feedsources_view()); }
         }
-        ICommand toggle_feedsource_command()
+        ICommand toggle_feedsources_view()
         {
             return new RelayCommand(ExecuteToggleFeedSource);
         }
         void ExecuteToggleFeedSource()
         {
             Messenger.Default.Send(new ToggleFeedSource());
+        }
+
+        ICommand _show_find_feedsource_view;
+        public ICommand FindFeedSourceCommand
+        {
+          get { return _show_find_feedsource_view ?? (_show_find_feedsource_view = show_find_feedsource_view()); }
+        }
+        ICommand show_find_feedsource_view()
+        {
+          return new RelayCommand(ExecuteShowFindFeedSourceView);
+        }
+        void ExecuteShowFindFeedSourceView()
+        {
+          Messenger.Default.Send(new ShowFindFeedSourceView());
         }
     }
 }

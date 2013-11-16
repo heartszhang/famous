@@ -187,6 +187,7 @@ var (
 		"":         Feed_type_unknown,
 		"rss":      Feed_type_rss,
 		"atom":     Feed_type_atom,
+		"atom10":   Feed_type_atom,
 		"rss+xml":  Feed_type_rss,
 		"atom+xml": Feed_type_atom,
 		"feed":     Feed_type_atom,
@@ -203,4 +204,11 @@ type FeedImage struct {
 	Code           int    `json:"code" bson:"code"`
 	Width          int    `json:"width" bson:"width"`
 	Height         int    `json:"height" bson:"height"`
+}
+
+type FeedSourceFindEntry struct {
+	Url     string `json:"url,omitempty`
+	Title   string `json:"title,omitempty`
+	Summary string `json:"summary,omitempty`
+	Website string `json:"website,omitempty"`
 }

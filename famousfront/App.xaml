@@ -8,6 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
             	<ResourceDictionary Source="/Elysium;component/Themes/Generic.xaml"/>
         <ResourceDictionary Source="themes/generic.xaml"/>
+        <ResourceDictionary Source="themes/light/colors.xaml"/>
         <ResourceDictionary Source="Converters.xaml"/>
             	<ResourceDictionary Source="themes/TextBlocks.xaml"/>
             	<ResourceDictionary Source="Controls.xaml"/>

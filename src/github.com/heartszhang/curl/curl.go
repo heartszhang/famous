@@ -5,6 +5,7 @@ import (
 	"code.google.com/p/go.net/html"
 	"compress/flate"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"github.com/qiniu/iconv"
 	"io"
@@ -36,21 +37,46 @@ const (
 )
 
 type Curler interface {
-	Get(uri string, proxypolicy int) (Cache, error)
-	GetUtf8(uri string, proxypolicy int) (Cache, error)
+	Get(uri string) (Cache, error)
+	GetUtf8(uri string) (Cache, error)
+	GetAsJson(uri string, val interface{}) error
+	GetLocalAsJson(uri string, val interface{}) (Cache, error)
+	GetAsString(uri string) (string, error)
+}
+type CurlerRoundTrip interface {
+	RoundTrip(*http.Request)
+}
+type roundtrip_wrapper func(*http.Request)
+
+func (this roundtrip_wrapper) RoundTrip(r *http.Request) {
+	this(r)
 }
 
 type curler struct {
-	data_dir    string
-	interceptor func(*http.Request)
+	data_dir     string
+	proxy_policy int
+	dial_timeo   int
+	interceptor  CurlerRoundTrip
 }
 
 func NewCurl(datadir string) Curler {
-	return &curler{data_dir: datadir}
+	return &curler{data_dir: datadir, proxy_policy: 0, dial_timeo: connection_timeout, interceptor: nil}
 }
 
 func NewInterceptCurler(datadir string, intercepter func(*http.Request)) Curler {
-	return &curler{data_dir: datadir, interceptor: intercepter}
+	return &curler{data_dir: datadir,
+		interceptor: roundtrip_wrapper(intercepter),
+		dial_timeo:  connection_timeout}
+}
+
+func NewCurlerDetail(datadir string, proxypolicy, dialtimeo int, intercepter CurlerRoundTrip) Curler {
+	if dialtimeo == 0 {
+		dialtimeo = connection_timeout
+	}
+	return &curler{data_dir: datadir,
+		proxy_policy: proxypolicy,
+		interceptor:  intercepter,
+		dial_timeo:   dialtimeo}
 }
 
 const (
@@ -70,23 +96,23 @@ func timeout_dialer(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, time.Duration(connection_timeout*time.Second))
 }
 */
-func client_do_get(client *http.Client, uri string, interceptor func(*http.Request)) (resp *http.Response, err error) {
+func client_do_get(client *http.Client, uri string, interceptor CurlerRoundTrip) (resp *http.Response, err error) {
 	req, err := http.NewRequest("GET", uri, nil)
 	if err == nil {
 		req.Header.Add("accept-encoding", "gzip,deflate")
 		if interceptor != nil {
-			interceptor(req)
+			interceptor.RoundTrip(req)
 		}
 		resp, err = client.Do(req)
 	}
 	return
 }
 
-func do_get(uri string, useproxy int, interceptor func(*http.Request)) (*http.Response, error) {
+func do_get(uri string, useproxy int, interceptor CurlerRoundTrip) (*http.Response, error) {
 	return do_get_timeo(uri, useproxy, connection_timeout, interceptor)
 }
 
-func do_get_timeo(uri string, useproxy int, timeo int, interceptor func(*http.Request)) (*http.Response, error) {
+func do_get_timeo(uri string, useproxy int, timeo int, interceptor CurlerRoundTrip) (*http.Response, error) {
 	trans := &http.Transport{
 		Dial: new_timeout_dialer(timeo),
 		ResponseHeaderTimeout: time.Duration(response_timeout) * time.Second,
@@ -225,14 +251,29 @@ func file_detect_content_type(local, mime string) string {
 	return ct
 }
 
+func (this *curler) GetLocalAsJson(uri string, v interface{}) (Cache, error) {
+	c, err := this.GetUtf8(uri)
+	if err != nil {
+		return c, err
+	}
+	file, err := os.Open(c.LocalUtf8)
+	if err != nil {
+		return c, err
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(v)
+	return c, err
+}
+
 // detect content-type via http://mimesniff.spec.whatwg.org/ if charset isn't declared
 // treat gb2312 as gbk
 // convert text/* and application/*+xml to utf-8
 // only when converting sucessfully, Cache.LocalUtf8 would be set
 // when convert non-utf8 encoded xml, file would be saved as utf-8, but xml declares another encoding
 // xml-decoder should use a passthrough charset-reader
-func (this *curler) GetUtf8(uri string, proxypolicy int) (Cache, error) {
-	v, err := this.Get(uri, proxypolicy)
+func (this *curler) GetUtf8(uri string) (Cache, error) {
+	v, err := this.Get(uri)
 	if err != nil {
 		return v, err
 	}
@@ -291,19 +332,87 @@ func (this *curler) GetUtf8(uri string, proxypolicy int) (Cache, error) {
 	return v, err
 }
 
+type curler_error struct {
+	code   int
+	reason string
+}
+
+func (this curler_error) Error() string {
+	return fmt.Sprintf("%v: %v", this.code, this.reason)
+}
+
+func (this *curler) GetAsString(uri string) (rtn string, err error) {
+
+	resp, err := do_get(uri, this.proxy_policy, this.interceptor)
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return rtn, curler_error{resp.StatusCode, resp.Status}
+	}
+
+	reader, err := uncompress(resp)
+	if err != nil {
+		return
+	}
+	defer reader.Close()
+	if resp.Body != reader {
+		defer resp.Body.Close()
+	}
+	_, cs, err := extract_charset(resp.Header.Get("content-type"))
+	if err != nil {
+		return
+	}
+	converter, err := iconv.Open("utf-8", cs)
+	if err != nil {
+		return
+	}
+	defer converter.Close()
+	ireader := iconv.NewReader(converter, reader, 0)
+	x, err := ioutil.ReadAll(ireader)
+	if err != nil {
+		return
+	}
+	return string(x), err
+}
+
+func (this *curler) GetAsJson(uri string, val interface{}) error {
+	resp, err := do_get(uri, this.proxy_policy, this.interceptor)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return curler_error{resp.StatusCode, resp.Status}
+	}
+
+	reader, err := uncompress(resp)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+	if resp.Body != reader {
+		defer resp.Body.Close()
+	}
+	decoder := json.NewDecoder(reader)
+	err = decoder.Decode(val)
+	return err
+}
+
 // use env-proxy or goagent for all http sessions, if direct conn fail
 // detect charset by mimetype
 // use server-site filename as name-prefix
-func (this *curler) Get(uri string, useproxy int) (Cache, error) {
+func (this *curler) Get(uri string) (Cache, error) {
 	v := Cache{}
-	resp, err := do_get(uri, useproxy, this.interceptor)
+	resp, err := do_get(uri, this.proxy_policy, this.interceptor)
 	if err != nil {
 		return v, err
 	}
 	v.StatusCode = resp.StatusCode
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return v, fmt.Errorf("%v", resp.Status)
+		return v, curler_error{resp.StatusCode, resp.Status}
 	}
 	mime, cs, err := extract_charset(resp.Header.Get("content-type"))
 	if err == nil {
@@ -317,7 +426,9 @@ func (this *curler) Get(uri string, useproxy int) (Cache, error) {
 		return v, err
 	}
 	defer reader.Close()
-
+	if reader != resp.Body {
+		defer resp.Body.Close()
+	}
 	out, err := ioutil.TempFile(this.data_dir, mime_to_ext(v.Mime, v.Disposition))
 	if err != nil {
 		return v, err
@@ -348,6 +459,7 @@ func mime_to_ext(typesubtype, dispose string) string {
 	}
 	return typesubtype
 }
+
 func MimeToExt(typesubtype string) string {
 	types := strings.Split(typesubtype, "/")
 	switch len(types) > 1 {

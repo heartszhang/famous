@@ -14,7 +14,7 @@ func image_description(uri string) (feedfeed.FeedImage, error) {
 		return v, nil
 	}
 	c := curl.NewCurl(config.ImageDir)
-	cache, err := c.Get(uri, 0)
+	cache, err := c.Get(uri)
 
 	v.Mime = cache.Mime
 	v.Code = cache.StatusCode

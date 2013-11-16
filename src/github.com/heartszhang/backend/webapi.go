@@ -33,15 +33,26 @@ func init() {
 	http.HandleFunc("/api/feed_entry/drop.json", webapi_feedentry_drop)
 	//	http.HandleFunc("/api/meta/categories.json", webapi_meta_categories)
 	http.HandleFunc("/api/image/description.json", webapi_image_description)
-	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail) // ?uri=
-	http.HandleFunc("/api/image/origin.json", webapi_image_origin)       // ?uri=
-	http.HandleFunc("/api/link/origin.json", webapi_link_origin)         // ?uri=
-
+	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail)  // ?uri=
+	http.HandleFunc("/api/image/origin.json", webapi_image_origin)        // ?uri=
+	http.HandleFunc("/api/link/origin.json", webapi_link_origin)          // ?uri=
+	http.HandleFunc("/api/suggest/bing.json", webapi_suggest_bing)        // ?q=
+	http.HandleFunc("/api/feed_source/find.json", webapi_feedsource_find) // ?q=
 	http.HandleFunc("/exit.json", webapi_exit)
 	http.HandleFunc("/", webapi_home)
 }
 
 const uint64_bits int = 64
+
+func webapi_feedsource_find(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+	switch fs, err := feedsource_find(q); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
+}
 
 func webapi_feedtag_all(w http.ResponseWriter, r *http.Request) {
 	switch ft, err := feedtag_all(); err {
@@ -51,6 +62,16 @@ func webapi_feedtag_all(w http.ResponseWriter, r *http.Request) {
 		webapi_write_error(w, err)
 	}
 	log.Println(r.URL.RequestURI())
+}
+
+func webapi_suggest_bing(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+	switch sg, err := suggest_bing(q); err {
+	case nil:
+		webapi_write_as_json(w, sg)
+	default:
+		webapi_write_error(w, err)
+	}
 }
 
 // uri : /api/feed_category/all.json
@@ -68,7 +89,8 @@ func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {
 func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
 	//	category, err := strconv.ParseUint(r.URL.Query().Get("category"), 0, uint64_bits)
 	log.Println(r.URL.RequestURI())
-	uri, _ := url.QueryUnescape(r.URL.Query().Get("uri"))
+	//uri, _ := url.QueryUnescape(r.URL.Query().Get("uri"))
+	uri := r.URL.Query().Get("uri")
 	count, _ := strconv.ParseUint(r.URL.Query().Get("count"), 0, 0)
 	page, _ := strconv.ParseUint(r.URL.Query().Get("page"), 0, 0)
 	switch fe, err, sc := feedentry_unread(uri, uint(count), uint(page)); err {

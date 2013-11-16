@@ -30,11 +30,5 @@
     {
       return string.Format("Error:\"{0}\", Description:\"{1}\", Uri:\"{2}\"", Error, ErrorDescription, ErrorUri);
     }
-
-    /// <summary>Constructs a new empty token error response.</summary>
-    public TokenErrorResponse()
-    {
-    }
-
   }
 }

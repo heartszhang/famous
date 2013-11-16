@@ -97,6 +97,9 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 			if entry.Status&feed.Feed_status_media_one != 0 && len(entry.Videos[0].Description) == 0 {
 				entry.Videos[0].Description = d
 			}
+			if entry.Status&feed.Feed_status_image_many != 0 && len(entry.Images[0].Description) == 0 {
+				entry.Images[0].Description = d
+			}
 		}
 	}
 	return entries

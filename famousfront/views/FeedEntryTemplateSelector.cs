@@ -18,7 +18,7 @@ namespace famousfront.views
                 return base.SelectTemplate(item, container);
             var fe = container as FrameworkElement;
             var mot = fe.FindResource("MediaOneTemplate") as DataTemplate;
-            if (ws.HasMedia && !ws.HasDocument)
+            if (ws.HasMedia && !ws.HasDocument && !ws.HasMediaGallery)
                 return mot ?? base.SelectTemplate(item, container);
             return base.SelectTemplate(item, container);
         }

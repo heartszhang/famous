@@ -5,6 +5,7 @@ import (
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
+	google "github.com/heartszhang/googlefeedservice"
 )
 
 // since_unixtime , 0: from now
@@ -12,13 +13,12 @@ import (
 // count: entries per page
 // page: page no, start at 0
 func feeds_entries_since(since_unixtime int64, category string, count uint, page uint) ([]feed.FeedEntry, error) {
-
 	return []feed.FeedEntry{}, nil
 }
 
 func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, error, int) {
 	c := curl.NewCurl(backend_config().FeedEntryDir)
-	cache, err := c.GetUtf8(source, curl.CurlProxyPolicyUseProxy)
+	cache, err := c.GetUtf8(source)
 
 	if err != nil || cache.LocalUtf8 == "" {
 		return nil, err, cache.StatusCode
@@ -62,7 +62,7 @@ func feedentry_umark(uri string, flags uint) (uint, error) {
 // /feed/entry/full_text.json/{url}/{entry_id}
 func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err error) {
 	c := curl.NewCurl(config.DocumentDir)
-	cache, err := c.GetUtf8(uri, 0)
+	cache, err := c.GetUtf8(uri)
 	v.Uri = uri
 	v.Local = cache.LocalUtf8
 	v.Length = cache.LengthUtf8
@@ -135,7 +135,7 @@ func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err 
 		return *fs, nil
 	}
 	curler := curl.NewCurl(backend_config().FeedSourceDir)
-	cache, err := curler.GetUtf8(uri, curl.CurlProxyPolicyUseProxy)
+	cache, err := curler.GetUtf8(uri)
 	ext := curl.MimeToExt(cache.Mime)
 	if ext != "xml" && ext != "atom+xml" {
 		return v, fmt.Errorf("unsupported mime: %v", cache.Mime)
@@ -184,4 +184,9 @@ func source_type_map(sourcetype string) uint {
 func feedtag_all() ([]string, error) {
 	fto := new_feedtag_operator()
 	return fto.all()
+}
+
+func feedsource_find(q string) ([]feed.FeedSourceFindEntry, error) {
+	svc := google.NewGoogleFeedApi("http://iweizhi2.duapp.com", config.FeedSourceDir)
+	return svc.Find(q, "")
 }

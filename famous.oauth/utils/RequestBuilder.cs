@@ -12,12 +12,6 @@ namespace famous.oauth.utils
   /// <see cref="BuildUri"/> from the query and path parameters of a REST call.</summary>
   public class RequestBuilder
   {
-    /// <summary>Supported HTTP methods.</summary> 
-    private static readonly IEnumerable<string> SupportedMethods = new List<string> 
-    { 
-      HttpMethods.Get, HttpMethods.Post, HttpMethods.Put, HttpMethods.Delete, HttpMethods.Patch 
-    };
-
     /// <summary>
     /// A dictionary containing the parameters which will be inserted into the path
     /// of the URI. These parameters will be substituted into the URI path where the 
@@ -60,7 +54,7 @@ namespace famous.oauth.utils
         .Aggregate(this.PathPattern, (path, param) => path.Replace(param.Token, param.Value)));
 
       if (QueryParameters.Count <= 0) return new Uri(this.BaseUri, restPath.ToString());
-      restPath.Append("?");
+      restPath.Append(string.IsNullOrEmpty(BaseUri.Query) ? "?" : "&");
       // If parameter value is empty - just add the "name", otherwise "name=value"
       restPath.Append(String.Join("&", QueryParameters.Select(
         x => string.IsNullOrEmpty(x.Value) ?

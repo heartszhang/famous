@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels">
+  <DataTemplate DataType="{x:Type vm:FeedSourceFindEntryViewModel}">
+    <Grid>
+      <StackPanel>
+        <TextBlock 
+          TextElement.FontSize="{Binding (params:General.TitleFontSize),RelativeSource={RelativeSource Self}}"><Hyperlink NavigateUri="{Binding Uri,Mode=OneWay}"><Run Text="{Binding Title,Mode=OneWay}"/></Hyperlink></TextBlock>
+        <TextBlock Text="{Binding Summary}" TextElement.FontSize="{Binding (params:General.ContentFontSize),RelativeSource={RelativeSource Self}}"/>
+      </StackPanel>
+    </Grid>
+  </DataTemplate>
+</ResourceDictionary>

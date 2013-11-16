@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <SolidColorBrush Color="#40000000" x:Key="LowestLightBrush"/>
+  <!--from elysium-->
+  <SolidColorBrush Color="#1F000000" x:Key="SemitransparentBackgroundContrastBrush"/>
+  <SolidColorBrush Color="#FF000000" x:Key="ForegroundBrush"/>
+  <SolidColorBrush Color="#FFDEDEDE" x:Key="PaleBrush"/>
+  <SolidColorBrush Color="#7FDEDEDE" x:Key="SemiPaleBrush"/>
+
+</ResourceDictionary>

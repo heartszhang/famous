@@ -47,19 +47,6 @@ namespace famous.oauth.responses
 
     #region Constructs
 
-    /// <summary>Constructs a new authorization code response URL from the specified query string.</summary>
-    public AuthorizationCodeResponse(string query)
-    {
-      var pairs = query.Split('&');
-      var queryString = new Dictionary<string, string>();
-      foreach (var keyValue in pairs.Select(pair => pair.Split('=')))
-      {
-        queryString[keyValue[0]] = keyValue[1];
-      }
-
-      InitFromDictionary(queryString);
-    }
-
     /// <summary>Initializes this instance from the input dictionary.</summary>
     private void InitFromDictionary(IEnumerable<KeyValuePair<string, string>> queryString)
     {
@@ -79,11 +66,6 @@ namespace famous.oauth.responses
           setter(pair.Value);
         }
       }
-    }
-
-    /// <summary>Constructs a new empty authorization code response URL.</summary>
-    public AuthorizationCodeResponse()
-    {
     }
 
     #endregion

@@ -16,7 +16,6 @@
           </Style>
         </ItemsControl.ItemContainerStyle>
       </ItemsControl>
-
     </Grid>    
   </DataTemplate>
 </ResourceDictionary>

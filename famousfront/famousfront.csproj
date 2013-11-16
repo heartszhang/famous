@@ -105,6 +105,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="controls\ListBoxScrollToTopBehavior.cs" />
+    <Compile Include="viewmodels\FeedSourceFindEntryViewModel.cs" />
+    <Compile Include="viewmodels\FeedSourceFindViewModel.cs" />
     <Compile Include="views\FeedEntryTemplateSelector.cs" />
     <Compile Include="controls\FlowTextBlock.cs" />
     <Compile Include="controls\GooglePlusPanel.cs" />
@@ -179,6 +181,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="themes\light\colors.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="themes\textblocks.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -198,6 +204,14 @@
     <Page Include="views\FeedEntryView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="views\FeedSourceFindEntryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\FeedSourceFindView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="views\FeedSourcesView.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -291,7 +305,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\" />
-    <Folder Include="themes\light\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="gnote.ico" />

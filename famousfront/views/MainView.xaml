@@ -5,22 +5,25 @@
     <Grid Background="Gray" Opacity="0.2"></Grid>
   </DataTemplate>
   <DataTemplate DataType="{x:Type vm:MainViewModel}">
-        <ContentPresenter x:Name="_content" Content="{x:Null}"/>
-        <DataTemplate.Triggers>
-            <DataTrigger Binding="{Binding ShowSettings}" Value="True">
-                <Setter TargetName="_content" Property="Content" Value="{Binding SettingsViewModel}"/>
-            </DataTrigger>
-            <DataTrigger Binding="{Binding Status}" Value="READY">
-                <Setter TargetName="_content" Property="Content" Value="{Binding ContentViewModel}"/>
-            </DataTrigger>
+    <ContentPresenter x:Name="_content" Content="{x:Null}"/>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding Status}" Value="READY">
+        <Setter TargetName="_content" Property="Content" Value="{Binding ContentViewModel}"/>
+      </DataTrigger>
       <DataTrigger Binding="{Binding Status}" Value="BOOTSTRAP">
         <Setter TargetName="_content" Property="Content" Value="{Binding BootstrapViewModel}"/>
-                <!--<Setter TargetName="_content" Property="ContentTemplate" Value="{StaticResource ConnectingTemplate}"/>-->
-            </DataTrigger>
-            <DataTrigger Binding="{Binding Status}" Value="OFFLINE">
-                <Setter TargetName="_content" Property="ContentTemplate" Value="{StaticResource OfflineTemplate}"/>
-                <!--<Setter TargetName="_content" Property="Content" Value="{Binding OfflineViewModel}"/>-->
-            </DataTrigger>
-        </DataTemplate.Triggers>
-    </DataTemplate>
+        <!--<Setter TargetName="_content" Property="ContentTemplate" Value="{StaticResource ConnectingTemplate}"/>-->
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Status}" Value="OFFLINE">
+        <Setter TargetName="_content" Property="ContentTemplate" Value="{StaticResource OfflineTemplate}"/>
+        <!--<Setter TargetName="_content" Property="Content" Value="{Binding OfflineViewModel}"/>-->
+      </DataTrigger>
+      <DataTrigger Binding="{Binding ShowFeedSourceFindView}" Value="True">
+        <Setter Property="Content" TargetName="_content" Value="{Binding FeedSourceFindViewModel}"/>
+      </DataTrigger>
+      <DataTrigger Binding="{Binding ShowSettingsView}" Value="True">
+        <Setter TargetName="_content" Property="Content" Value="{Binding SettingsViewModel}"/>
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
 </ResourceDictionary>

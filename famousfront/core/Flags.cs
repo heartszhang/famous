@@ -40,6 +40,9 @@ namespace famousfront.core
             ImageMaxWidth = 320.0;
             VideoElementHeight = 331.0;
             BodyMaxWidth = 800.0;
+            SearchBoxMargin = new Thickness(160.0, 12, 160, 12);
+            FeedSourceFindEntriesMaxWidth = 800;
+            ProgressRingLargeSize = 80.0;
         }
         [DataMember(Name="backend")]
         public string Backend
@@ -102,6 +105,15 @@ namespace famousfront.core
 
         [DataMember(Name = "video_elementheight")]
         public double VideoElementHeight { get; set; }
+
+        [DataMember(Name = "searchbox_margin")]
+        public Thickness SearchBoxMargin{ get; set; }
+
+        [DataMember(Name = "feedsource_findentries_maxwidth")]
+        public double FeedSourceFindEntriesMaxWidth { get; set; }
+
+        [DataMember(Name = "progressring_largesize")]
+        public double ProgressRingLargeSize { get; set; }
     }
 
 }

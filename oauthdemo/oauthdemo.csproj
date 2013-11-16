@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1CD0DCC2-41FC-4225-9BC9-CB67B5DA9FA8}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{DB7C75EE-32EE-41ED-AF9A-029457423059}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>famous.oauth</RootNamespace>
-    <AssemblyName>famous.oauth</AssemblyName>
+    <RootNamespace>oauthdemo</RootNamespace>
+    <AssemblyName>oauthdemo</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -30,18 +32,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Extensions">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.15\lib\net45\System.Net.Http.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http.Formatting, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.0.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Primitives">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.15\lib\net45\System.Net.Http.Primitives.dll</HintPath>
@@ -54,32 +49,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\SlnAssemblyInfo.cs" />
-    <Compile Include="ClientSecrets.cs" />
-    <Compile Include="AuthorizationCodeFlow.cs" />
-    <Compile Include="core\request\HttpParam.cs" />
-    <Compile Include="core\ICodeReceiver.cs" />
-    <Compile Include="FileDataStore.cs" />
-    <Compile Include="OAuth2Context.cs" />
-    <Compile Include="responses\ResponseException.cs" />
-    <Compile Include="responses\TokenErrorResponse.cs" />
-    <Compile Include="WebAuthorizationBroker.cs" />
-    <Compile Include="LocalServerCodeReceiver.cs" />
-    <Compile Include="requests\AuthorizationCodeRequest.cs" />
-    <Compile Include="requests\AuthorizationCodeTokenRequest.cs" />
-    <Compile Include="core\IDataStorage.cs" />
-    <Compile Include="core\request\HttpMethods.cs" />
-    <Compile Include="requests\AuthorizeImplicitRequestUrl.cs" />
-    <Compile Include="requests\RefreshTokenRequest.cs" />
-    <Compile Include="requests\TokenRequestBase.cs" />
-    <Compile Include="responses\AuthorizationCodeResponse.cs" />
-    <Compile Include="utils\ParameterUtils.cs" />
-    <Compile Include="utils\RequestBuilder.cs" />
-    <Compile Include="responses\TokenResponse.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\famous.oauth\famous.oauth.csproj">
+      <Project>{1cd0dcc2-41fc-4225-9bc9-cb67b5da9fa8}</Project>
+      <Name>famous.oauth</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" />

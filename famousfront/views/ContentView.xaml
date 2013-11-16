@@ -12,7 +12,7 @@
 <!--    
       <i:Interaction.Triggers>
         <i:EventTrigger EventName="MouseRightButtonUp">
-          <cmd:EventToCommand Command="{Binding ToggleFeedSourcesCommand,Mode=OneWay}" MustToggleIsEnabledValue="True" PassEventArgsToCommand="True"/>
+          <cmd:EventToCommand Command="{Binding ToggleFeedSourcesViewCommand,Mode=OneWay}" MustToggleIsEnabledValue="True" PassEventArgsToCommand="True"/>
         </i:EventTrigger>
       </i:Interaction.Triggers>
 -->

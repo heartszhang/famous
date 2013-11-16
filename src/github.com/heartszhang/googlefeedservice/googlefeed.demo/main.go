@@ -7,7 +7,8 @@ import (
 
 func main() {
 	fi := g.NewGoogleFeedApi("http://iweizhi2.duapp.com", "")
-	//	r, err := fi.Find("caoliu", "")
-	r, err := fi.Load("http://caoliuok.blogspot.com/feeds/posts/default", "", 1, false)
-	fmt.Println(r.ResponseStatus, r.ResponseData.Feed, err)
+	f, err := fi.Find("caoliu", "")
+	fmt.Println(f, err)
+	//	s, e, err := fi.Load("http://sex8.cc/rss-htm-fid-4.html", "", 10, false)
+	//	fmt.Println(s.Name, e, err)
 }

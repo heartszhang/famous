@@ -13,6 +13,8 @@
         <ResourceDictionary Source="views/BootstrapView.xaml"/>
         <ResourceDictionary Source="views/FeedSourceView.xaml"/>
         <ResourceDictionary Source="views/FeedSourcesView.xaml"/>
+    <ResourceDictionary Source="views/FeedSourceFindEntryView.xaml"/>
+    <ResourceDictionary Source="views/FeedSourceFindView.xaml"/>
     <ResourceDictionary Source="views/ContentView.xaml"/>
     <ResourceDictionary Source="views/MainView.xaml"/>
     </ResourceDictionary.MergedDictionaries>

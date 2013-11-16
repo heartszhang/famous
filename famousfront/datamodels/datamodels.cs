@@ -522,5 +522,16 @@ internal class FeedImage  // => ImageCache
     [DataMember(EmitDefaultValue = false)]
     public int height { get; set; }
 }
-
+  [DataContract]
+internal class FeedSourceFindEntry
+{
+    [DataMember(EmitDefaultValue = false)]
+    public string url { get; set; }
+    [DataMember(EmitDefaultValue = false)]
+    public string title { get; set; }
+    [DataMember(EmitDefaultValue = false)]
+    public string summary { get; set; }
+    [DataMember(EmitDefaultValue = false)]
+    public string website { get; set; }
+}
 }

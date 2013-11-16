@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using famousfront.core;
 using famousfront.messages;
 using GalaSoft.MvvmLight.Command;
+using famousfront.datamodels;
+using System.Windows.Input;
 
 namespace famousfront.viewmodels
 {
@@ -21,6 +23,7 @@ namespace famousfront.viewmodels
         internal MainViewModel()
         {
             MessengerInstance.Register<BackendInitialized>(this, OnBackendInitialized);
+            MessengerInstance.Register<ShowFindFeedSourceView>(this, ExecuteShowFindFeedSourceView);
             _content = new ContentViewModel();
             _offline = new OfflineViewModel();
             _booting = new BootstrapViewModel();
@@ -65,23 +68,34 @@ namespace famousfront.viewmodels
         SettingsViewModel _settings;
         public SettingsViewModel SettingsViewModel
         {
-            get { return _settings; }
-            internal set
-            {
-                Set(ref _settings, value);
-            }
+          get { return _settings; }
+          internal set
+          {
+            Set(ref _settings, value);
+          }
         }
 
-        bool _show_settings = false;
-        public bool ShowSettings
+        FeedSourceFindViewModel _feedsourcefind;
+        public FeedSourceFindViewModel FeedSourceFindViewModel
         {
-            get { return _show_settings; }
+          get { return _feedsourcefind; }
+          internal set { Set(ref _feedsourcefind, value); }
+        }
+        bool _show_settings_view = false;
+        public bool ShowSettingsView
+        {
+            get { return _show_settings_view; }
             internal set 
             {
-                Set(ref _show_settings, value);
+              Set(ref _show_settings_view, value);
             }
         }
-
+        bool _show_feedsourcefind_view;
+        public bool ShowFeedSourceFindView
+        {
+          get { return _show_feedsourcefind_view; }
+          internal set { Set(ref _show_feedsourcefind_view, value); }
+        }
         MainViewStatus _status = MainViewStatus.BOOTSTRAP;
         public MainViewStatus Status
         {
@@ -96,6 +110,20 @@ namespace famousfront.viewmodels
         {
             Status = MainViewStatus.READY;
             _content.ReloadFeedSources();
+        }
+
+        void ExecuteShowFindFeedSourceView(ShowFindFeedSourceView msg)
+        {
+          if (FeedSourceFindViewModel == null)
+          {
+            FeedSourceFindViewModel = new FeedSourceFindViewModel();
+          }
+
+          ShowFeedSourceFindView = !ShowFeedSourceFindView;
+          if (!ShowFeedSourceFindView)
+          {
+//            FeedSourceFindViewModel = null;  // reserve previous search
+          }
         }
     }
 }

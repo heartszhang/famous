@@ -9,13 +9,13 @@ using System.Windows.Data;
     using famousfront.core;
     using GalaSoft.MvvmLight.Threading;
     using famousfront.utils;
+    using famousfront.messages;
 
 namespace famousfront.viewmodels
 {
     using FeedSources = ObservableCollection<FeedSourceViewModel>;
-    using famousfront.messages;
     
-    class FeedSourcesViewModel : famousfront.core.ViewModelBase
+    class FeedSourcesViewModel : famousfront.core.TaskViewModel
     {
         internal FeedSourcesViewModel()
         {
@@ -64,25 +64,27 @@ namespace famousfront.viewmodels
         }
         internal async void Reload()
         {
-            var fs = await HttpClientUtils.Get<famousfront.datamodels.FeedSource[]>(ServiceLocator.BackendPath("/api/feed_source/all.json"));
-            if (fs.code != 0)
+          IsBusying = true;
+          var fs = await HttpClientUtils.Get<famousfront.datamodels.FeedSource[]>(ServiceLocator.BackendPath("/api/feed_source/all.json"));
+          IsBusying = false;
+          if (fs.code != 0)
+          {
+            MessengerInstance.Send(new famousfront.messages.BackendError() { code = fs.code, reason = fs.reason });
+            return;
+          }
+          var fss = fs.data;
+          await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
+          {
+            _sources.Clear();
+          }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+          foreach (var f in fss)
+          {
+            var c = f;
+            await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
             {
-                MessengerInstance.Send(new famousfront.messages.BackendError() { code = fs.code, reason = fs.reason });
-                return;
-            }
-            var fss = fs.data;
-            await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() => 
-            {
-                _sources.Clear(); 
+              _sources.Add(new FeedSourceViewModel(c));
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
-            foreach (var f in fss)
-            {
-                var c = f;
-                await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() => 
-                {
-                    _sources.Add(new FeedSourceViewModel(c) );
-                }), System.Windows.Threading.DispatcherPriority.ContextIdle);
-            }
+          }
         }
     }
 }

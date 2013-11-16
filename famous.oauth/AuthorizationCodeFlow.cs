@@ -18,7 +18,7 @@ namespace famous.oauth
   /// that access token when it expires.
   /// </para>
   /// </summary>
-  internal class AuthorizationCodeFlow : IAuthorizationCodeFlow
+  internal class AuthorizationCodeFlow 
   {
     /// <summary>An OAuth2Context class for the authorization code flow. </summary>
     private readonly OAuth2Context _;
