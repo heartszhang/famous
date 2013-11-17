@@ -7,9 +7,10 @@
 
     <Grid MaxHeight="{Binding Flags.ImageMaxHeight,Mode=OneWay,Source={StaticResource _locator}}"
           ctrls:ImageTipProviderBehavior.ImageUrl="{Binding OriginUrl,Mode=OneWay}">
-      <i:Interaction.Behaviors>
+<!--      <i:Interaction.Behaviors>
         <ctrls:ImageTipProviderBehavior />
       </i:Interaction.Behaviors>
+      -->
       <Grid Background="Gray" Opacity="0.1"/>
       
       <Image Source="{Binding Url,Mode=OneWay, IsAsync=True, Converter={StaticResource NullImageConverter}}" 

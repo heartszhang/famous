@@ -21,4 +21,24 @@
   <Style TargetType="{x:Type Hyperlink}" BasedOn="{StaticResource {x:Type Hyperlink}}">
     
   </Style>
+
+  <Style x:Key="ButtonLightStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Style.Triggers>
+      <Trigger Property="IsDefault" Value="True">
+        <Setter Property="FontWeight" Value="Bold"/>
+      </Trigger>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource MiddleLightBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+      </Trigger>
+      <Trigger Property="IsPressed" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource LowlightBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
 </ResourceDictionary>

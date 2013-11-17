@@ -3,29 +3,42 @@
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
   <DataTemplate DataType="{x:Type vm:MediaElementViewModel}">
-    <Grid>
+    <Grid params:General.HeaderFontSize="{StaticResource MonsterTextSize}">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition/>
-        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="320"/>
+        <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
-      <Grid  TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}">
-        <Grid Background="Gray" Opacity="0.1"/>
+      <Grid x:Name="_thumb">
+        <Grid Background="{DynamicResource AccentBrush}"/>
+        <Grid Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}">
+          <Image Source="{Binding Url,Mode=OneWay,Converter={StaticResource NullImageConverter}}" StretchDirection="DownOnly" Stretch="UniformToFill" MaxHeight="331"/>
+        </Grid>
+      </Grid>
+      <Grid Grid.Column="1">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid 
+          Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource Self}}"  >
+          <TextBlock x:Name="_desc" Text="{Binding Description}" 
+                     TextAlignment="Center"
+                     TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}"
+                     VerticalAlignment="Center"/>
+        </Grid>
+        <Grid Grid.Row="1">
+          <Button Style="{DynamicResource ButtonLightStyle}" Command="{Binding VideoPlayCommand}">
+            <Path Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}" Height="81.818" Width="108"/>
+          </Button>
+        </Grid>
+      </Grid>
 
-        <TextBlock Text="{Binding Description}" TextAlignment="Center" VerticalAlignment="Center"/>
-      </Grid>
-      <Grid Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}">
-        <Image Source="{Binding Url,Mode=OneWay,Converter={StaticResource NullImageConverter}}" StretchDirection="DownOnly" Stretch="UniformToFill" MaxHeight="331"/>
-        <Button HorizontalAlignment="Center" Height="{Binding Flags.ProgressRingLargeSize,Source={StaticResource _locator}}" Width="{Binding Flags.ProgressRingLargeSize,Source={StaticResource _locator}}"
-              Command="{Binding VideoPlayCommand}" >
-          <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}"/>
-        </Button>
-      </Grid>
-      <Button HorizontalAlignment="Center" MinHeight="70" Grid.Column="1"
-               Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, ConverterParameter=true, FallbackValue=Collapsed}"
-              Command="{Binding VideoPlayCommand}" >
-        <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}"/>
-      </Button>
     </Grid>    
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding Path=(TextElement.FontSize), ElementName=_desc, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_desc"/>
+      </DataTrigger>
+    </DataTemplate.Triggers>
   </DataTemplate>
     
 </ResourceDictionary>

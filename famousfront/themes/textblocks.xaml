@@ -9,7 +9,9 @@
   <System:Double x:Key="LargeTextSize">16</System:Double><!-- 12pt TitleFontSize-->
   <System:Double x:Key="VeryLargeTextSize">17.333</System:Double><!-- 13pt-->
   <System:Double x:Key="LargestTextSize">18.667</System:Double><!-- 14pt-->
-  <!-- 16pt HeaderFontSize, -->
+  <System:Double x:Key="HugeTextSize">20</System:Double> <!-- 15pt-->
+  <System:Double x:Key="MonsterTextSize">21.333</System:Double><!-- 16pt-->
+  <!-- 16pt = 21.333 HeaderFontSize, -->
 
   <FontFamily x:Key="DefaultFont">Microsoft YaHei UI, Segoe UI</FontFamily>
   <FontFamily x:Key="LightFont">Microsoft YaHei UI Light, Segoe UI Light</FontFamily>

@@ -46,6 +46,7 @@ namespace famousfront.core
         ProgressRingLargeSize = 80.0;
         ImageTipShowDelay = 150;
         ImageTipHideDelay = 800;
+        ImageTipMaxWidth = 500.0;
       }
         [DataMember(Name="backend")]
         public string Backend
@@ -125,6 +126,8 @@ namespace famousfront.core
         public int ImageTipShowDelay { get; set; }// milliseconds
         [DataMember(Name = "imagetip_hidedelay")]
         public int ImageTipHideDelay { get; set; }// milliseconds
+        [DataMember(Name = "imagetip_maxwidth")]
+        public double ImageTipMaxWidth { get; set; }// milliseconds
     }
 
 }

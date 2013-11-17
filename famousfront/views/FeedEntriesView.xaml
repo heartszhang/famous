@@ -38,13 +38,18 @@
                   Visibility="{Binding IsReady,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},ConverterParameter=true}">        
         <metro:ProgressBar  Value="100" VerticalAlignment="Top"
           State="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToBusyIndicatorConverter}}" />
-        <TextBlock Text="{Binding Reason}" 
+        <TextBlock Text="{Binding Reason}" x:Name="_desc"
                    HorizontalAlignment="Center" Margin="{Binding Path=(params:General.SemiBoldPadding), RelativeSource={RelativeSource self}, Mode=OneWay}"
                    FontSize="{Binding Path=(params:General.HeaderFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
       </Grid>
 
       <ContentPresenter x:Name="_video_room" Content="{Binding VideoService}" VerticalAlignment="Bottom" />
     </Grid>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding FontSize, ElementName=_desc, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_desc"/>
+      </DataTrigger>
 
+    </DataTemplate.Triggers>
   </DataTemplate>
 </ResourceDictionary>

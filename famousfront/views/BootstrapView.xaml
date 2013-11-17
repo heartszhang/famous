@@ -12,7 +12,7 @@
       <Grid Background="{DynamicResource SemitransparentBrush}"/>
       <StackPanel VerticalAlignment="Center">
         <metro:ProgressRing x:Name="_indicator" Width="64" Height="64" State="Normal" HorizontalAlignment="Center"/>
-        <TextBlock Foreground="{DynamicResource HighlightBrush}" 
+        <TextBlock x:Name="_desc" Foreground="{DynamicResource HighlightBrush}" 
                    Text="{Binding Reason}" HorizontalAlignment="Center"
                    FontSize="{Binding Path=(params:General.HeaderFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
       </StackPanel>
@@ -20,6 +20,9 @@
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding IsBusying}" Value="True">
         <Setter Property="State" TargetName="_indicator" Value="Indeterminate"/>
+      </DataTrigger>
+      <DataTrigger Binding="{Binding FontSize, ElementName=_desc, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_desc"/>
       </DataTrigger>
 
     </DataTemplate.Triggers>

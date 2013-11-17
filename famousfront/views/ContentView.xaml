@@ -43,7 +43,7 @@
             Visibility="{Binding ShowFeedSources, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
-      <ContentPresenter Grid.Column="0" Content="{Binding ImageTipViewModel}" HorizontalAlignment="Left" Grid.ColumnSpan="2" MaxWidth="560">
+      <ContentPresenter Grid.Column="0" Content="{Binding ImageTipViewModel}" HorizontalAlignment="Left" Grid.ColumnSpan="2" MaxWidth="{Binding Flags.ImageTipMaxWidth, Source={StaticResource _locator}}">
         <i:Interaction.Behaviors>
           <ctrls:ImageTipServiceHostBehavior/>
         </i:Interaction.Behaviors>
