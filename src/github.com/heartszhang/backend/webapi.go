@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	feed "github.com/heartszhang/feedfeed"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -32,9 +33,13 @@ func init() {
 	http.HandleFunc("/api/feed_entry/media.json", webapi_feedentry_media)
 	http.HandleFunc("/api/feed_entry/drop.json", webapi_feedentry_drop)
 	//	http.HandleFunc("/api/meta/categories.json", webapi_meta_categories)
+
 	http.HandleFunc("/api/image/description.json", webapi_image_description)
-	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail)  // ?uri=
-	http.HandleFunc("/api/image/origin.json", webapi_image_origin)        // ?uri=
+	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail)       // ?uri= return image/jpeg
+	http.HandleFunc("/api/image/origin.json", webapi_image_origin)             // ?uri=, return image/xxx
+	http.HandleFunc("/api/image/dimension.json", webapi_image_dimension)       // ?uri=, return FeedMedia
+	http.HandleFunc("/api/image/video.thumbnail", webapi_image_videothumbnail) //?uri=, return image/xxx
+
 	http.HandleFunc("/api/link/origin.json", webapi_link_origin)          // ?uri=
 	http.HandleFunc("/api/suggest/bing.json", webapi_suggest_bing)        // ?q=
 	http.HandleFunc("/api/feed_source/find.json", webapi_feedsource_find) // ?q=
@@ -269,10 +274,30 @@ func webapi_image_description(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
-// /api/image/thumbnail.json?uri=
-func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
+// uri: /image/dimension.json?uri=
+func webapi_image_dimension(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.RequestURI())
 	url := r.URL.Query().Get("uri")
-	switch cache, err := image_description(url); err {
+	v, err := image_dimension(url)
+	if err != nil {
+		webapi_write_error(w, err)
+	} else {
+		webapi_write_as_json(w, v)
+	}
+}
+func webapi_image_videothumbnail(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Query().Get("uri")
+	switch vt, err := image_videothumbnail(url); err {
+	case nil:
+		webapi_image_entity(vt.Image, w, r)
+	default:
+		webapi_write_error(w, err)
+	}
+}
+
+func webapi_image_entity(uri string, w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.RequestURI())
+	switch cache, err := image_description(uri); err {
 	case nil:
 		w.Header().Set("content-type", cache.Mime)
 		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
@@ -283,7 +308,12 @@ func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
 	default:
 		webapi_write_error_code(w, err, cache.Code)
 	}
-	log.Println(r.URL.RequestURI())
+}
+
+// /api/image/thumbnail.json?uri=
+func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Query().Get("uri")
+	webapi_image_entity(url, w, r)
 }
 
 // /api/image/origin.json?uri=
@@ -307,10 +337,23 @@ func webapi_link_origin(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
+type counted_writer struct {
+	io.Writer
+	content_length int
+}
+
+func (this *counted_writer) Write(p []byte) (n int, err error) {
+	n, e := this.Writer.Write(p)
+	this.content_length += n
+	return n, e
+}
+
 func webapi_write_as_json(w http.ResponseWriter, body interface{}) {
+	cw := &counted_writer{w, 0}
 	w.Header().Set("content-type", "application/json")
-	enc := json.NewEncoder(w)
+	enc := json.NewEncoder(cw)
 	enc.Encode(body)
+	w.Header().Set("content-length", strconv.Itoa(cw.content_length))
 }
 
 // sc may be ok, if err == nil, sc would be ignored
@@ -322,10 +365,12 @@ func webapi_write_error_code(w http.ResponseWriter, err error, statuscode int) {
 	case nil: // ignore statuscode
 		webapi_write_as_json(w, BackendError{})
 	default:
+		cw := &counted_writer{w, 0}
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(statuscode)
-		enc := json.NewEncoder(w)
+		enc := json.NewEncoder(cw)
 		enc.Encode(BackendError{Reason: err.Error(), Code: statuscode})
+		w.Header().Set("content-length", strconv.Itoa(cw.content_length))
 	}
 }
 
@@ -361,6 +406,10 @@ func webapi_home(w http.ResponseWriter, r *http.Request) {
 //http://address/api/image/thumbnail.json?uri=
 func redirect_thumbnail(uri string) string {
 	return fmt.Sprintf("http://%v/api/image/thumbnail.json?uri=%v", config.Address(), url.QueryEscape(uri))
+}
+
+func imageurl_from_video(uri string) string {
+	return fmt.Sprintf("http://%v/api/image/video.thumbnail?uri=%v", config.Address(), url.QueryEscape(uri))
 }
 
 //server/api/link/origin.json?uri=

@@ -14,36 +14,39 @@ namespace famousfront.core
     [DataContract]
     class Flags
     {
-        public Flags()
-        {
-            Backend = "127.0.0.1:8002";
-            KaPeriod = 100;  // milliseconds
-            ContentMarginHeight = 16.0;
-            FeedSourceWidth = 360.0;
-            ContentMarginMinWidth = 180.0;
-            TinyFontSize = 12.0;
-            SmallFontSize = 13.333;
-            NormalFontSize = 16.0;
-            LargeFontSize = 17.0;
-            HugeFontSize = 18.666;
+      public Flags()
+      {
+        Backend = "127.0.0.1:8002";
+        KaPeriod = 100;  // milliseconds
+        ContentMarginHeight = 16.0;
+        FeedSourceWidth = 360.0;
+        ContentMarginMinWidth = 180.0;
+        TinyFontSize = 12.0;
+        SmallFontSize = 13.333;
+        NormalFontSize = 14.667;
+        LargeFontSize = 16.0;
+        VeryLargeFontSize = 17.333;
+        LargestTextSize = 18.667;
+        DefaultFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI, Segoe UI");
+        SemiBoldFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI, Segoe UI Semibold");
+        LightFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI Light, Segoe UI Light");
 
-            DefaultFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI, Segoe UI");
-            SemiBoldFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI, Segoe UI Semibold");
-            LightFont = new System.Windows.Media.FontFamily("Microsoft YaHei UI Light, Segoe UI Light");
-
-            Theme = Elysium.Theme.Light;
-            ThemeAccent = Elysium.AccentBrushes.Blue.Color;
-            ThemeContrast = System.Windows.Media.Colors.White;
-            MarginTopDown = new Thickness(0, 8, 0, 8);
-            MarginAllBounds = new Thickness(4);
-            ImageMaxHeight = 640.0;
-            ImageMaxWidth = 320.0;
-            VideoElementHeight = 331.0;
-            BodyMaxWidth = 800.0;
-            SearchBoxMargin = new Thickness(160.0, 12, 160, 12);
-            FeedSourceFindEntriesMaxWidth = 800;
-            ProgressRingLargeSize = 80.0;
-        }
+        Theme = Elysium.Theme.Light;
+        ThemeAccent = Elysium.AccentBrushes.Blue.Color;
+        ThemeContrast = System.Windows.Media.Colors.White;
+        MarginTopDown = new Thickness(0, 8, 0, 8);
+        MarginAllBounds = new Thickness(4);
+        ImageMaxHeight = 640.0;
+        ImageMaxWidth = 320.0;
+        VideoElementHeight = 331.0;
+        BodyMaxWidth = 800.0;
+        SearchBoxTopOffset = 64.0;
+        SearchBoxMargin = new Thickness(160.0, 12, 160, 12);
+        FeedSourceFindEntriesMaxWidth = 800;
+        ProgressRingLargeSize = 80.0;
+        ImageTipShowDelay = 150;
+        ImageTipHideDelay = 800;
+      }
         [DataMember(Name="backend")]
         public string Backend
         {
@@ -73,8 +76,10 @@ namespace famousfront.core
         public double NormalFontSize { get; set; }
         [DataMember(Name = "large_fontsize")]
         public double LargeFontSize { get; set; }
-        [DataMember(Name = "huge_fontsize")]
-        public double HugeFontSize { get; set; }
+        [DataMember(Name = "verylarge_fontsize")]
+        public double VeryLargeFontSize { get; set; }
+        [DataMember(Name = "largest_fontsize")]
+        public double LargestTextSize { get; set; }
 
         [DataMember(Name = "default_font")]
         public System.Windows.Media.FontFamily DefaultFont { get; set; }
@@ -108,12 +113,18 @@ namespace famousfront.core
 
         [DataMember(Name = "searchbox_margin")]
         public Thickness SearchBoxMargin{ get; set; }
+        [DataMember(Name = "searchbox_topoffset")]
+        public double SearchBoxTopOffset { get; set; }
 
         [DataMember(Name = "feedsource_findentries_maxwidth")]
         public double FeedSourceFindEntriesMaxWidth { get; set; }
 
         [DataMember(Name = "progressring_largesize")]
         public double ProgressRingLargeSize { get; set; }
+        [DataMember(Name = "imagetip_showdelay")]
+        public int ImageTipShowDelay { get; set; }// milliseconds
+        [DataMember(Name = "imagetip_hidedelay")]
+        public int ImageTipHideDelay { get; set; }// milliseconds
     }
 
 }

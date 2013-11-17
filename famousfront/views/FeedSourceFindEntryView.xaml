@@ -1,14 +1,29 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:utils="clr-namespace:famousfront.utils"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
   <DataTemplate DataType="{x:Type vm:FeedSourceFindEntryViewModel}">
-    <Grid>
+    <DataTemplate.Resources>
+      <Style TargetType="{x:Type Hyperlink}" BasedOn="{StaticResource {x:Type Hyperlink}}">
+        <Setter Property="Foreground" Value="{Binding Path=(utils:HyperlinkOptions.ForegroundBrush), RelativeSource={RelativeSource Self},Mode=OneWay}"/>
+        <Setter Property="Command" Value="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}"/>
+        <Setter Property="CommandParameter" Value="{Binding NavigateUri, RelativeSource={RelativeSource Self}}"/>
+      </Style>
+
+    </DataTemplate.Resources>
+    <Border Padding="{Binding Path=(params:General.SemiBoldPadding), RelativeSource={RelativeSource Self},Mode=OneWay}">
       <StackPanel>
+        <Grid>
         <TextBlock 
-          TextElement.FontSize="{Binding (params:General.TitleFontSize),RelativeSource={RelativeSource Self}}"><Hyperlink NavigateUri="{Binding Uri,Mode=OneWay}"><Run Text="{Binding Title,Mode=OneWay}"/></Hyperlink></TextBlock>
-        <TextBlock Text="{Binding Summary}" TextElement.FontSize="{Binding (params:General.ContentFontSize),RelativeSource={RelativeSource Self}}"/>
+          TextElement.FontSize="{Binding Path=(params:General.TitleFontSize),RelativeSource={RelativeSource Self}, Mode=OneWay}"><Hyperlink NavigateUri="{Binding Uri,Mode=OneWay}"><Run x:Name="_title" Text="{Binding Title,Mode=OneWay}"/></Hyperlink></TextBlock>
+          <Path HorizontalAlignment="Right" 
+                Height="16" Visibility="{Binding HasSubscribed,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
+                Stretch="Uniform" UseLayoutRounding="False"
+                Fill="{DynamicResource LowlightBrush}" Data="F1 M 90,24L 6,24L 6,6L 90,6M 90,60L 54,60L 54,30L 90,30M 90,72L 54,72L 54,66L 90,66M 48,36L 6,36L 6,30L 48,30M 48,48L 6,48L 6,42L 48,42M 48,72L 6,72L 6,66L 48,66M 6,54L 36,54L 36,60L 6,60M 0,0L 0,78L 6,84L 90,84L 96,78L 96,0L 0,0 Z "/>
+        </Grid>
+        <TextBlock Text="{Binding Summary}" TextElement.FontSize="{Binding Path=(params:General.ContentFontSize),RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
       </StackPanel>
-    </Grid>
+    </Border>
   </DataTemplate>
 </ResourceDictionary>

@@ -5,7 +5,7 @@
                     xmlns:cmd="http://www.galasoft.ch/mvvmlight"
                     xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                    xmlns:ctrl="clr-namespace:famousfront.controls"
+                    xmlns:ctrls="clr-namespace:famousfront.controls"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
   <DataTemplate DataType="{x:Type vm:ContentViewModel}" d:IsDesignTimeCreatable="false">
     <Grid Background="Transparent" d:DesignWidth="500" d:DesignHeight="300">
@@ -43,6 +43,11 @@
             Visibility="{Binding ShowFeedSources, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
+      <ContentPresenter Grid.Column="0" Content="{Binding ImageTipViewModel}" HorizontalAlignment="Left" Grid.ColumnSpan="2" MaxWidth="560">
+        <i:Interaction.Behaviors>
+          <ctrls:ImageTipServiceHostBehavior/>
+        </i:Interaction.Behaviors>
+      </ContentPresenter>
       <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Fill="{StaticResource FadeOutBottomBrush}"/>
     </Grid>
     <DataTemplate.Triggers>

@@ -19,5 +19,6 @@ namespace famousfront.viewmodels
     public string Title { get { return _.title; } }
     public string Summary { get { return _.summary; } }
     public string Website { get { return _.website; } }
+    public bool HasSubscribed { get { return _.subscribed; } }
   }
 }

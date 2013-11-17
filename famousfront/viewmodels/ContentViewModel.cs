@@ -13,6 +13,7 @@ namespace famousfront.viewmodels
   {
     FeedSourcesViewModel _sources = new FeedSourcesViewModel();
     FeedEntriesViewModel _entries = null;
+    ImageTipViewModel _image_tip = new ImageTipViewModel();
     bool _show_sources = true;
     public bool ShowFeedSources
     {
@@ -28,6 +29,10 @@ namespace famousfront.viewmodels
 
       MessengerInstance.Register<FeedSourceViewModel>(this, OnSelectedFeedSourceChanged);
       MessengerInstance.Register<ToggleFeedSource>(this, OnToggleFeedSource);
+    }
+    public ImageTipViewModel ImageTipViewModel
+    {
+      get { return _image_tip; }
     }
     public FeedEntriesViewModel FeedEntriesViewModel
     {

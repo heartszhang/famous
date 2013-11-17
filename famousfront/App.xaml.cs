@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using famousfront.core;
+using famousfront.utils;
 using Elysium;
 namespace famousfront
 {

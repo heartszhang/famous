@@ -21,7 +21,7 @@
 
     </DataTemplate.Resources>
     <StackPanel >
-      <TextBlock x:Name="_title" Text="{Binding Title}" FontSize="{Binding (params:General.TitleFontSize), RelativeSource={RelativeSource self}}" />
+      <TextBlock x:Name="_title" Text="{Binding Title}" FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}" />
       <Grid x:Name="_media_room" Margin="0,8" 
             Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
         <ContentPresenter Content="{Binding Media}"/>
@@ -43,7 +43,7 @@
   </DataTemplate>
 
   <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" x:Key="MediaOneTemplate">
-    <Grid x:Name="_media_room" 
+    <Grid x:Name="_media_room"
             Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
       <ContentPresenter Content="{Binding Media}"/>
     </Grid>

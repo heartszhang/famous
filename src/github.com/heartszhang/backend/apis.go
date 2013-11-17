@@ -188,5 +188,25 @@ func feedtag_all() ([]string, error) {
 
 func feedsource_find(q string) ([]feed.FeedSourceFindEntry, error) {
 	svc := google.NewGoogleFeedApi("http://iweizhi2.duapp.com", config.FeedSourceDir)
-	return svc.Find(q, "")
+	v, err := svc.Find(q, "")
+	if err != nil {
+		return v, err
+	}
+	uris := make([]string, 0)
+	for _, ve := range v {
+		uris = append(uris, ve.Url)
+	}
+	dbo := new_feedsource_operator()
+	subed, err := dbo.findbatch(uris)
+	if err != nil {
+		return v, err
+	}
+	for _, fs := range subed {
+		for i := 0; i < len(v); i++ {
+			if v[i].Url == fs.Uri {
+				v[i].Subscribed = true
+			}
+		}
+	}
+	return v, err
 }

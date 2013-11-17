@@ -25,34 +25,39 @@ namespace famousfront.viewmodels
             var imgone = _.status & FeedStatuses.Feed_status_image_one;
             var imgmany = _.status & FeedStatuses.Feed_status_image_many;
             var media = _.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many);
+            if (imgone != 0 && inline == 0 && media == 0) {
+                Media = new ImageElementViewModel(_.images[0]);
+            }
+            else if (imgmany != 0 && inline == 0 && media == 0)
+            {
+                Media = new ImageGalleryViewModel(_.images);
+            }
             if (media != 0)
             {
                 Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : null);
-                HasMedia = true;
-            }
-            if (imgone != 0 && inline == 0) {
-                Media = new ImageElementViewModel(_.images[0]);
-                HasMedia = true;
-            }
-            else if (imgmany != 0 && inline == 0)
-            {
-                Media = new ImageGalleryViewModel(_.images);
-                HasMedia = true;
-                HasMediaGallery = true;
             }
         }
-        bool _has_mediagallery;
-        public bool HasMediaGallery
-        {
-          get { return _has_mediagallery; }
-          private set { Set(ref _has_mediagallery, value); }
-        }
-        bool _has_media = false;
         public bool HasMedia
         {
-            get { return _has_media; }
-            private set { Set(ref _has_media, value); }
+          get { return Media != null; }
         }
+        bool is_media_inline()
+        {
+          var inline = _.status & FeedStatuses.Feed_status_media_inline;
+          return inline != 0;
+        }
+        public bool HasImageGallery
+        {
+          get { return  !is_media_inline() && (_.status & FeedStatuses.Feed_status_image_many) != 0; }
+        }
+        public bool HasVideo
+        {
+          get { return !is_media_inline() && (_.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many)) != 0; }
+        }
+      public bool HasImageOne
+      {
+        get { return (_.status & FeedStatuses.Feed_status_image_one) != 0; }
+      }
         public string Summary { get { return _.summary; } }
         public string Title { get { return _.title.main; } }
 

@@ -36,6 +36,7 @@ type feedsource_operator interface {
 	drop(uri string) error
 	disable(uri string, dis bool) error
 	update(f *feed.FeedSource) error
+	findbatch(uris []string) ([]feed.FeedSource, error)
 }
 
 type feedcontent_operator interface {

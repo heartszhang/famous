@@ -6,7 +6,7 @@
              xmlns:ff="clr-namespace:famousfront"
              xmlns:ctrl="clr-namespace:famousfront.controls"
              xmlns:utils="clr-namespace:famousfront.utils"
-             xmlns:vm="clr-namespace:famousfront.viewmodels" d:DesignWidth="1100"
+             xmlns:vm="clr-namespace:famousfront.viewmodels" d:DesignWidth="800"
              xmlns:metro="http://schemas.codeplex.com/elysium"
              xmlns:params="http://schemas.codeplex.com/elysium/params" 
              params:Design.Theme="Light"
@@ -17,81 +17,14 @@
              TextElement.FontFamily="{StaticResource LightFont}"      
              d:DesignHeight="454" 
              mc:Ignorable="d" Background="White">
-  <UserControl.Resources>
-    
-  </UserControl.Resources>
-  <StackPanel x:Name="LayoutRoot" Margin="6px">
-    <StackPanel Orientation="Horizontal" Height="32" Background="{DynamicResource AccentBrush}">
-      <Rectangle Width="1" Stroke="#7FDEDEDE"/>
-      <ToggleButton Content="T" >
-        <ToggleButton.Style>
-          <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
-            <Setter Property="BorderBrush" Value="{DynamicResource TransparentBrush}"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="IsTabStop" Value="False"/>
-            <Setter Property="MinWidth" Value="32"/>
-            <Setter Property="MinHeight" Value="32"/>
-            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
-            <Style.Triggers>
-              <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource PaleBrush}"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource PaleBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-              </Trigger>
-              <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ContrastBrush}"/>
-              </Trigger>
-            </Style.Triggers>
-
-          </Style>
-        </ToggleButton.Style>
-      </ToggleButton>
-    </StackPanel>
-    <metro:CommandButton HorizontalAlignment="Left">
-      <Path Width="14" Height="14" Stroke="{Binding BorderBrush,RelativeSource={RelativeSource AncestorType={x:Type metro:CommandButton}}}" StrokeThickness="3.5" Stretch="Uniform" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="F1 M 328.101,80.0001L 80,328.101L 328.101,576.203" />
-    </metro:CommandButton>
-    <Grid Height="{Binding (params:General.BoldPaddingValue), RelativeSource={RelativeSource Self}}"/>
-    <Grid Margin="{Binding Flags.SearchBoxMargin, Source={StaticResource _locator}}">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition/>
-        <ColumnDefinition Width="Auto"/>
-      </Grid.ColumnDefinitions>
-      <TextBox Grid.Column="1" TextElement.FontSize="{Binding (params:General.TitleFontSize),RelativeSource={RelativeSource Self}}"/>
-      <Button Grid.Column="2" >
-        <Path Stretch="Uniform" Height="18" Fill="{DynamicResource ContrastBrush}" Data="F1 M 477.366,32.4489C 470.432,35.802 462.011,33.0596 458.558,26.3193C 455.103,19.5833 457.927,11.3994 464.867,8.04321C 471.8,4.69006 480.222,7.4342 483.675,14.1729C 487.123,20.9102 484.303,29.0901 477.366,32.4489 Z M 489.398,50.2073L 481.138,34.0914C 488.075,29.3633 490.6,20.2981 486.712,12.7021C 482.423,4.33691 471.967,0.928711 463.351,5.09277C 454.739,9.26074 451.234,19.4209 455.52,27.7913C 459.414,35.3821 468.384,38.8887 476.447,36.3619L 484.703,52.4756C 485.051,53.1487 485.924,53.4045 486.66,53.0488L 488.688,52.0686C 489.427,51.7129 489.742,50.8782 489.398,50.2073 Z " UseLayoutRounding="False"/>
-      </Button>
-    </Grid>
-    <Grid Margin="{Binding Flags.SearchBoxMargin, Source={StaticResource _locator}}">
-      <ItemsControl >
-        <ListBoxItem>
-          <StackPanel >
-            <TextBlock Text="Title" FontSize="18"/>
-            <TextBlock TextWrapping="Wrap" FontSize="14" Text="Welcome to ChinaToday.com, a China information base. Find out what is happening in China sdsafs today."/>
-          </StackPanel>
-          
-        </ListBoxItem>
-        <ListBoxItem>
-          <StackPanel >
-            <TextBlock FontSize="18"><Hyperlink NavigateUri="{Binding Uri}"><Run Text="{Binding Title}"/></Hyperlink></TextBlock>
-            <TextBlock TextWrapping="Wrap" FontSize="14" Text="Welcome to ChinaToday.com, a China information base. Find out what is happening in China sdsafs today."/>
-          </StackPanel>
-
-        </ListBoxItem>
-        <ListBoxItem>
-          <StackPanel >
-            <TextBlock Text="Title" FontSize="18"/>
-            <TextBlock TextWrapping="Wrap" FontSize="14" Text="Welcome to ChinaToday.com, a China information base. Find out what is happening in China sdsafs today."/>
-          </StackPanel>
-
-        </ListBoxItem>
-
-      </ItemsControl>
-      <Grid >
-        <metro:ProgressRing Height="80" Margin="80"/>
-      </Grid>
-    </Grid>
-  </StackPanel>
+  <Grid x:Name="LayoutRoot">
+    <Border MaxWidth="560" HorizontalAlignment="Left" >
+      <Border.Effect>
+        <DropShadowEffect Opacity="0.5" ShadowDepth="1" Direction="0"/>
+      </Border.Effect>
+      <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
+        <Image Stretch="Uniform" Source="http://ww4.sinaimg.cn/bmiddle/820887e2gw1eanep9qf01j20cs07gaau.jpg"/>
+      </ScrollViewer>
+    </Border>
+  </Grid>
 </UserControl>

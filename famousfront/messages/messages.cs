@@ -41,4 +41,9 @@ namespace famousfront.messages
     {
 
     }
+    internal class ImageTipRequest : GenericMessage
+    {
+      internal string image_uri;
+      internal bool open;
+    }
 }

@@ -140,13 +140,30 @@ func feedentry_content_exists(hash uint64) bool {
 	return cnt > config.SummaryDuplicateCount
 }
 
+func feedmedia_append_unique(set []feed.FeedMedia, v ...feed.FeedMedia) []feed.FeedMedia {
+	hav := make(map[string]bool)
+	for _, s := range set {
+		hav[s.Uri] = true
+	}
+	for _, a := range v {
+		if !hav[a.Uri] {
+			hav[a.Uri] = true
+			set = append(set, a)
+		}
+	}
+	return set
+}
 func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.DocumentSummary {
 	frag, _ := html_create_fragment(text)
 	frag, score, _ := cleaner.MakeFragmentReadable(frag)
 	entry.Words = uint(score.WordCount)
 	entry.Density = uint(score.LinkWordCount)
-	entry.Images = append(entry.Images, feedmedias_from_docsummary(score.Images)...)
-	entry.Videos = append(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
+	entry.Images = feedmedia_append_unique(entry.Images, feedmedias_from_docsummary(score.Images)...)
+	entry.Videos = feedmedia_append_unique(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
+	if len(entry.Videos) > 0 {
+		//		iu := imageurl_from_video(entry.Videos[0].Uri)
+		entry.Images = feedmedia_append_unique(entry.Images, feed.FeedMedia{Uri: imageurl_from_video(entry.Videos[0].Uri)})
+	}
 	//	log.Println("text-imgs:", len(entry.Images), len(entry.Videos))
 	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
 	imgs := len(entry.Images)

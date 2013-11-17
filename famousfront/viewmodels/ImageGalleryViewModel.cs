@@ -34,12 +34,8 @@ namespace famousfront.viewmodels
       if (_ == null || _.Length == 0)
         return;
       IsBusying = true;
-      var tasks = new Task[_.Length];
-      for (int i = 0; i < _.Length; ++i)
-      {
-        tasks[i] = LoadImage(_[i]);
-      }
-      await Task.WhenAll(tasks);
+
+      await Task.WhenAll(_.Select(m => DescribeImage(m))).ConfigureAwait(false);
       IsBusying = false;
 
       await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
@@ -63,9 +59,10 @@ namespace famousfront.viewmodels
 
       IsReady = true;
     }
-    async Task LoadImage(FeedMedia img)
+    async Task DescribeImage(FeedMedia img)
     {
-      var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(img.uri);
+      var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(img.uri);
+//      var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(img.uri);
       var v = await HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
       if (v.code != 0)
       {

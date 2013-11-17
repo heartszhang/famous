@@ -48,7 +48,7 @@ func findresult_to_findentry(x find_result) ([]feedfeed.FeedSourceFindEntry, err
 		v = append(v, feedfeed.FeedSourceFindEntry{e.Url,
 			strip_html_tags(e.Title),
 			strip_html_tags(e.ContentSnippet),
-			e.Website})
+			e.Website, false})
 	}
 	return v, nil
 }

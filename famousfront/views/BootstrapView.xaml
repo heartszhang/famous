@@ -14,7 +14,7 @@
         <metro:ProgressRing x:Name="_indicator" Width="64" Height="64" State="Normal" HorizontalAlignment="Center"/>
         <TextBlock Foreground="{DynamicResource HighlightBrush}" 
                    Text="{Binding Reason}" HorizontalAlignment="Center"
-                   FontSize="{Binding (params:General.HeaderFontSize), RelativeSource={RelativeSource self}}"/>
+                   FontSize="{Binding Path=(params:General.HeaderFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
       </StackPanel>
     </Grid>
     <DataTemplate.Triggers>

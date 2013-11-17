@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:famousfront.viewmodels"
+                    xmlns:utils="clr-namespace:famousfront.utils"
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:metro="http://schemas.codeplex.com/elysium">
   <DataTemplate DataType="{x:Type vm:FeedSourceFindViewModel}">
@@ -12,37 +13,67 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
       </Style>
-
+      <Style x:Key="FeedSourceFindItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+        <Setter Property="Padding" Value="{Binding Path=(params:General.BoldPaddingValue), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
+        <Setter Property="utils:HyperlinkOptions.ForegroundBrush" Value="{DynamicResource AccentBrush}"/>
+        <Style.Triggers>
+          <MultiTrigger>
+            <MultiTrigger.Conditions>
+              <Condition Property="IsEnabled" Value="True" />
+              <Condition Property="IsSelected" Value="True" />
+            </MultiTrigger.Conditions>
+            <MultiTrigger.Setters>
+  <!--            <Setter Property="Background" Value="{StaticResource AccentBrush}" />-->
+              <Setter Property="utils:HyperlinkOptions.ForegroundBrush" Value="{StaticResource ContrastBrush}" />
+            </MultiTrigger.Setters>
+          </MultiTrigger>
+          <MultiTrigger>
+            <MultiTrigger.Conditions>
+              <Condition Property="IsEnabled" Value="False" />
+              <Condition Property="IsSelected" Value="True" />
+            </MultiTrigger.Conditions>
+            <MultiTrigger.Setters>
+              <!--              <Setter Property="Background" Value="{StaticResource DisabledBrush}" />-->
+              <Setter Property="utils:HyperlinkOptions.ForegroundBrush" Value="{StaticResource ContrastBrush}" />
+            </MultiTrigger.Setters>
+          </MultiTrigger>
+        </Style.Triggers>
+      </Style>
     </DataTemplate.Resources>
     <Grid FocusManager.FocusedElement="{Binding ElementName=_box}">
       <StackPanel>
-        <metro:CommandButton HorizontalAlignment="Left" BorderThickness="0">
+        <metro:CommandButton HorizontalAlignment="Left" BorderThickness="0" x:Name="_returnback">
           <Path Width="18" Height="18" Stroke="{Binding BorderBrush,RelativeSource={RelativeSource AncestorType={x:Type metro:CommandButton}}}" StrokeThickness="3.5" Stretch="Uniform" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="{StaticResource PathDataLeftArrow}" />
         </metro:CommandButton>
-        <Grid Height="{Binding (params:General.BoldPaddingValue), RelativeSource={RelativeSource Self}}" 
-              Margin="{Binding (params:General.BoldPadding), RelativeSource={RelativeSource Self}}"/>
+        <Grid Height="{Binding Flags.SearchBoxTopOffset,Mode=OneWay,Source={StaticResource _locator}}"/>
         <Grid Margin="{Binding Flags.SearchBoxMargin,Source={StaticResource _locator}}">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="Auto"/>
-          </Grid.ColumnDefinitions>
-          <TextBox Grid.Column="1" x:Name="_box"
-                   TextElement.FontSize="{Binding (params:General.TitleFontSize),RelativeSource={RelativeSource Self}}"/>
-          <Button Grid.Column="2" IsDefault="True" Command="{Binding FeedSourceFindCommand}" CommandParameter="{Binding Text,ElementName=_box}">
-            <Path Stretch="Uniform"  Height="18"
+          <Grid Margin="{Binding Path=(params:General.BoldPaddingValue), RelativeSource={RelativeSource self}, Mode=OneWay}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="1" x:Name="_box"
+                   TextElement.FontSize="{Binding Path=(params:General.TitleFontSize),RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
+            <Grid  HorizontalAlignment="Right" Grid.Column="1" 
+                  Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
+                 Width="{Binding ActualHeight,RelativeSource={RelativeSource Self}}">
+              <metro:ProgressRing 
+              Margin="{Binding Path=(params:General.BoldPadding),RelativeSource={RelativeSource Self}, Mode=OneWay}"
+              State="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToBusyIndicatorConverter}}"/>
+            </Grid>
+
+            <Button Grid.Column="2" IsDefault="True" Command="{Binding FeedSourceFindCommand}" CommandParameter="{Binding Text,ElementName=_box}">
+              <Path Stretch="Uniform"  Height="18"
                   Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" 
                 Data="{StaticResource PathDataSearch}" UseLayoutRounding="False"/>
-          </Button>
+            </Button>
+          </Grid>
         </Grid>
         <Grid Margin="{Binding Flags.SearchBoxMargin,Source={StaticResource _locator}}">
-          <ListBox ItemsSource="{Binding Sources}" Style="{StaticResource FeedSourceFindEntriesListStyle}"/>
-          <Grid Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
-            <metro:ProgressRing 
-              Height="{Binding Flags.ProgressRingLargeSize, Source={StaticResource _locator}}" 
-              Margin="{Binding Flags.ProgressRingLargeSize, Source={StaticResource _locator}}"
-              State="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToBusyIndicatorConverter}}"/>
-          </Grid>
+          <ListBox ItemsSource="{Binding Sources}" Style="{StaticResource FeedSourceFindEntriesListStyle}" ItemContainerStyle="{StaticResource FeedSourceFindItemStyle}"/>
+          
+         <!-- <ItemsControl ItemsSource="{Binding Sources}" HorizontalContentAlignment="Stretch"/>-->
         </Grid>
       </StackPanel>
     </Grid>

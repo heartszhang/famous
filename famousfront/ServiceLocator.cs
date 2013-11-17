@@ -252,5 +252,19 @@ namespace famousfront
         {
           Messenger.Default.Send(new ShowFindFeedSourceView());
         }
+
+        ICommand _hyperlink_navigate;
+        public ICommand HyperlinkNavigateCommand
+        {
+          get { return _hyperlink_navigate ?? (_hyperlink_navigate = hyperlink_navigate()); }
+        }
+        ICommand hyperlink_navigate()
+        {
+          return new RelayCommand<Uri>(ExecuteHyperlinkNavigate);
+        }
+        void ExecuteHyperlinkNavigate(Uri url)
+        {
+          Process.Start(url.ToString());
+        }
     }
 }

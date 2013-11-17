@@ -3,8 +3,8 @@
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:vm="clr-namespace:famousfront.viewmodels"                    >
   <DataTemplate DataType="{x:Type vm:ImageUnitViewModel}">
-    <Border BorderBrush="{StaticResource LowestLightBrush}" BorderThickness="0" Margin="{Binding (params:General.DefaultPadding), RelativeSource={RelativeSource self}}">
-      <Image Source="{Binding Url}" Stretch="UniformToFill"/>
+    <Border BorderBrush="{StaticResource LowestLightBrush}" BorderThickness="0" Margin="{Binding Path=(params:General.DefaultPadding), RelativeSource={RelativeSource self}, Mode=OneWay}">
+      <Image Source="{Binding Url,Mode=OneWay,Converter={StaticResource NullImageConverter}}" Stretch="UniformToFill"/>
     </Border>
   </DataTemplate>
 

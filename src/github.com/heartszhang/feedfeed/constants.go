@@ -207,8 +207,9 @@ type FeedImage struct {
 }
 
 type FeedSourceFindEntry struct {
-	Url     string `json:"url,omitempty`
-	Title   string `json:"title,omitempty`
-	Summary string `json:"summary,omitempty`
-	Website string `json:"website,omitempty"`
+	Url        string `json:"url,omitempty`
+	Title      string `json:"title,omitempty`
+	Summary    string `json:"summary,omitempty`
+	Website    string `json:"website,omitempty"`
+	Subscribed bool   `json:"subscribed"`
 }

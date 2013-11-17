@@ -8,20 +8,15 @@ using System.Threading.Tasks;
 
 namespace famousfront.viewmodels
 {
-    class ImageUnitViewModel : ViewModelBase
+  class ImageUnitViewModel : ImageBaseViewModel
+  {
+    internal ImageUnitViewModel(FeedMedia v)
+      : base(v)
     {
-        FeedMedia _;
-        internal ImageUnitViewModel(FeedMedia v)
-        {
-            _ = v;
-        }
-        public double Scale
-        {
-            get { return _.height > 0 ? (double)_.width / _.height : 0.0; }
-        }
-        public string Url
-        {
-            get { return _.thumbanil; }
-        }
     }
+    public double Scale
+    {
+      get { return _.height > 0 ? (double)_.width / _.height : 0.0; }
+    }
+  }
 }

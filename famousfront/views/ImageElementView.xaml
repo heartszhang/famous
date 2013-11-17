@@ -1,13 +1,21 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                    xmlns:ctrls="clr-namespace:famousfront.controls"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
   <DataTemplate DataType="{x:Type vm:ImageElementViewModel}">
 
-    <Grid MaxHeight="{Binding Flags.ImageMaxHeight,Mode=OneWay,Source={StaticResource _locator}}">
+    <Grid MaxHeight="{Binding Flags.ImageMaxHeight,Mode=OneWay,Source={StaticResource _locator}}"
+          ctrls:ImageTipProviderBehavior.ImageUrl="{Binding OriginUrl,Mode=OneWay}">
+      <i:Interaction.Behaviors>
+        <ctrls:ImageTipProviderBehavior />
+      </i:Interaction.Behaviors>
       <Grid Background="Gray" Opacity="0.1"/>
       
       <Image Source="{Binding Url,Mode=OneWay, IsAsync=True, Converter={StaticResource NullImageConverter}}" 
-             x:Name="_image"  Stretch="UniformToFill" VerticalAlignment="Center" StretchDirection="DownOnly" HorizontalAlignment="Center"/>
+             x:Name="_image" 
+             Stretch="UniformToFill" 
+             VerticalAlignment="Center" StretchDirection="DownOnly" HorizontalAlignment="Center"/>
       <Grid VerticalAlignment="Bottom" Width="{Binding ActualWidth,ElementName=_image}"
             Visibility="{Binding Description,Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}}">
         <Grid Background="{DynamicResource AccentBrush}" Opacity="0.6"/>

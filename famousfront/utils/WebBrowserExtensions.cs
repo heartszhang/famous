@@ -11,17 +11,17 @@ using System.Windows.Navigation;
 
 namespace famousfront.utils
 {
-    public static class WebBrowserUtility
+    public static class WebBrowserExtensions
     {
         /// <summary>
         ///   AutoDetectHtmlContent Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty AutoDetectHtmlContentProperty =
-            DependencyProperty.RegisterAttached("AutoDetectHtmlContent", typeof(bool), typeof(WebBrowserUtility),
+            DependencyProperty.RegisterAttached("AutoDetectHtmlContent", typeof(bool), typeof(WebBrowserExtensions),
                                                 new FrameworkPropertyMetadata(true));
 
         public static readonly DependencyProperty BindableSourceProperty =
-            DependencyProperty.RegisterAttached("BindableSource", typeof(string), typeof(WebBrowserUtility),
+            DependencyProperty.RegisterAttached("BindableSource", typeof(string), typeof(WebBrowserExtensions),
                                                 new UIPropertyMetadata(null, BindableSourcePropertyChanged));
 
 
@@ -29,7 +29,7 @@ namespace famousfront.utils
         ///   NavigatedCommand Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty NavigatedCommandProperty =
-            DependencyProperty.RegisterAttached("NavigatedCommand", typeof(ICommand), typeof(WebBrowserUtility),
+            DependencyProperty.RegisterAttached("NavigatedCommand", typeof(ICommand), typeof(WebBrowserExtensions),
                                                 new FrameworkPropertyMetadata(null,
                                                                               OnNavigatedCommandChanged));
 
@@ -37,7 +37,7 @@ namespace famousfront.utils
         ///   NavigatingCommand Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty NavigatingCommandProperty =
-            DependencyProperty.RegisterAttached("NavigatingCommand", typeof(ICommand), typeof(WebBrowserUtility),
+            DependencyProperty.RegisterAttached("NavigatingCommand", typeof(ICommand), typeof(WebBrowserExtensions),
                                                 new FrameworkPropertyMetadata(null,
                                                                               OnNavigatingCommandChanged));
 
@@ -45,7 +45,7 @@ namespace famousfront.utils
         /// PreventCOMFatalError Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty PreventCOMFatalErrorProperty =
-            DependencyProperty.RegisterAttached("PreventCOMFatalError", typeof(bool), typeof(WebBrowserUtility),
+            DependencyProperty.RegisterAttached("PreventCOMFatalError", typeof(bool), typeof(WebBrowserExtensions),
                                         new FrameworkPropertyMetadata(false,
                                                                       OnPreventCOMFatalErrorChanged));
 
@@ -53,7 +53,7 @@ namespace famousfront.utils
         ///   OpenLinksExternally Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty OpenLinksExternallyProperty =
-            DependencyProperty.RegisterAttached("OpenLinksExternally", typeof(bool), typeof(WebBrowserUtility),
+            DependencyProperty.RegisterAttached("OpenLinksExternally", typeof(bool), typeof(WebBrowserExtensions),
                                                 new FrameworkPropertyMetadata(false,
                                                                               OnOpenLinksExternallyChanged));
 
@@ -61,7 +61,7 @@ namespace famousfront.utils
         ///   SupressScriptErrors Attached Dependency Property
         /// </summary>
         public static readonly DependencyProperty SupressScriptErrorsProperty =
-            DependencyProperty.RegisterAttached("SupressScriptErrors", typeof(bool), typeof(WebBrowserUtility),
+            DependencyProperty.RegisterAttached("SupressScriptErrors", typeof(bool), typeof(WebBrowserExtensions),
                                                 new FrameworkPropertyMetadata(false,
                                                                               OnSupressScriptErrorsChanged));
 
@@ -72,7 +72,7 @@ namespace famousfront.utils
         /// </summary>
         private static readonly DependencyPropertyKey HideScriptErrorsAppliedPropertyKey
             = DependencyProperty.RegisterAttachedReadOnly("HideScriptErrorsApplied", typeof(bool),
-                                                          typeof(WebBrowserUtility),
+                                                          typeof(WebBrowserExtensions),
                                                           new FrameworkPropertyMetadata(false));
 
 
@@ -81,17 +81,17 @@ namespace famousfront.utils
         /// </summary>
         private static readonly DependencyPropertyKey LoadCompletedEventHandlerPropertyKey
             = DependencyProperty.RegisterAttachedReadOnly("LoadCompletedEventHandler",
-                                                          typeof(LoadCompletedEventHandler), typeof(WebBrowserUtility),
+                                                          typeof(LoadCompletedEventHandler), typeof(WebBrowserExtensions),
                                                           new FrameworkPropertyMetadata((LoadCompletedEventHandler)null));
 
-//        private static readonly ILogger Log = LogManagerFactory.DefaultLogManager.GetLogger(typeof(WebBrowserUtility).Name);
+//        private static readonly ILogger Log = LogManagerFactory.DefaultLogManager.GetLogger(typeof(WebBrowserExtensions).Name);
 
         /// <summary>
         ///   NavigatedEventHandler Read-Only Dependency Property
         /// </summary>
         private static readonly DependencyPropertyKey NavigatedEventHandlerPropertyKey
             = DependencyProperty.RegisterAttachedReadOnly("NavigatedEventHandler", typeof(NavigatedEventHandler),
-                                                          typeof(WebBrowserUtility),
+                                                          typeof(WebBrowserExtensions),
                                                           new FrameworkPropertyMetadata((NavigatedEventHandler)null));
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace famousfront.utils
         private static readonly DependencyPropertyKey NavigatingEventHandlerPropertyKey
             = DependencyProperty.RegisterAttachedReadOnly("NavigatingEventHandler",
                                                           typeof(NavigatingCancelEventHandler),
-                                                          typeof(WebBrowserUtility),
+                                                          typeof(WebBrowserExtensions),
                                                           new FrameworkPropertyMetadata(
                                                               (NavigatingCancelEventHandler)null));
 

@@ -66,6 +66,15 @@ func (this feedsource_op) find(uri string) (*feed.FeedSource, error) {
 	return rtn, err
 }
 
+func (this feedsource_op) findbatch(uris []string) ([]feed.FeedSource, error) {
+	rtn := make([]feed.FeedSource, 0)
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
+		err := coll.Find(bson.M{"uri": bson.M{"$in": uris}}).All(&rtn)
+		return err
+	})
+	return rtn, err
+}
+
 func (this feedsource_op) all() (feds []feed.FeedSource, err error) {
 	feds = make([]feed.FeedSource, 0)
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {

@@ -7,7 +7,7 @@
     <Grid x:Name="_video_room" 
           Visibility="{Binding CurrentSource, Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}"
             VerticalAlignment="Bottom" Height="{Binding Flags.VideoElementHeight, Source={StaticResource _locator}}" 
-            Margin="{Binding (params:General.BoldPadding), RelativeSource={RelativeSource self}}">
+            Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource self}, Mode=OneWay}">
       <Grid.RowDefinitions>
         <RowDefinition Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}"/>
         <RowDefinition/>
@@ -19,9 +19,9 @@
         </Button>
       </Grid>
       <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource AccentBrush}" Grid.Row="1">
-        <WebBrowser utils:WebBrowserUtility.SupressScriptErrors="True" x:Name="_webv"
-                    utils:WebBrowserUtility.OpenLinksExternally="True"
-                    utils:WebBrowserUtility.BindableSource="{Binding CurrentSource}"/>
+        <WebBrowser utils:WebBrowserExtensions.SupressScriptErrors="True" x:Name="_webv"
+                    utils:WebBrowserExtensions.OpenLinksExternally="True"
+                    utils:WebBrowserExtensions.BindableSource="{Binding CurrentSource}"/>
       </Border>
 
     </Grid>

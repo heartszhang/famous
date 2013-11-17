@@ -8,18 +8,22 @@
         <ColumnDefinition/>
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
-      <Grid  TextElement.FontSize="{Binding (params:General.TitleFontSize), RelativeSource={RelativeSource self}}"
-              TextElement.Foreground="{DynamicResource LowlightBrush}">
+      <Grid  TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}">
         <Grid Background="Gray" Opacity="0.1"/>
 
         <TextBlock Text="{Binding Description}" TextAlignment="Center" VerticalAlignment="Center"/>
       </Grid>
-      <Grid Visibility="{Binding BackgroundImage, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}">
-        <Image Source="{Binding BackgroundImage,Mode=OneWay,Converter={StaticResource NullImageConverter}}" StretchDirection="DownOnly" Stretch="UniformToFill" MaxHeight="331"/>
+      <Grid Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}">
+        <Image Source="{Binding Url,Mode=OneWay,Converter={StaticResource NullImageConverter}}" StretchDirection="DownOnly" Stretch="UniformToFill" MaxHeight="331"/>
+        <Button HorizontalAlignment="Center" Height="{Binding Flags.ProgressRingLargeSize,Source={StaticResource _locator}}" Width="{Binding Flags.ProgressRingLargeSize,Source={StaticResource _locator}}"
+              Command="{Binding VideoPlayCommand}" >
+          <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}"/>
+        </Button>
       </Grid>
       <Button HorizontalAlignment="Center" MinHeight="70" Grid.Column="1"
-              Command="{Binding VideoPlayCommand}" CommandParameter="{Binding Url,Mode=OneWay}">
-        <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="F1 M 24.4815,12.6728L 9.98462,19.9692L 9.98462,5.37634L 24.4815,12.6728 Z M 3.02417,0C 1.03207,-0.119995 0.0240173,0.888062 0,3.0242L 0,22.2734C 0.0240173,24.2895 1.03207,25.2975 3.02417,25.2975L 29.4738,25.2975C 31.5779,25.2975 32.602,24.2895 32.546,22.2734L 32.546,3.0242C 32.602,0.960083 31.5779,-0.0480042 29.4738,0L 3.02417,0 Z "/>
+               Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, ConverterParameter=true, FallbackValue=Collapsed}"
+              Command="{Binding VideoPlayCommand}" >
+        <Path Width="32.5482" Height="25.3071" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}"/>
       </Button>
     </Grid>    
   </DataTemplate>

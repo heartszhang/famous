@@ -1,9 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     mc:Ignorable="d">
 	<DataTemplate DataType="{x:Type vm:FeedSourcesViewModel}" d:IsDesignTimeCreatable="false">
 	  <DataTemplate.Resources>
@@ -14,7 +14,7 @@
         <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
       </Style>
       <Style x:Key="FeedSourceItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-        <Setter Property="Padding" Value="{Binding (params:General.BoldPaddingValue), RelativeSource={RelativeSource self}}"/>
+        <Setter Property="Padding" Value="{Binding Path=(params:General.BoldPaddingValue), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
       </Style>
     </DataTemplate.Resources>
 		<Grid >

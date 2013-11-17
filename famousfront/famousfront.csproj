@@ -104,9 +104,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="controls\ImageTipProviderBehaviorcs.cs" />
     <Compile Include="controls\ListBoxScrollToTopBehavior.cs" />
+    <Compile Include="utils\HyperlinkOptions.cs" />
+    <Compile Include="utils\ElementOptions.cs" />
     <Compile Include="viewmodels\FeedSourceFindEntryViewModel.cs" />
     <Compile Include="viewmodels\FeedSourceFindViewModel.cs" />
+    <Compile Include="viewmodels\ImageBaseViewModel.cs" />
+    <Compile Include="viewmodels\ImageTipViewModel.cs" />
     <Compile Include="views\FeedEntryTemplateSelector.cs" />
     <Compile Include="controls\FlowTextBlock.cs" />
     <Compile Include="controls\GooglePlusPanel.cs" />
@@ -127,13 +132,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-    <Compile Include="utils\Notifier.cs" />
-    <Compile Include="core\WeakEventHandler.cs" />
+    <Compile Include="utils\WeakEventHandler.cs" />
     <Compile Include="utils\ColorExtensions.cs" />
-    <Compile Include="utils\NotificationExtensions.cs" />
     <Compile Include="utils\UrlLauncher.cs" />
     <Compile Include="ServiceLocator.cs" />
-    <Compile Include="utils\WebBrowserUtility.cs" />
+    <Compile Include="utils\WebBrowserExtensions.cs" />
     <Compile Include="viewmodels\BootstrapViewModel.cs" />
     <Compile Include="viewmodels\ContentViewModel.cs" />
     <Compile Include="viewmodels\FeedEntriesViewModel.cs" />
@@ -226,6 +229,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="views\ImageGalleryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\ImageTipView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
