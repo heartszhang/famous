@@ -12,12 +12,12 @@ type boilerpipe_score struct {
 	anchor_words int
 	imgs         int
 	anchor_imgs  int
+	tagged_imgs  int
 	objects      int
 	forms        int
 	anchors      int
 	commas       int
 	inner_text   string
-	img_score    int
 	is_content   bool
 }
 
@@ -42,13 +42,24 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 		width, height := media_get_dim(n)
 		if width > 320 || height > 320 || (width < 0 && height < 0) {
 			p.imgs++
-			p.img_score = int_min(p.img_score+int((width/21)*(height/21)/30), 140)
+			//p.img_score = int_min(p.img_score+int((width/21)*(height/21)/15), 140)
+			p.words += int_min(int(width/26*height/26), 140)
 		}
+		if alt := node_get_attribute(n, "alt"); alt != "" {
+			p.tagged_imgs++
+			p.words += 27
+		} else if width > 320 && height > 320 {
+			p.tagged_imgs++
+		}
+
 	case node_is_media(n):
 		mw, wh := media_get_dim(n)
 		if mw > 400 {
 			p.objects++
-			p.img_score = int_min(p.img_score+int((mw/21)*(wh/21)/11), 140)
+			p.words += int_min(int(mw*wh/21/26), 140)
+		}
+		if node_get_attribute(n, "alt") != "" {
+			p.words += 27
 		}
 	case omit_form && n.Data == "form":
 		p.forms++
@@ -61,7 +72,7 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 			p.add(np)
 		})
 	}
-	p.words += int_min(p.img_score, 40)
+
 	return p
 }
 
@@ -78,8 +89,8 @@ func (this *boilerpipe_score) add(rhs boilerpipe_score) {
 	this.words += rhs.words
 	this.anchor_imgs += rhs.anchor_imgs
 	this.imgs += rhs.imgs
-	this.img_score = int_min(this.img_score+rhs.img_score, 140)
 	this.objects += rhs.objects
+	this.tagged_imgs += rhs.tagged_imgs
 	//  this.forms += rhs.forms
 }
 
