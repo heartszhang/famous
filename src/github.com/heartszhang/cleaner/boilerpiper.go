@@ -2,6 +2,7 @@ package cleaner
 
 import (
 	"code.google.com/p/go.net/html"
+	//"log"
 )
 
 type boilerpiper struct {
@@ -111,15 +112,19 @@ const (
 func (this *boilerpiper) classify(prev *boilerpipe_score,
 	current *boilerpipe_score,
 	next *boilerpipe_score) {
-	if current.link_density() > ld_link_group_t {
+	ifpi := prev.element == nil && current.link_density() > 90 && current.tagged_imgs == 1
+	imgbtx := prev.is_content && current.link_density() > 90 && current.tagged_imgs >= 1 && current.tagged_imgs == current.imgs && current.imgs == current.anchor_imgs
+	if current.link_density() > 33 && !ifpi && !imgbtx {
 		current.is_content = false
+		//log.Println("link-density skip by ld", current.link_density(), current.words)
 	} else {
-		c := (prev.link_density() <= ld_link_group_title_t &&
-			(current.words > w_current_line_l || next.words > w_next_line_l || prev.words > w_prev_line_l)) ||
-			(prev.link_density() > ld_link_group_title_t && (current.words > 40 || next.words > 17))
+		c := (prev.link_density() <= 55 &&
+			(current.words > 20 || next.words > 15 || prev.words > 8)) ||
+			(prev.link_density() > 55 && (current.words > 40 || next.words > 17))
 		current.is_content = current.is_content || c
+		//log.Println("linkd check context", current.is_content, current.words, next.words, prev.words)
 		//images between content paragraphs
-		if prev.link_density() <= ld_link_group_t && next.link_density() <= ld_link_group_t &&
+		if prev.link_density() <= 33 && next.link_density() <= 33 &&
 			current.words == 0 && current.imgs > 0 && current.anchor_imgs == 0 {
 			current.is_content = true
 		}
@@ -129,7 +134,8 @@ func (this *boilerpiper) classify(prev *boilerpipe_score,
 			current.is_content = true
 		}
 	}
-	if current.words < w_prev_line_l && next.link_density() > ld_link_group_title_t {
+	//链接群标题
+	if current.words < 15 && next.link_density() > 55 {
 		current.is_content = false
 	}
 	if current.forms > 0 && current.words == 0 {
