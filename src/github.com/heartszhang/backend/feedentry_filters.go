@@ -87,10 +87,6 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 		}
 		if entry.Status&feed.Feed_status_text_empty != 0 {
 			d := entry.Title.Main
-			/*			if len(entry.Title.Others) != 0 && len(entry.Title.Others[0]) != 0 {
-							d = entry.Title.Others[0]
-						}
-			*/
 			if entry.Status&feed.Feed_status_image_one != 0 && len(entry.Images[0].Description) == 0 {
 				entry.Images[0].Description = d
 			}
@@ -155,7 +151,7 @@ func feedmedia_append_unique(set []feed.FeedMedia, v ...feed.FeedMedia) []feed.F
 }
 func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.DocumentSummary {
 	frag, _ := html_create_fragment(text)
-	frag, score, _ := cleaner.MakeFragmentReadable(frag)
+	frag, score, _ := cleaner.NewExtractor(config.CleanFolder).MakeFragmentReadable(frag)
 	entry.Words = uint(score.WordCount)
 	entry.Density = uint(score.LinkWordCount)
 	entry.Images = feedmedia_append_unique(entry.Images, feedmedias_from_docsummary(score.Images)...)
@@ -164,18 +160,38 @@ func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.Documen
 		//		iu := imageurl_from_video(entry.Videos[0].Uri)
 		entry.Images = feedmedia_append_unique(entry.Images, feed.FeedMedia{Uri: imageurl_from_video(entry.Videos[0].Uri)})
 	}
-	//	log.Println("text-imgs:", len(entry.Images), len(entry.Videos))
+
 	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
 	imgs := len(entry.Images)
 	ext := feedentry_content_exists(score.Hash)
-	log.Println(score.Text)
+
 	if score.WordCount < config.SummaryMinWords {
+		log.Println("clean-failed", text, score.Text)
+		feedentry_write_fails(text)
 		entry.Title.Others = append(entry.Title.Others, score.Text)
 	}
 	summary, s := feedentry_make_summary(frag, entry.Words, entry.Density, mc, imgs, ext)
+
 	entry.Summary = summary
 	entry.Status |= s
 	return score
+}
+func feedentry_write_flowdoc(text string) {
+	of, err := ioutil.TempFile(config.FlowDocumentFolder, "xaml.")
+	if err != nil {
+		return
+	}
+	defer of.Close()
+	of.WriteString(text)
+}
+func feedentry_write_fails(text string) {
+	of, err := ioutil.TempFile(config.FailedFolder, "text.")
+	if err != nil {
+		return
+	}
+	defer of.Close()
+	of.WriteString(text)
+	log.Println("backup-fails", of.Name())
 }
 
 func feedentry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
@@ -318,7 +334,9 @@ func make_flowdocument(frag *html.Node, excludeimg bool) string {
 	node_clean_empty(frag)
 	var buffer bytes.Buffer
 	html.Render(&buffer, frag) // ignore return error
-	return buffer.String()
+	body := buffer.String()
+	//	feedentry_write_flowdoc(body)
+	return body
 }
 
 func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias, imgs int, dup bool) (v string, s uint64) {
@@ -328,7 +346,7 @@ func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias, imgs
 	switch {
 	case dup == true:
 		v = empty_flowdocument
-		s |= feed.Feed_status_text_empty
+		s |= feed.Feed_status_text_empty | feed.Feed_status_duplicated
 	case medias == 0 && wm == true:
 		//v = node_extract_text(frag)
 		v = empty_flowdocument
