@@ -17,7 +17,7 @@ func feeds_entries_since(since_unixtime int64, category string, count uint, page
 }
 
 func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, error, int) {
-	c := curl.NewCurl(backend_config().FeedEntryDir)
+	c := curl.NewCurl(backend_config().FeedEntryFolder)
 	cache, err := c.GetUtf8(source)
 
 	if err != nil || cache.LocalUtf8 == "" {
@@ -32,8 +32,8 @@ func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, e
 
 	v = feed_entries_unreaded(v) // clean readed entries
 	v = feed_entries_clean(v)
-	v = feed_entries_clean_fulltext(v)
 	v = feed_entries_clean_summary(v)
+	v = feed_entries_clean_fulltext(v)
 	v = feed_entries_autotag(v)
 	v = feed_entries_statis(v)
 	v = feed_entries_backup(v)
@@ -61,7 +61,7 @@ func feedentry_umark(uri string, flags uint) (uint, error) {
 
 // /feed/entry/full_text.json/{url}/{entry_id}
 func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err error) {
-	c := curl.NewCurl(config.DocumentDir)
+	c := curl.NewCurl(config.DocumentFolder)
 	cache, err := c.GetUtf8(uri)
 	v.Uri = uri
 	v.Local = cache.LocalUtf8
@@ -76,7 +76,7 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err erro
 	if err != nil {
 		return v, err
 	}
-	article, sum, err := cleaner.MakeHtmlReadable(doc, uri)
+	article, sum, err := cleaner.NewExtractor(config.CleanFolder).MakeHtmlReadable(doc, uri)
 	v.Images = make([]feed.FeedMedia, len(sum.Images))
 	for idx, img := range sum.Images {
 		v.Images[idx].Uri = img.Uri
@@ -86,7 +86,7 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err erro
 	}
 	v.Words = sum.WordCount
 	v.Links = sum.LinkCount
-	v.CleanedLocal, err = html_write_file(article, config.DocumentDir)
+	v.CleanedLocal, err = html_write_file(article, config.DocumentFolder)
 	return v, err
 }
 
@@ -134,7 +134,7 @@ func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err 
 	if err == nil {
 		return *fs, nil
 	}
-	curler := curl.NewCurl(backend_config().FeedSourceDir)
+	curler := curl.NewCurl(backend_config().FeedSourceFolder)
 	cache, err := curler.GetUtf8(uri)
 	ext := curl.MimeToExt(cache.Mime)
 	if ext != "xml" && ext != "atom+xml" {
@@ -187,7 +187,7 @@ func feedtag_all() ([]string, error) {
 }
 
 func feedsource_find(q string) ([]feed.FeedSourceFindEntry, error) {
-	svc := google.NewGoogleFeedApi("http://iweizhi2.duapp.com", config.FeedSourceDir)
+	svc := google.NewGoogleFeedApi("http://iweizhi2.duapp.com", config.FeedSourceFolder)
 	v, err := svc.Find(q, "")
 	if err != nil {
 		return v, err
