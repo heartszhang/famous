@@ -2,7 +2,6 @@ package backend
 
 import (
 	"fmt"
-	feed "github.com/heartszhang/feedfeed"
 	"os"
 	"path/filepath"
 	"sync"
@@ -10,24 +9,25 @@ import (
 )
 
 type FeedsBackendConfig struct {
-	Ip            string              `json:"web_ip"`
-	Port          uint                `json:"port"`
-	DbAddress     string              `json:"db_address"` // ip:port or ip
-	DbName        string              `json:"db_name"`
-	Categories    []feed.FeedCategory `json:"categories,omitempty"`
-	DataDir       string              `json:"data_dir,omitempty"` //absolute
-	Usage         uint64              `json:"usage"`              //bytes
-	ImageDir      string              `json:"image,omitempty"`    //absolute
-	ThumbnailDir  string              `json:"thumbnail,omitempty"`
-	DocumentDir   string              `json:"document,omitempty"` //absolute
-	FeedSourceDir string              `json:"feed_source,omitmepty"`
-	FeedEntryDir  string              `json:"feed_entry,omitempty"`
-	Proxy         string              `json:"proxy, omitempty"` // "127.0.0.1:8087"
-
-	SummaryThreshold      uint `json:"summary_threshold" bson:"summary_threshuld"`
-	SummaryMinWords       int  `json:"summary_minwords" bson:"summary_minwords"`
-	ThumbnailWidth        uint `json:"thumbnail_width" bson:"thumbnail_width"`
-	SummaryDuplicateCount uint `json:"summary_duplicatecount" bson:"summary_duplicatecount"`
+	BackendIp             string `json:"web_ip"`
+	BackendPort           uint   `json:"port"`
+	DbAddress             string `json:"db_address"` // ip:port or ip
+	DbName                string `json:"db_name"`
+	CacheUsage            uint64 `json:"usage"`              //bytes
+	DataFolder            string `json:"data_dir,omitempty"` //absolute
+	ImageFolder           string `json:"image,omitempty"`    //absolute
+	ThumbnailFolder       string `json:"thumbnail,omitempty"`
+	DocumentFolder        string `json:"document,omitempty"` //absolute
+	FeedSourceFolder      string `json:"feed_source,omitmepty"`
+	FeedEntryFolder       string `json:"feed_entry,omitempty"`
+	CleanFolder           string `json:"clean,omitempty"`
+	FailedFolder          string `json:"fails,omitempty"`
+	FlowDocumentFolder    string `json:"flowdocs,omitempty"`
+	Proxy                 string `json:"proxy, omitempty"` // "127.0.0.1:8087"
+	SummaryThreshold      uint   `json:"summary_threshold" bson:"summary_threshuld"`
+	SummaryMinWords       int    `json:"summary_minwords" bson:"summary_minwords"`
+	ThumbnailWidth        uint   `json:"thumbnail_width" bson:"thumbnail_width"`
+	SummaryDuplicateCount uint   `json:"summary_duplicatecount" bson:"summary_duplicatecount"`
 }
 
 func pwd() string {
@@ -35,31 +35,38 @@ func pwd() string {
 	return dir
 }
 func init() {
-	config.Ip = "127.0.0.1"
-	config.Port = 8002
+	config.BackendIp = "127.0.0.1"
+	config.BackendPort = 8002
 	config.DbAddress = "127.0.0.1"
 	config.DbName = "backend"
-	config.DataDir = filepath.Join(pwd(), "data/")
-	config.ImageDir = filepath.Join(config.DataDir, "images/")
-	config.ThumbnailDir = filepath.Join(config.DataDir, "thumbnails/")
-	config.DocumentDir = filepath.Join(config.DataDir, "fulltext/")
-	config.FeedSourceDir = filepath.Join(config.DataDir, "sources/")
-	config.FeedEntryDir = filepath.Join(config.DataDir, "entries/")
+	config.DataFolder = filepath.Join(pwd(), "data/")
+	config.ImageFolder = filepath.Join(config.DataFolder, "images/")
+	config.ThumbnailFolder = filepath.Join(config.DataFolder, "thumbnails/")
+	config.FeedEntryFolder = filepath.Join(config.DataFolder, "entries/")
+	config.DocumentFolder = filepath.Join(config.DataFolder, "fulltexts/")
+	config.FeedSourceFolder = filepath.Join(config.DataFolder, "sources/")
+	config.CleanFolder = filepath.Join(config.DataFolder, "cleans/")
+	config.FailedFolder = filepath.Join(config.DataFolder, "clean_fails/")
+	config.FlowDocumentFolder = filepath.Join(config.DataFolder, "flowdocs/")
 	config.SummaryThreshold = 250
 	config.SummaryMinWords = 25
 	config.SummaryDuplicateCount = 3
-	//	config.Categories = make([]feed.FeedCategory, 0)
-	config.ThumbnailWidth = 320
-	os.MkdirAll(config.ImageDir, 0644)
-	os.MkdirAll(config.DocumentDir, 0644)
-	os.MkdirAll(config.FeedSourceDir, 0644)
-	os.MkdirAll(config.FeedEntryDir, 0644)
-	os.MkdirAll(config.ThumbnailDir, 0644)
+
+	config.ThumbnailWidth = 400
+	os.Mkdir(config.DataFolder, 0644)
+	os.Mkdir(config.ImageFolder, 0644)
+	os.Mkdir(config.ThumbnailFolder, 0644)
+	os.Mkdir(config.FeedEntryFolder, 0644)
+	os.Mkdir(config.DocumentFolder, 0644)
+	os.Mkdir(config.FeedSourceFolder, 0644)
+	os.Mkdir(config.CleanFolder, 0644)
+	os.Mkdir(config.FailedFolder, 0644)
+	os.Mkdir(config.FlowDocumentFolder, 0644)
 	status.startat = time.Now()
 }
 
 func (this FeedsBackendConfig) Address() string {
-	return fmt.Sprintf("%v:%d", this.Ip, this.Port)
+	return fmt.Sprintf("%v:%d", this.BackendIp, this.BackendPort)
 }
 
 type FeedsStatus struct {
