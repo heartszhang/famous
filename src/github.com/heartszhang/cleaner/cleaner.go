@@ -282,11 +282,6 @@ func trim_invisible_image(img *html.Node) (drop bool) {
 	width, werr := strconv.ParseInt(node_get_attribute(img, "width"), 0, 32)
 	height, herr := strconv.ParseInt(node_get_attribute(img, "height"), 0, 32)
 
-	// sina weibo use the wrong attribute
-	if herr != nil {
-		height, herr = strconv.ParseInt(node_get_attribute(img, "heigh"), 0, 32)
-	}
-
 	if werr != nil || herr != nil || img.Parent == nil {
 		return
 	}
@@ -311,14 +306,14 @@ func trim_display_none(n *html.Node) {
 	}
 }
 
-// reserve id, class, href, src
+// reserve id, class, href, src, width, height, alt
 func (this *html_cleaner) clean_attributes(n *html.Node) {
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
 		this.clean_attributes(child)
 	}
 	attrs := []html.Attribute{}
 	for _, attr := range n.Attr {
-		if attr.Key == "id" || attr.Key == "class" || attr.Key == "href" || attr.Key == "src" || attr.Key == "width" || attr.Key == "height" {
+		if attr.Key == "id" || attr.Key == "class" || attr.Key == "href" || attr.Key == "src" || attr.Key == "width" || attr.Key == "height" || attr.Key == "alt" {
 			attrs = append(attrs, attr)
 		}
 	}
