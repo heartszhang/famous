@@ -51,6 +51,7 @@ const (
 	Feed_summary_ready
 	Feed_summary_empty
 	Feed_content_unavail
+	Feed_status_duplicated
 )
 
 const (
