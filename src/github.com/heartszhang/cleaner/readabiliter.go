@@ -123,7 +123,6 @@ func (this *readabilitier) make_readability_score(n *html.Node) *readability_sco
 	// wrap lines
 	score += min(bc.lines(), 3)
 	score += min(bc.imgs*3, 3)
-	score += min(bc.img_score, 3)
 	rtn.content_score += score
 
 	if pext != nil {
