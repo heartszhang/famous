@@ -16,13 +16,49 @@
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>      
+        <Setter Property="Background" Value="Transparent"/>
       </Style>
       <Style x:Key="FeedEntryItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-        <Setter Property="Padding" Value="{Binding Path=(params:General.BoldPaddingValue), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
+        <Setter Property="Margin" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
+        <Setter Property="Padding" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+              <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                <Grid >
+                  <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                </Grid>
+              </Border>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+          <MultiTrigger>
+            <MultiTrigger.Conditions>
+              <Condition Property="IsEnabled" Value="True" />
+              <Condition Property="IsSelected" Value="True" />
+            </MultiTrigger.Conditions>
+            <MultiTrigger.Setters>
+              <Setter Property="Background" Value="{StaticResource SemiPaleBrush}" />
+              <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}" />
+            </MultiTrigger.Setters>
+          </MultiTrigger>
+          <MultiTrigger>
+            <MultiTrigger.Conditions>
+              <Condition Property="IsEnabled" Value="False" />
+              <Condition Property="IsSelected" Value="True" />
+            </MultiTrigger.Conditions>
+            <MultiTrigger.Setters>
+              <Setter Property="Background" Value="{StaticResource DisabledBrush}" />
+              <Setter Property="Foreground" Value="{StaticResource ContrastBrush}" />
+            </MultiTrigger.Setters>
+          </MultiTrigger>
+        </Style.Triggers>
       </Style>
     </DataTemplate.Resources>
-    <Grid>
+    <Grid ><!-- Background="{StaticResource SemiPaleBrush}">-->
       <Grid.Resources>
       <views:FeedEntryTemplateSelector x:Key="FeedEntryTemplateSelector" />
         
@@ -45,11 +81,5 @@
 
       <ContentPresenter x:Name="_video_room" Content="{Binding VideoService}" VerticalAlignment="Bottom" />
     </Grid>
-    <DataTemplate.Triggers>
-      <DataTrigger Binding="{Binding FontSize, ElementName=_desc, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
-        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_desc"/>
-      </DataTrigger>
-
-    </DataTemplate.Triggers>
   </DataTemplate>
 </ResourceDictionary>

@@ -14,10 +14,10 @@
               Background="{DynamicResource BackgroundBrush}"
               WindowStartupLocation="CenterScreen"              
               DataContext="{StaticResource _locator}"
-  params:General.TextFontSize="{StaticResource SmallTextSize}"
-  params:General.ContentFontSize="{StaticResource NormalTextSize}"
-  params:General.TitleFontSize="{StaticResource LargeTextSize}"
-  params:General.HeaderFontSize="{StaticResource VeryLargeTextSize}"
+  params:General.TextFontSize="{StaticResource NormalTextSize}"
+  params:General.ContentFontSize="{StaticResource LargeTextSize}"
+  params:General.TitleFontSize="{StaticResource HugeTextSize}"
+  params:General.HeaderFontSize="{StaticResource MonsterTextSize}"
   FocusManager.FocusedElement="{Binding ElementName=_content}"
      Title="FamousFront" Height="960" Width="1400" x:Name="root">
   <Window.Resources>

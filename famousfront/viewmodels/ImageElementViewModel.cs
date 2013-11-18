@@ -14,6 +14,7 @@ namespace famousfront.viewmodels
   {
     internal ImageElementViewModel(FeedMedia v) : base(v)
     {
+
     }
   }
 }

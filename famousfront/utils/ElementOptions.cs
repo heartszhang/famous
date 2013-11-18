@@ -40,7 +40,7 @@ namespace famousfront.utils
 
     public static readonly DependencyProperty HeaderFontSizeProperty =
         DependencyProperty.RegisterAttached("HeaderFontSize", typeof(double), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(16d * (96d / 72d),
+                                            new FrameworkPropertyMetadata(13d * (96d / 72d),
                                                                           FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                           FrameworkPropertyMetadataOptions.AffectsRender |
@@ -63,7 +63,7 @@ namespace famousfront.utils
 
     public static readonly DependencyProperty ContentFontSizeProperty =
         DependencyProperty.RegisterAttached("ContentFontSize", typeof(double), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(10d * (96d / 72d),
+                                            new FrameworkPropertyMetadata(11d * (96d / 72d),
                                                                           FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                           FrameworkPropertyMetadataOptions.AffectsRender |
@@ -86,7 +86,7 @@ namespace famousfront.utils
 
     public static readonly DependencyProperty TextFontSizeProperty =
         DependencyProperty.RegisterAttached("TextFontSize", typeof(double), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(9d * (96d / 72d),
+                                            new FrameworkPropertyMetadata(10d * (96d / 72d),
                                                                           FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                           FrameworkPropertyMetadataOptions.AffectsRender |
@@ -266,7 +266,7 @@ namespace famousfront.utils
     
     public static readonly DependencyProperty SemiBoldPaddingProperty =
         DependencyProperty.RegisterAttached("SemiBoldPadding", typeof(Thickness), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(new Thickness(2d),
+                                            new FrameworkPropertyMetadata(new Thickness(4d),
                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                           FrameworkPropertyMetadataOptions.Inherits,
                                                                           null, ThicknessUtil.CoerceNonNegative));
@@ -290,7 +290,7 @@ namespace famousfront.utils
     
     public static readonly DependencyProperty BoldPaddingProperty =
         DependencyProperty.RegisterAttached("BoldPadding", typeof(Thickness), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(new Thickness(6d),
+                                            new FrameworkPropertyMetadata(new Thickness(8d),
                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                           FrameworkPropertyMetadataOptions.Inherits,
                                                                           null, ThicknessUtil.CoerceNonNegative));
@@ -338,7 +338,7 @@ namespace famousfront.utils
     
     public static readonly DependencyProperty SemiBoldPaddingValueProperty =
         DependencyProperty.RegisterAttached("SemiBoldPaddingValue", typeof(double), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(2d,
+                                            new FrameworkPropertyMetadata(4d,
                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                           FrameworkPropertyMetadataOptions.Inherits,
                                                                           null, DoubleExtension.CoerceNonNegative));
@@ -362,7 +362,7 @@ namespace famousfront.utils
     
     public static readonly DependencyProperty BoldPaddingValueProperty =
         DependencyProperty.RegisterAttached("BoldPaddingValue", typeof(double), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(6d,
+                                            new FrameworkPropertyMetadata(8d,
                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                           FrameworkPropertyMetadataOptions.Inherits,
                                                                           null, DoubleExtension.CoerceNonNegative));
@@ -468,27 +468,65 @@ namespace famousfront.utils
 
     #endregion
 
-    #region System Resources
-
-    
-    public static readonly DependencyProperty ShadowBrushProperty =
-        DependencyProperty.RegisterAttached("ShadowBrush", typeof(SolidColorBrush), typeof(ElementOptions),
-                                            new FrameworkPropertyMetadata(null,
+    #region Render Resources
+    public static readonly DependencyProperty ContrastBrushProperty =
+        DependencyProperty.RegisterAttached("ContrastBrush", typeof(SolidColorBrush), typeof(ElementOptions),
+                                            new FrameworkPropertyMetadata(new SolidColorBrush(Color.FromArgb(0xff, 0xEE, 0xEE, 0xEE)),
                                                                           FrameworkPropertyMetadataOptions.AffectsRender |
                                                                           FrameworkPropertyMetadataOptions.Inherits));
 
-    
-    public static SolidColorBrush GetShadowBrush( DependencyObject obj)
+
+    public static SolidColorBrush GetContrastBrush(DependencyObject obj)
     {
       Debug.Assert(obj != null);
-      return (SolidColorBrush)obj.GetValue(ShadowBrushProperty);
+      return (SolidColorBrush)obj.GetValue(ContrastBrushProperty);
     }
 
-    
-    public static void SetShadowBrush( DependencyObject obj, SolidColorBrush value)
+
+    public static void SetContrastBrush(DependencyObject obj, SolidColorBrush value)
     {
       Debug.Assert(obj != null);
-      obj.SetValue(ShadowBrushProperty, value);
+      obj.SetValue(ContrastBrushProperty, value);
+    }
+
+    public static readonly DependencyProperty ForegroundBrushProperty =
+        DependencyProperty.RegisterAttached("ForegroundBrush", typeof(SolidColorBrush), typeof(ElementOptions),
+                                            new FrameworkPropertyMetadata(new SolidColorBrush(Color.FromArgb(0xff, 0x11, 0x11, 0x11)),
+                                                                          FrameworkPropertyMetadataOptions.AffectsRender |
+                                                                          FrameworkPropertyMetadataOptions.Inherits));
+
+
+    public static SolidColorBrush GetForegroundBrush(DependencyObject obj)
+    {
+      Debug.Assert(obj != null);
+      return (SolidColorBrush)obj.GetValue(ForegroundBrushProperty);
+    }
+
+
+    public static void SetForegroundBrush(DependencyObject obj, SolidColorBrush value)
+    {
+      Debug.Assert(obj != null);
+      obj.SetValue(ForegroundBrushProperty, value);
+    }
+    
+    public static readonly DependencyProperty BackgroundBrushProperty =
+        DependencyProperty.RegisterAttached("BackgroundBrush", typeof(SolidColorBrush), typeof(ElementOptions),
+                                            new FrameworkPropertyMetadata(new SolidColorBrush(Color.FromArgb(0xff, 0xEE, 0xEE, 0xEE)),
+                                                                          FrameworkPropertyMetadataOptions.AffectsRender |
+                                                                          FrameworkPropertyMetadataOptions.Inherits));
+
+
+    public static SolidColorBrush GetBackgroundBrush(DependencyObject obj)
+    {
+      Debug.Assert(obj != null);
+      return (SolidColorBrush)obj.GetValue(BackgroundBrushProperty);
+    }
+
+
+    public static void SetBackgroundBrush(DependencyObject obj, SolidColorBrush value)
+    {
+      Debug.Assert(obj != null);
+      obj.SetValue(BackgroundBrushProperty, value);
     }
 
     #endregion

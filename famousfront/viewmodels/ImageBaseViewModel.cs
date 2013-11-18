@@ -17,6 +17,12 @@ namespace famousfront.viewmodels
       _ = v;
       LoadImage();
     }
+    string _ideal_url;
+    public string IdealUrl
+    {
+      get { return _ideal_url; }
+      protected set { Set(ref _ideal_url, value); }
+    }
     public string Url
     {
       get { return _.thumbanil; }
@@ -56,12 +62,12 @@ namespace famousfront.viewmodels
       }
       IsReady = true;
       Width = v.data.width;
-
       Height = v.data.height;
-
       _.mime = v.data.mime;
       OriginUrl = v.data.origin;
       Url = v.data.thumbnail;
+      var scale = Height > 0 ? (Width * 100 / Height) : 0;
+      IdealUrl = (scale >= 100) ? OriginUrl : Url;
       await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
       {
       }), System.Windows.Threading.DispatcherPriority.ContextIdle); 

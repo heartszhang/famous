@@ -77,11 +77,5 @@
         </Grid>
       </StackPanel>
     </Grid>
-    <DataTemplate.Triggers>
-      <DataTrigger Binding="{Binding FontSize, ElementName=_box, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
-        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_box"/>
-      </DataTrigger>
-
-    </DataTemplate.Triggers>
   </DataTemplate>
 </ResourceDictionary>

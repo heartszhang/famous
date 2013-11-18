@@ -5,6 +5,7 @@
   <SolidColorBrush Color="#1F000000" x:Key="SemitransparentBackgroundContrastBrush"/>
   <SolidColorBrush Color="#FF000000" x:Key="ForegroundBrush"/>
   <SolidColorBrush Color="#FFDEDEDE" x:Key="PaleBrush"/>
-  <SolidColorBrush Color="#7FDEDEDE" x:Key="SemiPaleBrush"/>
+  <SolidColorBrush Color="#80EEEEEE" x:Key="SemiPaleBrush"/>
+  <!-- <SolidColorBrush Color="#7FDEDEDE" x:Key="SemiPaleBrush"/>-->
 
 </ResourceDictionary>

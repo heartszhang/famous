@@ -5,11 +5,10 @@
   <DataTemplate DataType="{x:Type vm:MediaElementViewModel}">
     <Grid params:General.HeaderFontSize="{StaticResource MonsterTextSize}">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="320"/>
+        <ColumnDefinition Width="{Binding Flags.ImageMaxWidth,Mode=OneWay, Source={StaticResource _locator}}"/>
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
       <Grid x:Name="_thumb">
-        <Grid Background="{DynamicResource AccentBrush}"/>
         <Grid Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}">
           <Image Source="{Binding Url,Mode=OneWay,Converter={StaticResource NullImageConverter}}" StretchDirection="DownOnly" Stretch="UniformToFill" MaxHeight="331"/>
         </Grid>
@@ -28,17 +27,12 @@
         </Grid>
         <Grid Grid.Row="1">
           <Button Style="{DynamicResource ButtonLightStyle}" Command="{Binding VideoPlayCommand}">
-            <Path Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}" Height="81.818" Width="108"/>
+            <Path Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}" Height="60.545" Width="79.92"/>
           </Button>
         </Grid>
       </Grid>
 
     </Grid>    
-    <DataTemplate.Triggers>
-      <DataTrigger Binding="{Binding Path=(TextElement.FontSize), ElementName=_desc, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
-        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_desc"/>
-      </DataTrigger>
-    </DataTemplate.Triggers>
   </DataTemplate>
     
 </ResourceDictionary>

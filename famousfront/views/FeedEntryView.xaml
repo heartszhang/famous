@@ -17,6 +17,8 @@
           </Style>
         </Style.Resources>
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+        <Setter Property="Block.LineHeight" Value="26" />
       </Style>
 
     </DataTemplate.Resources>
@@ -34,12 +36,7 @@
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
       </Grid>
     </StackPanel>
-    <DataTemplate.Triggers>
-      <DataTrigger Binding="{Binding FontSize, ElementName=_title, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
-        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_title"/>
-      </DataTrigger>
 
-    </DataTemplate.Triggers>
   </DataTemplate>
 
   <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" x:Key="MediaOneTemplate">

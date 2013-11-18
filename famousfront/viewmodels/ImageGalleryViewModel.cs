@@ -8,10 +8,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace famousfront.viewmodels
 {
-  using System.Windows.Data;
   using FeedImages = System.Collections.ObjectModel.ObservableCollection<ImageUnitViewModel>;
 
   class ImageGalleryViewModel : TaskViewModel

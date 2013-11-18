@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using famousfront.utils;
 using Elysium;
+using System.Windows.Media;
 namespace famousfront
 {
     /// <summary>
@@ -21,13 +22,24 @@ namespace famousfront
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            this.Apply(Elysium.Theme.Light);
+            base.OnStartup(e);
             WireUnhandledExceptionHandlers();
             ServiceLocator.Startup();
-            base.OnStartup(e);
-            var fvi = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
+            this.Apply(Elysium.Theme.Light);
+            AlterDefaultBrushes();
         }
-
+        void AlterDefaultBrushes()
+        {
+          var eg = new Uri("/Elysium;component/Themes/Generic.xaml", UriKind.Relative);
+          var egds = this.Resources.MergedDictionaries.Where(d => d.Source == eg).ToList();
+          Debug.Assert(egds.Count == 1);
+          var uri = new Uri("/Elysium;component/Themes/LightBrushes.xaml", UriKind.Relative);
+          var dictionaries = egds[0].MergedDictionaries.Where(d => d.Source == uri).ToList();
+          Debug.Assert(dictionaries.Count == 1);
+          var result = dictionaries[0];
+          result["ForegroundBrush"] = ((SolidColorBrush)(new BrushConverter().ConvertFrom("#FF040404"))).GetAsFrozen();
+//          result["BackgroundBrush"] = ((SolidColorBrush)(new BrushConverter().ConvertFrom("#FFEEEEEE"))).GetAsFrozen();
+        }
         static App()
         {
             GalaSoft.MvvmLight.Threading.DispatcherHelper.Initialize();

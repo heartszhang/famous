@@ -32,9 +32,6 @@
         <Setter TargetName="_label" Property="TextBlock.FontWeight" Value="Bold" />
 
       </DataTrigger>
-      <DataTrigger Binding="{Binding FontSize, ElementName=_name, Mode=OneWay,Converter={StaticResource IsGreaterThanConverter}, ConverterParameter=18}" Value="True">
-        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" TargetName="_name"/>
-      </DataTrigger>
     </DataTemplate.Triggers>
   </DataTemplate>
 </ResourceDictionary>
