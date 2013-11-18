@@ -14,9 +14,5 @@ namespace famousfront.viewmodels
       : base(v)
     {
     }
-    public double Scale
-    {
-      get { return _.height > 0 ? (double)_.width / _.height : 0.0; }
-    }
   }
 }

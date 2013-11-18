@@ -37,7 +37,7 @@ namespace famousfront.core
         MarginTopDown = new Thickness(0, 8, 0, 8);
         MarginAllBounds = new Thickness(4);
         ImageMaxHeight = 640.0;
-        ImageMaxWidth = 320.0;
+        ImageMaxWidth = 400.0;
         VideoElementHeight = 331.0;
         BodyMaxWidth = 800.0;
         SearchBoxTopOffset = 64.0;
@@ -47,6 +47,7 @@ namespace famousfront.core
         ImageTipShowDelay = 150;
         ImageTipHideDelay = 800;
         ImageTipMaxWidth = 500.0;
+        FlowDocumentBlockLineHeight = 26d;
       }
         [DataMember(Name="backend")]
         public string Backend
@@ -128,6 +129,8 @@ namespace famousfront.core
         public int ImageTipHideDelay { get; set; }// milliseconds
         [DataMember(Name = "imagetip_maxwidth")]
         public double ImageTipMaxWidth { get; set; }// milliseconds
+        [DataMember(Name = "flowdocument_block_lineheight")]
+        public double FlowDocumentBlockLineHeight { get; set; }// milliseconds
     }
 
 }

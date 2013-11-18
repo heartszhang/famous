@@ -81,5 +81,9 @@ namespace famousfront.viewmodels
             get { return _has_document; }
             private set { Set(ref _has_document, value); }
         }
+        public string Url
+        {
+          get { return _.uri; }
+        }
     }
 }

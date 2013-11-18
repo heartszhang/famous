@@ -48,9 +48,37 @@ namespace famousfront.viewmodels
       get { return _.height; }
       protected set { _.height = value; RaisePropertyChanged(); }
     }
+    public double Scale
+    {
+      get { return _.height > 0 ? (double)_.width / _.height : 0.0; }
+    }
+    async Task DescribeImage()
+    {
+      if (_.width * _.height != 0)
+        return;
+      var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(_.uri);
+      var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
+      if (v.code != 0)
+      {
+        _.duration = v.code;
+        Reason = v.reason;
+        MessengerInstance.Send(new BackendError() { code = v.code, reason = v.reason });
+        return;
+      }
+      Width = v.data.width;
+      Height = v.data.height;
+      _.mime = v.data.mime;
+      if (!string.IsNullOrEmpty(v.data.origin))
+        _.local = v.data.origin;
+      if (!string.IsNullOrEmpty(v.data.thumbnail))
+        _.thumbanil = v.data.thumbnail;
+      if (Width * Height != 0)
+        RaisePropertyChanged("Scale");
+    }
     async void LoadImage()
     {
       IsBusying = true;
+      await DescribeImage();
       var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(_.uri);
       var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
       IsBusying = false;
@@ -68,9 +96,6 @@ namespace famousfront.viewmodels
       Url = v.data.thumbnail;
       var scale = Height > 0 ? (Width * 100 / Height) : 0;
       IdealUrl = (scale >= 100) ? OriginUrl : Url;
-      await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
-      {
-      }), System.Windows.Threading.DispatcherPriority.ContextIdle); 
     }
   }
 }

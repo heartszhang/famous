@@ -2,37 +2,42 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
+
   <DataTemplate DataType="{x:Type vm:MediaElementViewModel}">
-    <Grid params:General.HeaderFontSize="{StaticResource MonsterTextSize}">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="{Binding Flags.ImageMaxWidth,Mode=OneWay, Source={StaticResource _locator}}"/>
-        <ColumnDefinition Width="*"/>
-      </Grid.ColumnDefinitions>
+    <DataTemplate.Resources>
+      <Style x:Key="ButtonLightStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Foreground" Value="{StaticResource SemiTransparentForegroundBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Style.Triggers>
+          <Trigger Property="IsDefault" Value="True">
+            <Setter Property="FontWeight" Value="Bold"/>
+          </Trigger>
+          <Trigger Property="IsMouseOver" Value="True">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+          </Trigger>
+          <Trigger Property="IsPressed" Value="True">
+            <Setter Property="Foreground" Value="{DynamicResource MiddleLightBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+          </Trigger>
+        </Style.Triggers>
+      </Style>
+
+    </DataTemplate.Resources>
+    <Grid>
       <Grid x:Name="_thumb">
         <Grid Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}">
           <Image Source="{Binding Url,Mode=OneWay,Converter={StaticResource NullImageConverter}}" StretchDirection="DownOnly" Stretch="UniformToFill" MaxHeight="331"/>
         </Grid>
-      </Grid>
-      <Grid Grid.Column="1">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid 
-          Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource Self}}"  >
-          <TextBlock x:Name="_desc" Text="{Binding Description}" 
-                     TextAlignment="Center"
-                     TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}"
-                     VerticalAlignment="Center"/>
-        </Grid>
-        <Grid Grid.Row="1">
-          <Button Style="{DynamicResource ButtonLightStyle}" Command="{Binding VideoPlayCommand}">
+        <Grid>
+          <Button HorizontalAlignment="Center" VerticalAlignment="Center"
+            Style="{DynamicResource ButtonLightStyle}" Command="{Binding VideoPlayCommand}">
             <Path Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathMediaPlay}" Height="60.545" Width="79.92"/>
           </Button>
         </Grid>
       </Grid>
-
-    </Grid>    
+    </Grid>
   </DataTemplate>
-    
+
 </ResourceDictionary>

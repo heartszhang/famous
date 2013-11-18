@@ -18,11 +18,13 @@ namespace famousfront
     /// </summary>
     public partial class App : Application
     {
-        private static ILogger Log ;
+      private ILogger Log ;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new StreamingFileTarget { PathUnderAppData = "famous" });
+            Log = LogManagerFactory.DefaultLogManager.GetLogger<Application>();
             WireUnhandledExceptionHandlers();
             ServiceLocator.Startup();
             this.Apply(Elysium.Theme.Light);
@@ -43,9 +45,6 @@ namespace famousfront
         static App()
         {
             GalaSoft.MvvmLight.Threading.DispatcherHelper.Initialize();
-            var fst = new StreamingFileTarget { PathUnderAppData = "famous" };
-            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, fst);
-            Log = LogManagerFactory.DefaultLogManager.GetLogger<Application>();
         }
         protected override void OnExit(ExitEventArgs e)
         {
@@ -66,17 +65,17 @@ namespace famousfront
         }
         static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Log.Fatal("Unhandled TaskScheduler Exception", e.Exception);
+          ((App)App.Current).Log.Fatal("Unhandled TaskScheduler Exception", e.Exception);
         }
 
         static void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            Log.Fatal("Unhandled Dispatcher Exception", e.Exception);
+          ((App)App.Current).Log.Fatal("Unhandled Dispatcher Exception", e.Exception);
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Log.Fatal("Unhandled AppDomain Exception", e.ExceptionObject as Exception);
+          ((App)App.Current).Log.Fatal("Unhandled AppDomain Exception", e.ExceptionObject as Exception);
         }
     }
 }

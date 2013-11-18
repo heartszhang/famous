@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using famousfront.utils;
 
 namespace famousfront.converters
 {
@@ -127,6 +128,38 @@ namespace famousfront.converters
         {
             throw new NotImplementedException();
         }
+    }
+    [ValueConversion(typeof(string), typeof(Uri))]
+    public class StringToUriConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var str = value as string;
+            var en = string.IsNullOrEmpty(str);
+            return string.IsNullOrEmpty(str) ? null : new Uri(str);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    [ValueConversion(typeof(double), typeof(double))]
+    public class ScaleToHeightConverter : IValueConverter
+    {
+      public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+      {
+        var width = System.Convert.ToDouble(parameter);
+        var scale = System.Convert.ToDouble(value);
+        //var scale = (double)value;  //width / height = scale => width / scale
+        //var width = (double)parameter;
+        return scale.zero() ? 0 : width / scale;
+      }
+
+      public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+      {
+        throw new NotImplementedException();
+      }
     }
     [ValueConversion(typeof(bool), typeof(Elysium.Controls.ProgressState))]
     internal class BoolToBusyIndicatorConverter : IValueConverter

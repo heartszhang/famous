@@ -3,82 +3,34 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
 
-  <System:Double x:Key="TinyTextSize">12</System:Double>  <!-- 9pt params.TextFontSize--> 
-  <System:Double x:Key="SmallTextSize">13.333</System:Double> <!-- 10pt params.ContentFontSize-->
-  <System:Double x:Key="NormalTextSize">14.667</System:Double><!-- 11pt-->
-  <System:Double x:Key="LargeTextSize">16</System:Double><!-- 12pt TitleFontSize-->
-  <System:Double x:Key="VeryLargeTextSize">17.333</System:Double><!-- 13pt-->
-  <System:Double x:Key="LargestTextSize">18.667</System:Double><!-- 14pt-->
-  <System:Double x:Key="HugeTextSize">20</System:Double> <!-- 15pt-->
-  <System:Double x:Key="MonsterTextSize">21.333</System:Double><!-- 16pt-->
-  <!-- 16pt = 21.333 HeaderFontSize, -->
+  <System:Double x:Key="LittleFiveTextSize">12</System:Double>
+  <!-- 9pt 小五params.TextFontSize 小五-->
+  <System:Double x:Key="FiveTextSize">14</System:Double>
+  <!-- 10.5pt params.ContentFontSize 五号-->
+  <System:Double x:Key="FiveFiveTextSize">14.666667</System:Double><!-- 11pt-->
+  <System:Double x:Key="LittleFourTextSize">16</System:Double>  <!-- 12pt 小四 TitleFontSize-->
+  <System:Double x:Key="FourTextSize">18.333333</System:Double>  <!-- 13.75pt 四-->
+  <System:Double x:Key="LittleThreeTextSize">20</System:Double>
+  <!-- 15pt 小三-->
+  <System:Double x:Key="ThreeTextSize">21.333333</System:Double>
+  <!-- 16pt 三号-->
+  <System:Double x:Key="LittleTwoTextSize">24</System:Double>
+  <!-- 18pt 小二-->
 
   <FontFamily x:Key="DefaultFont">Microsoft YaHei UI, Segoe UI</FontFamily>
   <FontFamily x:Key="LightFont">Microsoft YaHei UI Light, Segoe UI Light</FontFamily>
-  <FontFamily x:Key="SemiBoldFont">Microsoft YaHei UI, Segoe UI Semibold</FontFamily>
+  <FontFamily x:Key="SemiBoldFont">Microsoft YaHei Light, Segoe UI Semibold</FontFamily>
+  <FontFamily x:Key="BoldFont">Microsoft YaHei, Microsoft YaHei UI, Segoe UI Semibold, Microsoft YaHei UI Light</FontFamily>
 
 
-  <Style x:Key="MetroHeader1" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource VeryLargeTextSize}"/>
+  <Style x:Key="TextBlockHeaderStyle" TargetType="{x:Type TextBlock}">
+    <Setter Property="FontSize" Value="{StaticResource LittleThreeTextSize}"/>
     <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
   </Style>
 
-  <Style x:Key="MetroHeaderBold" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource VeryLargeTextSize}"/>
+  <Style x:Key="TextBlockContentStyle" TargetType="{x:Type TextBlock}">
+    <Setter Property="FontSize" Value="{StaticResource FiveTextSize}"/>
     <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
   </Style>
 
-
-
-  <Style x:Key="MetroHeader2" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource LargeTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource SemiBoldFont}"/>
-  </Style>
-
-  <Style x:Key="MetroHeader3" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-  </Style>
-
-  <Style x:Key="MetroNormalText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-  </Style>
-
-  <Style x:Key="MetroSmallBoldText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource SmallTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-    <Setter Property="FontWeight" Value="Bold"/>
-  </Style>
-
-  <Style x:Key="MetroSmallText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource SmallTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-  </Style>
-
-  <Style x:Key="MetroSubText" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-  </Style>
-
-  <Style x:Key="WaterMarkerTextBlock"  TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource SmallTextSize}"/>
-  </Style>
-
-
-  <Style x:Key="ItemTitle" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource LargeTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-  </Style>
-
-  <Style x:Key="ItemDate" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource NormalTextSize}"/>
-    <Setter Property="FontStyle" Value="Italic" />
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-  </Style>
-
-  <Style x:Key="ItemDescription" TargetType="{x:Type TextBlock}">
-    <Setter Property="FontSize" Value="{StaticResource SmallTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-  </Style>
 </ResourceDictionary>

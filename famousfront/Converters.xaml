@@ -12,6 +12,8 @@
     <cv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
   <cv:BoolToBusyIndicatorConverter x:Key="BoolToBusyIndicatorConverter"/>
   <cv:NullImageConverter x:Key="NullImageConverter"/>
+  <cv:StringToUriConverter x:Key="StringToUriConverter"/>
+  <cv:ScaleToHeightConverter x:Key="ScaleToHeightConverter"/>
   <cv:StringIsNullOrEmptyToVisibilityConverter x:Key="StringIsNullOrEmptyToVisibilityConverter"/>
     <metro:IsGreaterThanConverter x:Key="IsGreaterThanConverter"/>
 

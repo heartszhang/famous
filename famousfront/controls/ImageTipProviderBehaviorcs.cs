@@ -129,7 +129,8 @@ namespace famousfront.controls
         {
           return;
         }
-        SetImageUrl(AssociatedObject, null);
+        if (iu == msg.image_uri)
+          SetImageUrl(AssociatedObject, null);
       }), System.Windows.Threading.DispatcherPriority.ContextIdle);
     }
   }

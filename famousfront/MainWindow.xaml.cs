@@ -23,7 +23,7 @@ namespace famousfront
     {
         MainViewModel _main_viewmodel = null;
         public MainWindow()
-        {
+        {          
             InitializeComponent();            
             SetIsMainWindow(this, true);
             // expression windowsinstance to window error if IsMainWindow setted in xaml
@@ -32,6 +32,8 @@ namespace famousfront
         {
             base.OnInitialized(e);
             var locator = DataContext as ServiceLocator;
+            if (locator == null)
+              return;
             _main_viewmodel = locator.MainViewModel;
             _content.Content = _main_viewmodel;
         }

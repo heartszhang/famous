@@ -12,16 +12,19 @@
         <TextBlock x:Name="news" Text="{Binding Description}" TextWrapping="Wrap"/>
       </Grid>
       <Grid x:Name="_label_wrap" Background="Transparent" metro:ApplicationBar.PreventsOpen="true">
-        <DockPanel HorizontalAlignment="Right"
-                    TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}">
-          <TextBlock x:Name="_label" Text="{Binding UnreadsCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
+        <DockPanel HorizontalAlignment="Right">
+          <TextBlock x:Name="_label"
+                     Text="{Binding UnreadsCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
                      Visibility="{Binding UnreadsCount, Converter={StaticResource IntToVisibilityConverter}, Mode=OneWay}"/>
-          <TextBlock x:Name="_name" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+          <TextBlock x:Name="_name" Text="{Binding Name}"
+                     FontSize="{StaticResource LittleFourTextSize}"
+                     TextTrimming="CharacterEllipsis" />
         </DockPanel>
         <Grid.ContextMenu>
           <ContextMenu>
             <MenuItem Header="Subscribe..."/>
             <MenuItem Header="Unsubscribe this" Command="{Binding DropSelfCommand}"/>
+            <MenuItem Header="Open In Webbrowser" Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Uri,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
           </ContextMenu>
         </Grid.ContextMenu>
       </Grid>

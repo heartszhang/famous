@@ -3,32 +3,24 @@
                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:ctrls="clr-namespace:famousfront.controls"
+                    xmlns:famous="clr-namespace:famousfront"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
   <DataTemplate DataType="{x:Type vm:ImageElementViewModel}">
-
     <Grid MaxHeight="{Binding Flags.ImageMaxHeight,Mode=OneWay,Source={StaticResource _locator}}"
-          ctrls:ImageTipProviderBehavior.ImageUrl="{Binding OriginUrl,Mode=OneWay}">
-<!--      <i:Interaction.Behaviors>
-        <ctrls:ImageTipProviderBehavior />
-      </i:Interaction.Behaviors>
-      
-      <Grid Background="Gray" Opacity="0.1"/>
-      -->
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="{Binding Flags.ImageMaxWidth,Mode=OneWay,Source={StaticResource _locator}}"/>
-        <ColumnDefinition/>
-      </Grid.ColumnDefinitions>
+          Background="{StaticResource SemiPaleBrush}">
+      <Grid Width="{Binding Flags.ImageMaxWidth,Mode=OneWay,Source={StaticResource _locator}}"
+            Background="{StaticResource SemiPaleBrush}"
+            Height="{Binding Scale,Mode=OneWay,Converter={StaticResource ScaleToHeightConverter}, ConverterParameter=400}"/>
       <Image Source="{Binding Url,Mode=OneWay, IsAsync=True, Converter={StaticResource NullImageConverter}}" 
-             x:Name="_image" 
-             Stretch="UniformToFill" StretchDirection="DownOnly" />
-      <Grid Grid.Column="1"
-        Visibility="{Binding Description,Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}}">
-        <TextBlock Text="{Binding Description}" x:Name="_desc"
-                   Margin="{Binding Flags.MarginAllBounds,Source={StaticResource _locator}}"
-                   TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}" 
-                   TextWrapping="Wrap" TextAlignment="Center"/>
-      </Grid>
+             x:Name="_image"  Grid.Column="1"
+             Stretch="UniformToFill" StretchDirection="DownOnly"
+          ctrls:ImageTipProviderBehavior.ImageUrl="{Binding OriginUrl,Mode=OneWay}" >
+        <i:Interaction.Behaviors>
+          <ctrls:ImageTipProviderBehavior/>
+        </i:Interaction.Behaviors>
+      </Image>
     </Grid>
 
   </DataTemplate>
+
 </ResourceDictionary>

@@ -4,8 +4,9 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
+                    xmlns:metro="http://schemas.codeplex.com/elysium"
                     xmlns:views="clr-namespace:famousfront.views"
-                    xmlns:ctrl="clr-namespace:famousfront.controls"
+                    xmlns:ctrls="clr-namespace:famousfront.controls"
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" d:IsDesignTimeCreatable="false">
     <DataTemplate.Resources>
@@ -18,20 +19,26 @@
         </Style.Resources>
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-        <Setter Property="Block.LineHeight" Value="26" />
+        <Setter Property="Block.LineHeight" Value="{Binding Flags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
       </Style>
-
     </DataTemplate.Resources>
-    <StackPanel >
-      <TextBlock x:Name="_title" Text="{Binding Title}" FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}" />
+    <StackPanel Background="Transparent" metro:ApplicationBar.PreventsOpen="true">
+      <StackPanel.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
+          <MenuItem Header="Unsubscribe this" />
+        </ContextMenu>
+      </StackPanel.ContextMenu>
+      <TextBlock x:Name="_title" Text="{Binding Title}" Style="{StaticResource TextBlockHeaderStyle}" TextWrapping="WrapWithOverflow"/>
       <Grid x:Name="_media_room" Margin="0,8" 
             Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
         <ContentPresenter Content="{Binding Media}"/>
       </Grid>
       <Grid x:Name="_document_room" Margin="0,8" 
             Visibility="{Binding HasDocument,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
-        <ctrl:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
-                          IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}" 
+        <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
+                          IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}"
+                             Padding="0"
                           Background="Transparent" IsDocumentEnabled="True" Focusable="False"
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
       </Grid>

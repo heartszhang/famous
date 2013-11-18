@@ -21,36 +21,37 @@ internal class FeedFlags
 }
 internal class FeedStatuses
 {
-    public const ulong Feed_content_ready = 1 << 0;
-	public const ulong Feed_content_empty = 1 << 1;
-	public const ulong Feed_content_inline = 1 << 2;
-	public const ulong Feed_content_external_ready = 1 << 3;
-	public const ulong Feed_content_external_empty = 1 << 4;
-	public const ulong Feed_status_has_audio = 1 << 5;
-	public const ulong Feed_status_has_video = 1 <<6;
-	public const ulong Feed_status_has_url = 1 << 7;
-	public const ulong Feed_status_has_image = 1 << 8;
-	public const ulong Feed_status_invisible = 1 << 9;
-	public const ulong Feed_status_text_empty = 1 << 10;
-	public const ulong Feed_status_text_little = 1 << 11;
-	public const ulong Feed_status_text_many = 1 << 12;
-	public const ulong Feed_status_image_empty = 1 <<13;
-	public const ulong Feed_status_image_one = 1<< 14;
-	public const ulong Feed_status_image_many = 1 << 15;
-	public const ulong Feed_status_media_empty = 1 << 16;// image, audio , video
-	public const ulong Feed_status_media_one = 1 << 17;
-	public const ulong Feed_status_media_many = 1 << 18;
-	public const ulong Feed_status_media_inline = 1 << 19;
-	public const ulong Feed_status_linkdensity_low = 1 << 20;
-	public const ulong Feed_status_linkdensity_high = 1 << 21;
-	public const ulong Feed_status_format_flowdocument = 1 << 22;
-	public const ulong Feed_status_format_text = 1 <<23;
-	public const ulong Feed_status_mp4 = 1 << 24;
-	public const ulong Feed_status_flv = 1 << 25;
-	public const ulong Feed_content_unresolved = 1 << 26;
-	public const ulong Feed_summary_ready = 1 << 27;
-	public const ulong Feed_summary_empty = 1 << 28;
-    public const ulong Feed_content_unavail = 1 << 29;
+  public const ulong Feed_content_ready = 1 << 0;
+  public const ulong Feed_content_empty = 1 << 1;
+  public const ulong Feed_content_inline = 1 << 2;
+  public const ulong Feed_content_external_ready = 1 << 3;
+  public const ulong Feed_content_external_empty = 1 << 4;
+  public const ulong Feed_status_has_audio = 1 << 5;
+  public const ulong Feed_status_has_video = 1 << 6;
+  public const ulong Feed_status_has_url = 1 << 7;
+  public const ulong Feed_status_has_image = 1 << 8;
+  public const ulong Feed_status_invisible = 1 << 9;
+  public const ulong Feed_status_text_empty = 1 << 10;
+  public const ulong Feed_status_text_little = 1 << 11;
+  public const ulong Feed_status_text_many = 1 << 12;
+  public const ulong Feed_status_image_empty = 1 << 13;
+  public const ulong Feed_status_image_one = 1 << 14;
+  public const ulong Feed_status_image_many = 1 << 15;
+  public const ulong Feed_status_media_empty = 1 << 16;// image, audio , video
+  public const ulong Feed_status_media_one = 1 << 17;
+  public const ulong Feed_status_media_many = 1 << 18;
+  public const ulong Feed_status_media_inline = 1 << 19;
+  public const ulong Feed_status_linkdensity_low = 1 << 20;
+  public const ulong Feed_status_linkdensity_high = 1 << 21;
+  public const ulong Feed_status_format_flowdocument = 1 << 22;
+  public const ulong Feed_status_format_text = 1 << 23;
+  public const ulong Feed_status_mp4 = 1 << 24;
+  public const ulong Feed_status_flv = 1 << 25;
+  public const ulong Feed_content_unresolved = 1 << 26;
+  public const ulong Feed_summary_ready = 1 << 27;
+  public const ulong Feed_summary_empty = 1 << 28;
+  public const ulong Feed_content_unavail = 1 << 29;
+  public const ulong Feed_status_duplicated = 1 << 30;
 }
 internal class FeedTypes
 {

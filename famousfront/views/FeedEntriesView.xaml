@@ -16,7 +16,7 @@
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>      
+        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/> 
         <Setter Property="Background" Value="Transparent"/>
       </Style>
       <Style x:Key="FeedEntryItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
@@ -59,11 +59,7 @@
       </Style>
     </DataTemplate.Resources>
     <Grid ><!-- Background="{StaticResource SemiPaleBrush}">-->
-      <Grid.Resources>
-      <views:FeedEntryTemplateSelector x:Key="FeedEntryTemplateSelector" />
-        
-      </Grid.Resources>
-      <ListBox ItemsSource="{Binding Entries}" ItemTemplateSelector="{StaticResource FeedEntryTemplateSelector}"
+      <ListBox ItemsSource="{Binding Entries}" 
                      ItemContainerStyle="{StaticResource FeedEntryItemStyle}"
                      Style="{StaticResource FeedEntriesListStyle}">
         <i:Interaction.Behaviors>
@@ -75,8 +71,7 @@
         <metro:ProgressBar  Value="100" VerticalAlignment="Top"
           State="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToBusyIndicatorConverter}}" />
         <TextBlock Text="{Binding Reason}" x:Name="_desc"
-                   HorizontalAlignment="Center" Margin="{Binding Path=(params:General.SemiBoldPadding), RelativeSource={RelativeSource self}, Mode=OneWay}"
-                   FontSize="{Binding Path=(params:General.HeaderFontSize), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
+                   HorizontalAlignment="Center" Margin="{Binding Path=(params:General.SemiBoldPadding), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
       </Grid>
 
       <ContentPresenter x:Name="_video_room" Content="{Binding VideoService}" VerticalAlignment="Bottom" />

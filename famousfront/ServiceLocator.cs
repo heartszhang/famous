@@ -264,7 +264,9 @@ namespace famousfront
         }
         void ExecuteHyperlinkNavigate(Uri url)
         {
-          Process.Start(url.ToString());
+          if (url == null)
+            return;
+          using (var p = Process.Start(url.ToString())) { };
         }
     }
 }
