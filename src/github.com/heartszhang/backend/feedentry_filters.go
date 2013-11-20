@@ -1,18 +1,78 @@
 package backend
 
 import (
-	"bytes"
 	"code.google.com/p/go.net/html"
-	"code.google.com/p/go.net/html/atom"
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
 	"io/ioutil"
 	"log"
-	"os"
-	"strings"
 	"sync"
 )
+
+type text_score struct {
+	*cleaner.DocumentSummary
+	flowdoc string
+	status  uint64
+}
+
+func feedentry_eval_text(entry *feed.FeedEntry, text string,
+	emptyflag,
+	readyflag,
+	dupflag,
+	inlineflag uint64, disableinline bool) text_score {
+	frag, _ := html_create_fragment(text)
+	frag, score, _ := cleaner.NewExtractor(config.CleanFolder).MakeFragmentReadable(frag)
+	entry.Images = feedmedia_append_unique(entry.Images, feedmedias_from_docsummary(score.Images)...)
+	entry.Videos = feedmedia_append_unique(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
+	if len(entry.Videos) > 0 {
+		fm := feed.FeedMedia{Uri: imageurl_from_video(entry.Videos[0].Uri)}
+		entry.Images = feedmedia_append_unique(entry.Images, fm)
+	}
+	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
+	imgs := len(entry.Images)
+	ext := feedentry_content_exists(score.Hash) && text != ""
+
+	if score.WordCount < config.SummaryMinWords && mc == 0 {
+		log.Println("clean-failed", text, score.Text)
+		entry.Title.Others = append(entry.Title.Others, score.Text)
+	}
+	flowdoc, s := feedentry_make_flowdoc(frag, score.WordCount, score.LinkWordCount, mc, imgs, ext, emptyflag, readyflag, dupflag, inlineflag, disableinline)
+	return text_score{score, flowdoc, s}
+}
+
+func feedentry_make_flowdoc(frag *html.Node, words, linkwords int, medias, imgs int, dup bool, emptyflag, readyflag, dupflag, inlineflag uint64, disableinline bool) (v string, s uint64) {
+	s = feed.Feed_status_format_flowdocument
+	dh := words > 0 && linkwords*100/words > 50
+	wm := words < config.SummaryMinWords
+	switch {
+	case dup == true:
+		v = empty_flowdocument
+		s |= emptyflag | dupflag
+	case medias == 0 && wm == true: // no video/audio/image/text
+		//v = node_extract_text(frag)
+		v = empty_flowdocument
+	case medias == 0 && wm == false: // no vi/audio/image, has text
+		v = make_flowdocument(frag, true)
+	case medias > 0 && wm == true: // only image
+		v = empty_flowdocument
+		s |= emptyflag
+	case medias < 4: // a little images
+		v = make_flowdocument(frag, true)
+	case medias > 1 && imgs > 0 && medias > imgs: // has au/video
+		v = make_flowdocument(frag, true)
+	case medias > 1 && wm == false && dh == true: // has many images , text quality is low
+		v = make_flowdocument(frag, true)
+	case medias > 1 && wm == false && dh == false && !disableinline: //many images and text quality is high
+		v = make_flowdocument(frag, false)
+		s |= inlineflag
+	case medias > 1 && wm == true: // text-quality is low
+		v = make_flowdocument(frag, true)
+	default:
+		v = make_flowdocument(frag, true)
+	}
+	return
+}
 
 func feed_entries_unreaded(entries []feed.FeedEntry) []feed.FeedEntry {
 	return entries
@@ -57,6 +117,12 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 		default:
 			entry.Status |= feed.Feed_status_text_many
 		}
+		if entry.Status&feed.Feed_status_summary_empty != 0 && entry.Status&feed.Feed_status_content_empty != 0 {
+			entry.Status |= feed.Feed_status_text_empty
+		}
+		if entry.Status&(feed.Feed_status_content_mediainline|feed.Feed_status_summary_mediainline) != 0 {
+			entry.Status |= feed.Feed_status_media_inline
+		}
 		switch len(entry.Audios) + len(entry.Videos) {
 		case 0:
 			entry.Status |= feed.Feed_status_media_empty
@@ -73,17 +139,11 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 		default:
 			entry.Status |= feed.Feed_status_image_many
 		}
-		switch entry.Density == 0 {
+		switch entry.Density < config.LinkDensityThreshuld {
 		case true:
 			entry.Status |= feed.Feed_status_linkdensity_low
 		default:
-			d := entry.Density * 100 / entry.Words
-			switch d < 33 {
-			case true:
-				entry.Status |= feed.Feed_status_linkdensity_low
-			default:
-				entry.Status |= feed.Feed_status_linkdensity_high
-			}
+			entry.Status |= feed.Feed_status_linkdensity_high
 		}
 		if entry.Status&feed.Feed_status_text_empty != 0 {
 			d := entry.Title.Main
@@ -111,20 +171,6 @@ func feed_entries_backup(entries []feed.FeedEntry) []feed.FeedEntry {
 	return entries
 }
 
-func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
-	defer wg.Done()
-	if (entry.Status & (feed.Feed_content_ready | feed.Feed_content_external_ready)) != 0 {
-		return
-	}
-	score := feedentry_fill_summary(entry, entry.Summary)
-
-	if score.WordCount < config.SummaryMinWords {
-		entry.Status |= feed.Feed_summary_empty
-	} else {
-		entry.Status |= feed.Feed_summary_ready
-	}
-}
-
 const (
 	empty_flowdocument = `<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"/>`
 )
@@ -149,33 +195,7 @@ func feedmedia_append_unique(set []feed.FeedMedia, v ...feed.FeedMedia) []feed.F
 	}
 	return set
 }
-func feedentry_fill_summary(entry *feed.FeedEntry, text string) *cleaner.DocumentSummary {
-	frag, _ := html_create_fragment(text)
-	frag, score, _ := cleaner.NewExtractor(config.CleanFolder).MakeFragmentReadable(frag)
-	entry.Words = uint(score.WordCount)
-	entry.Density = uint(score.LinkWordCount)
-	entry.Images = feedmedia_append_unique(entry.Images, feedmedias_from_docsummary(score.Images)...)
-	entry.Videos = feedmedia_append_unique(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
-	if len(entry.Videos) > 0 {
-		//		iu := imageurl_from_video(entry.Videos[0].Uri)
-		entry.Images = feedmedia_append_unique(entry.Images, feed.FeedMedia{Uri: imageurl_from_video(entry.Videos[0].Uri)})
-	}
 
-	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
-	imgs := len(entry.Images)
-	ext := feedentry_content_exists(score.Hash)
-
-	if score.WordCount < config.SummaryMinWords {
-		log.Println("clean-failed", text, score.Text)
-		feedentry_write_fails(text)
-		entry.Title.Others = append(entry.Title.Others, score.Text)
-	}
-	summary, s := feedentry_make_summary(frag, entry.Words, entry.Density, mc, imgs, ext)
-
-	entry.Summary = summary
-	entry.Status |= s
-	return score
-}
 func feedentry_write_flowdoc(text string) {
 	of, err := ioutil.TempFile(config.FlowDocumentFolder, "xaml.")
 	if err != nil {
@@ -191,219 +211,41 @@ func feedentry_write_fails(text string) {
 	}
 	defer of.Close()
 	of.WriteString(text)
-	log.Println("backup-fails", of.Name())
+}
+
+func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if entry.Summary == "" {
+		entry.Status |= feed.Feed_status_summary_empty
+		return
+	}
+	score := feedentry_eval_text(entry, entry.Summary, feed.Feed_status_summary_empty, feed.Feed_status_summary_ready, feed.Feed_status_summary_duplicated, feed.Feed_status_summary_mediainline, true)
+	entry.Summary = score.flowdoc
+	entry.Status |= score.status
+	if entry.Words < uint(score.WordCount) {
+		entry.Words = uint(score.WordCount)
+		entry.Density = uint(score.LinkWordCount * 100 / score.WordCount)
+	}
 }
 
 func feedentry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
-	if entry.Content != nil && entry.Content.FullText != "" {
-		entry.Status |= feed.Feed_content_inline
-		score := feedentry_fill_summary(entry, entry.Content.FullText)
-
-		if score.WordCount < config.SummaryMinWords {
-			entry.Status |= feed.Feed_content_empty
-		} else {
-			entry.Status |= feed.Feed_content_ready
-		}
-	}
-}
-
-func node_convert_attr(attrs []html.Attribute, origin, updated string, converter func(string) string) []html.Attribute {
-	for _, attr := range attrs {
-		if attr.Key == origin {
-			return []html.Attribute{html.Attribute{Key: updated, Val: converter(attr.Val)}}
-		}
-	}
-	return nil
-}
-func extract_imgsrc_attr(attrs []html.Attribute) []html.Attribute {
-	return node_convert_attr(attrs, "src", "Source", redirect_thumbnail)
-}
-
-func extract_ahref_attr(attrs []html.Attribute) []html.Attribute {
-	return node_convert_attr(attrs, "href", "NavigateUri", redirect_link)
-}
-
-const (
-	fdocns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-)
-
-func make_image_node(n *html.Node) *html.Node {
-	c := &html.Node{Type: html.ElementNode, Data: "BlockUIContainer", DataAtom: n.DataAtom}
-	v := &html.Node{Type: html.ElementNode, Data: "Image", DataAtom: n.DataAtom}
-	v.Attr = extract_imgsrc_attr(n.Attr)
-	c.AppendChild(v)
-	return c
-}
-func make_run_node(n *html.Node) *html.Node {
-	v := &html.Node{Type: html.TextNode, Data: "VIDEO", DataAtom: n.DataAtom}
-	return v
-}
-func node_clear_children(frag *html.Node) {
-	for child := frag.FirstChild; child != nil; {
-		next := child.NextSibling
-		frag.RemoveChild(child)
-		child = next
-	}
-}
-
-func node_is_hyperlink_decendant(frag *html.Node) bool {
-	for p := frag.Parent; p != nil; p = p.Parent {
-		if p.Type == html.ElementNode && (p.Data == "a" || p.Data == "Hyperlink") {
-			return true
-		}
-	}
-	return false
-}
-
-func node_convert_flowdocument(frag *html.Node, excludeimg bool) {
-	if frag.Type == html.TextNode {
+	if entry.Content == "" {
+		entry.Status |= feed.Feed_status_content_empty
 		return
 	}
-	ignore_children := false
-	switch frag.Data {
-	case "img":
-		if excludeimg == true {
-			frag.Type = html.CommentNode
-			node_clear_children(frag)
-			frag.Attr = nil
-		} else if node_is_hyperlink_decendant(frag) == false {
-			frag.Data = "Figure"
-			node_clear_children(frag)
-			frag.AppendChild(make_image_node(frag))
-			frag.Attr = nil
-		} else {
-			frag.Data = "Image"
-			frag.Attr = extract_imgsrc_attr(frag.Attr)
-		}
-		ignore_children = true
-	case "a":
-		frag.Data = "Hyperlink"
-		frag.Attr = extract_ahref_attr(frag.Attr)
-	case "article":
-		frag.Data = "FlowDocument"
-		// set namespace dont work
-		frag.Attr = []html.Attribute{html.Attribute{Key: "xmlns", Val: fdocns}}
-	case "object":
-		fallthrough
-	case "video":
-		fallthrough
-	case "audio":
-		fallthrough
-	case "embed":
-		frag.Type = html.CommentNode
-		node_clear_children(frag)
-		frag.Attr = nil
-		ignore_children = true
-	case "p":
-		fallthrough
-	default:
-		frag.Data = "Paragraph"
-		frag.Attr = nil
+	backup := entry.Summary
+	entry.Status |= feed.Feed_status_content_inline
+	score := feedentry_eval_text(entry, entry.Content, feed.Feed_status_content_empty, feed.Feed_status_content_ready, feed.Feed_status_content_duplicated, feed.Feed_status_content_mediainline, false)
+	entry.Status |= score.status
+	if entry.Words < uint(score.WordCount) {
+		entry.Summary = score.flowdoc
+		entry.Words = uint(score.WordCount)
+		entry.Density = uint(score.LinkWordCount * 100 / score.WordCount)
+		entry.Content = backup
+	} else {
+		entry.Content = score.flowdoc
 	}
-	for child := frag.FirstChild; ignore_children == false && child != nil; child = child.NextSibling {
-		node_convert_flowdocument(child, excludeimg)
-	}
-}
-func node_is_empty(n *html.Node) bool {
-	return n.Type == html.CommentNode ||
-		(n.Type == html.ElementNode && (n.Data == "Paragraph" || n.Data == "Hyperlink") && n.FirstChild == nil) ||
-		(n.Type == html.TextNode && n.Data == "")
-}
-
-func node_clean_empty(n *html.Node) {
-	child := n.FirstChild
-	for child != nil {
-		next := child.NextSibling
-		node_clean_empty(child)
-		child = next
-	}
-
-	if node_is_empty(n) && n.Parent != nil {
-		parent := n.Parent
-		parent.RemoveChild(n)
-	}
-}
-
-//p, img, a, text
-func make_flowdocument(frag *html.Node, excludeimg bool) string {
-	if frag == nil || frag.Type != html.ElementNode {
-		return empty_flowdocument
-	}
-	node_convert_flowdocument(frag, excludeimg)
-	node_clean_empty(frag)
-	var buffer bytes.Buffer
-	html.Render(&buffer, frag) // ignore return error
-	body := buffer.String()
-	//	feedentry_write_flowdoc(body)
-	return body
-}
-
-func feedentry_make_summary(frag *html.Node, words, linkwords uint, medias, imgs int, dup bool) (v string, s uint64) {
-	s = feed.Feed_status_format_flowdocument
-	dh := words > 0 && linkwords*100/words > 50
-	wm := words < uint(config.SummaryMinWords)
-	switch {
-	case dup == true:
-		v = empty_flowdocument
-		s |= feed.Feed_status_text_empty | feed.Feed_status_duplicated
-	case medias == 0 && wm == true:
-		//v = node_extract_text(frag)
-		v = empty_flowdocument
-	case medias == 0 && wm == false:
-		v = make_flowdocument(frag, true)
-	case medias > 0 && wm == true:
-		v = empty_flowdocument
-		s |= feed.Feed_status_text_empty
-	case medias == 1:
-		v = make_flowdocument(frag, true)
-	case medias > 1 && imgs > 0 && medias > imgs:
-		v = make_flowdocument(frag, true)
-	case medias > 1 && wm == false && dh == true:
-		v = make_flowdocument(frag, true)
-	case medias > 1 && wm == false && dh == false:
-		v = make_flowdocument(frag, false)
-		s |= feed.Feed_status_media_inline
-	case medias > 1 && wm == true:
-		v = make_flowdocument(frag, true)
-	default:
-		v = make_flowdocument(frag, true)
-	}
-	return
-}
-
-func html_create_fragment(fulltext string) (*html.Node, error) {
-	reader := strings.NewReader(fulltext)
-
-	v := &html.Node{Type: html.ElementNode, Data: "article", DataAtom: atom.Article}
-	frags, err := html.ParseFragment(reader, v)
-	if err != nil {
-		return v, err
-	}
-	for _, frag := range frags {
-		v.AppendChild(frag)
-	}
-	return v, err
-}
-
-func html_create_from_file(filepath string) (doc *html.Node, err error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	doc, err = html.Parse(f)
-	return
-}
-
-func html_write_file(article *html.Node, dir string) (string, error) {
-	f, err := ioutil.TempFile(dir, "html.")
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	err = html.Render(f, article)
-	return f.Name(), err
 }
 
 const (
