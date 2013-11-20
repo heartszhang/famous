@@ -23,6 +23,7 @@ func TestFeedSoruceImport(t *testing.T) {
 */
 
 func TestFeedSourceOps(t *testing.T) {
+	t.Skip()
 	dbo := new_feedsource_operator()
 	uris := []string{"http://is.gd/e3zMW", "http://www.voachinese.com/rss/?count=20&zoneid=1915"}
 	fs, err := dbo.findbatch(uris)
