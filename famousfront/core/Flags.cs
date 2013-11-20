@@ -47,7 +47,9 @@ namespace famousfront.core
         ImageTipShowDelay = 150;
         ImageTipHideDelay = 800;
         ImageTipMaxWidth = 500.0;
-        FlowDocumentBlockLineHeight = 26d;
+        FlowDocumentBlockLineHeight = 23d;
+        ImageTipMinHeight = 600d;
+        ImageTipMinWidth = 500d;
       }
         [DataMember(Name="backend")]
         public string Backend
@@ -131,6 +133,10 @@ namespace famousfront.core
         public double ImageTipMaxWidth { get; set; }// milliseconds
         [DataMember(Name = "flowdocument_block_lineheight")]
         public double FlowDocumentBlockLineHeight { get; set; }// milliseconds
+        [DataMember(Name = "imagetip_minwidth")]
+        public double ImageTipMinWidth{ get; set; }// milliseconds
+        [DataMember(Name = "imagetip_minheight")]
+        public double ImageTipMinHeight{ get; set; }// milliseconds
     }
 
 }
