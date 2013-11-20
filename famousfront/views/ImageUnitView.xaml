@@ -6,7 +6,7 @@
                     xmlns:vm="clr-namespace:famousfront.viewmodels"                    >
   <DataTemplate DataType="{x:Type vm:ImageUnitViewModel}">
     <Border BorderBrush="{StaticResource LowestLightBrush}"
-            BorderThickness="0" ctrls:ImageTipProviderBehavior.ImageUrl="{Binding OriginUrl,Mode=OneWay}"
+            BorderThickness="0" ctrls:ImageTipProviderBehavior.FeedImage="{Binding Self,Mode=OneWay}"
             Margin="{Binding Path=(params:General.DefaultPadding), RelativeSource={RelativeSource self}, Mode=OneWay}">
       <i:Interaction.Behaviors>
           <ctrls:ImageTipProviderBehavior/>

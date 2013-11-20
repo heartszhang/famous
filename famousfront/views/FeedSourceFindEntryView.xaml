@@ -13,13 +13,18 @@
 
     </DataTemplate.Resources>
     <Border Padding="{Binding Path=(params:General.SemiBoldPadding), RelativeSource={RelativeSource Self},Mode=OneWay}">
-      <StackPanel>
+      <StackPanel Background="Transparent">
+        <StackPanel.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Subscribe" Command="{Binding SubscribeCommand,Mode=OneWay}" CommandParameter="True"/>
+          </ContextMenu>
+        </StackPanel.ContextMenu>
         <Grid>
-        <TextBlock ><Hyperlink NavigateUri="{Binding Uri,Mode=OneWay}"><Run x:Name="_title" Text="{Binding Title,Mode=OneWay}"/></Hyperlink></TextBlock>
+          <TextBlock x:Name="_titlewrap"><Hyperlink NavigateUri="{Binding Url,Mode=OneWay}"><Run x:Name="_title" Text="{Binding Title,Mode=OneWay}"/></Hyperlink></TextBlock>
           <Path HorizontalAlignment="Right" 
                 Height="16" Visibility="{Binding HasSubscribed,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
                 Stretch="Uniform" UseLayoutRounding="False"
-                Fill="{DynamicResource LowlightBrush}" Data="F1 M 90,24L 6,24L 6,6L 90,6M 90,60L 54,60L 54,30L 90,30M 90,72L 54,72L 54,66L 90,66M 48,36L 6,36L 6,30L 48,30M 48,48L 6,48L 6,42L 48,42M 48,72L 6,72L 6,66L 48,66M 6,54L 36,54L 36,60L 6,60M 0,0L 0,78L 6,84L 90,84L 96,78L 96,0L 0,0 Z "/>
+                Fill="{Binding Foreground,ElementName=_titlewrap,Mode=OneWay}" Data="F1 M 90,24L 6,24L 6,6L 90,6M 90,60L 54,60L 54,30L 90,30M 90,72L 54,72L 54,66L 90,66M 48,36L 6,36L 6,30L 48,30M 48,48L 6,48L 6,42L 48,42M 48,72L 6,72L 6,66L 48,66M 6,54L 36,54L 36,60L 6,60M 0,0L 0,78L 6,84L 90,84L 96,78L 96,0L 0,0 Z "/>
         </Grid>
         <TextBlock Text="{Binding Summary}" TextElement.FontSize="{Binding Path=(params:General.ContentFontSize),RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
       </StackPanel>

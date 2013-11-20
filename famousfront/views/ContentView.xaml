@@ -44,13 +44,13 @@
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
       <ContentPresenter Grid.Column="0" VerticalAlignment="Center"
-                        Content="{Binding ImageTipViewModel}" HorizontalAlignment="Left" Grid.ColumnSpan="2" 
+                        Content="{Binding ImageTipViewModel}" HorizontalAlignment="Center" Grid.ColumnSpan="3" 
                         MaxWidth="{Binding Flags.ImageTipMaxWidth, Source={StaticResource _locator}}">
         <i:Interaction.Behaviors>
           <ctrls:ImageTipServiceHostBehavior/>
         </i:Interaction.Behaviors>
       </ContentPresenter>
-      <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Fill="{StaticResource FadeOutBottomBrush}"/>
+      <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Fill="{StaticResource FadeOutBottomBrush}"/>
     </Grid>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding ShowFeedSources}" Value="True">

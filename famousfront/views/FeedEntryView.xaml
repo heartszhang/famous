@@ -2,9 +2,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:metro="http://schemas.codeplex.com/elysium"
+                    xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
                     xmlns:views="clr-namespace:famousfront.views"
                     xmlns:ctrls="clr-namespace:famousfront.controls"
                     mc:Ignorable="d">
@@ -22,9 +24,17 @@
         <Setter Property="Block.LineHeight" Value="{Binding Flags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
       </Style>
     </DataTemplate.Resources>
-    <StackPanel Background="Transparent" metro:ApplicationBar.PreventsOpen="true">
+    <StackPanel metro:ApplicationBar.PreventsOpen="true" Background="Transparent">
+      <!--
+      <i:Interaction.Triggers>
+        <i:EventTrigger EventName="MouseLeftButtonUp">
+          <mvvm:EventToCommand Command="{Binding ToggleExpandSummaryCommand,Mode=OneWay}" MustToggleIsEnabledValue="True" PassEventArgsToCommand="True"/>
+        </i:EventTrigger>
+      </i:Interaction.Triggers>
+      -->
       <StackPanel.ContextMenu>
         <ContextMenu>
+          <MenuItem Header="Expand/Unexpand Body" Command="{Binding ToggleExpandSummaryCommand}" IsCheckable="{Binding CanExpand,Mode=OneWay}" IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
           <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
           <MenuItem Header="Unsubscribe this" />
         </ContextMenu>
@@ -34,11 +44,11 @@
             Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
         <ContentPresenter Content="{Binding Media}"/>
       </Grid>
-      <Grid x:Name="_document_room" Margin="0,8" 
+      <Grid x:Name="_document_room" Margin="0,8"
             Visibility="{Binding HasDocument,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
         <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
                           IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}"
-                             Padding="0"
+                             Padding="0" ContextMenu="{x:Null}"
                           Background="Transparent" IsDocumentEnabled="True" Focusable="False"
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
       </Grid>

@@ -9,7 +9,7 @@
       </Border.Effect>
       <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
         <Image Stretch="Uniform" StretchDirection="DownOnly"
-               Source="{Binding Path=(ctrls:ImageTipServiceHostBehavior.ImageUrl),Mode=OneWay,Converter={StaticResource NullImageConverter}, RelativeSource={RelativeSource Self}}"/>
+               Source="{Binding Path=(ctrls:ImageTipServiceHostBehavior.FeedImage).local,Mode=OneWay,Converter={StaticResource NullImageConverter}, RelativeSource={RelativeSource Self}}"/>
       </ScrollViewer>
     </Border>
   </DataTemplate>

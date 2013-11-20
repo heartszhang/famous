@@ -14,7 +14,7 @@
       <Image Source="{Binding Url,Mode=OneWay, IsAsync=True, Converter={StaticResource NullImageConverter}}" 
              x:Name="_image"  Grid.Column="1"
              Stretch="UniformToFill" StretchDirection="DownOnly"
-          ctrls:ImageTipProviderBehavior.ImageUrl="{Binding OriginUrl,Mode=OneWay}" >
+          ctrls:ImageTipProviderBehavior.FeedImage="{Binding Self,Mode=OneWay}" >
         <i:Interaction.Behaviors>
           <ctrls:ImageTipProviderBehavior/>
         </i:Interaction.Behaviors>
