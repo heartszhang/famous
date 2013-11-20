@@ -21,17 +21,17 @@ const (
 )
 
 const (
-	Feed_content_ready uint64 = 1 << iota
-	Feed_content_empty
-	Feed_content_inline
-	Feed_content_external_ready
-	Feed_content_external_empty
+	Feed_status_content_ready uint64 = 1 << iota
+	Feed_status_content_empty
+	Feed_status_content_inline
+	Feed_status_content_external_ready
+	Feed_status_content_external_empty
 	Feed_status_has_audio
 	Feed_status_has_video
 	Feed_status_has_url
 	Feed_status_has_image
 	Feed_status_invisible
-	Feed_status_text_empty
+	Feed_status_text_empty //deprecated
 	Feed_status_text_little
 	Feed_status_text_many
 	Feed_status_image_empty
@@ -40,18 +40,21 @@ const (
 	Feed_status_media_empty // image, audio , video
 	Feed_status_media_one
 	Feed_status_media_many
-	Feed_status_media_inline
+	Feed_status_media_inline //deprecated
 	Feed_status_linkdensity_low
 	Feed_status_linkdensity_high
 	Feed_status_format_flowdocument
 	Feed_status_format_text
 	Feed_status_mp4
 	Feed_status_flv
-	Feed_content_unresolved
-	Feed_summary_ready
-	Feed_summary_empty
-	Feed_content_unavail
-	Feed_status_duplicated
+	Feed_status_content_unresolved
+	Feed_status_summary_ready
+	Feed_status_summary_empty
+	Feed_status_content_unavail
+	Feed_status_content_duplicated
+	Feed_status_summary_duplicated
+	Feed_status_content_mediainline
+	Feed_status_summary_mediainline
 )
 
 const (
@@ -129,25 +132,25 @@ type FeedContent struct {
 }
 
 type FeedEntry struct {
-	Id         string       `bson:"_id,omitempty" json:"id,omitempty"`
-	Flags      uint         `json:"flags" bson:"flags"`
-	Source     string       `json:"src,omitempty" bson:"src,omitempty"` // source's uri
-	Type       uint         `json:"type" bson:"type"`                   // feed_type...
-	Uri        string       `json:"uri,omitempty" bson:"uri,omitempty"`
-	Title      FeedTitle    `json:"title,omitempty" bson:"title,omitempty"`
-	Author     *FeedAuthor  `json:"author,omitempty" bson:"author,omitempty"`
-	PubDate    int64        `json:"pubdate" bson:"pubdate"` // unix time
-	Summary    string       `json:"summary,omitempty" bson:"summary,omitempty"`
-	Content    *FeedContent `json:"content,omitempty" bson:"content,omitempty"`
-	Tags       []string     `json:"tags,omitempty" bson:"tags,omitempty"`
-	Images     []FeedMedia  `json:"images,omitempty" bson:"images,omitempty"`
-	Videos     []FeedMedia  `json:"videos,omitempty" bson:"videos,omitempty"`
-	Audios     []FeedMedia  `json:"audios,omitempty" bson:"audios,omitempty"`
-	Links      []FeedLink   `json:"links,omitempty" bson:"links,omitempty"`
-	Words      uint         `json:"words" bson:"words"`     // of sumary
-	Density    uint         `json:"density" bson:"density"` // percent
-	Status     uint64       `json:"status" bson:"status"`
-	Categories []string     `json:"categories,omitempty" bson:"category,omitempty"`
+	Id         string      `bson:"_id,omitempty" json:"id,omitempty"`
+	Flags      uint        `json:"flags" bson:"flags"`
+	Source     string      `json:"src,omitempty" bson:"src,omitempty"` // source's uri
+	Type       uint        `json:"type" bson:"type"`                   // feed_type...
+	Uri        string      `json:"uri,omitempty" bson:"uri,omitempty"`
+	Title      FeedTitle   `json:"title,omitempty" bson:"title,omitempty"`
+	Author     *FeedAuthor `json:"author,omitempty" bson:"author,omitempty"`
+	PubDate    int64       `json:"pubdate" bson:"pubdate"` // unix time
+	Summary    string      `json:"summary,omitempty" bson:"summary,omitempty"`
+	Content    string      `json:"content,omitempty" bson:"content,omitempty"`
+	Tags       []string    `json:"tags,omitempty" bson:"tags,omitempty"`
+	Images     []FeedMedia `json:"images,omitempty" bson:"images,omitempty"`
+	Videos     []FeedMedia `json:"videos,omitempty" bson:"videos,omitempty"`
+	Audios     []FeedMedia `json:"audios,omitempty" bson:"audios,omitempty"`
+	Links      []FeedLink  `json:"links,omitempty" bson:"links,omitempty"`
+	Words      uint        `json:"words" bson:"words"`     // of sumary
+	Density    uint        `json:"density" bson:"density"` // percent
+	Status     uint64      `json:"status" bson:"status"`
+	Categories []string    `json:"categories,omitempty" bson:"category,omitempty"`
 	//	TTL        time.Time    `json:"ttl" bson:"ttl"`
 }
 
@@ -156,21 +159,21 @@ const (
 )
 
 type FeedSource struct {
-	Name        string     `json:"name,omitempty" bson:"name,omitempty"`
-	Uri         string     `json:"uri,omitempty" bson:"uri,omitempty"` // rss/atom url
-	Local       string     `json:"local" bson:"local"`
-	Period      uint       `json:"period" bson:"period"`     // minutes
-	Deadline    int64      `json:"deadline" bson:"deadline"` // unixtime_nano
-	Type        uint       `json:"type" bson:"type"`         // feed_type...
-	Disabled    bool       `json:"disabled" bson:"disabled"` //auto refresh enabled
-	EnableProxy bool       `json:"enable_proxy" bson:"enable_proxy"`
-	Update      int64      `json:"update" bson:"update"`                       // the last time, we refreshed, unix-time
-	WebSite     string     `json:"website,omitempty" bson:"website,omitempty"` // home
-	Tags        []string   `json:"tags,omitempty" bson:"tags,omitempty"`
-	Categories  []string   `json:"categories,omitempty" bson:"categories,omitempty"`
-	Unreaded    int        `json:"unreaded" bson:"unreaded"`
-	Media       *FeedMedia `json:"media,omitempty" bson:"media,omitempty"`
-	Description string     `json:"description,omitempty" bson:"description,omitempty"`
+	Name        string   `json:"name,omitempty" bson:"name,omitempty"`
+	Uri         string   `json:"uri,omitempty" bson:"uri,omitempty"` // rss/atom url
+	Local       string   `json:"local" bson:"local"`
+	Period      uint     `json:"period" bson:"period"`     // minutes
+	Deadline    int64    `json:"deadline" bson:"deadline"` // unixtime_nano
+	Type        uint     `json:"type" bson:"type"`         // feed_type...
+	Disabled    bool     `json:"disabled" bson:"disabled"` //auto refresh enabled
+	EnableProxy bool     `json:"enable_proxy" bson:"enable_proxy"`
+	Update      int64    `json:"update" bson:"update"`                       // the last time, we refreshed, unix-time
+	WebSite     string   `json:"website,omitempty" bson:"website,omitempty"` // home
+	Tags        []string `json:"tags,omitempty" bson:"tags,omitempty"`
+	Categories  []string `json:"categories,omitempty" bson:"categories,omitempty"`
+	Unreaded    int      `json:"unreaded" bson:"unreaded"`
+	Description string   `json:"description,omitempty" bson:"description,omitempty"`
+	Logo        string   `json:"logo,omitempty" bson:"logo,omitempty"`
 }
 
 type FeedCategory struct {
