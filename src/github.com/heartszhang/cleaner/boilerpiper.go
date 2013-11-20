@@ -2,7 +2,7 @@ package cleaner
 
 import (
 	"code.google.com/p/go.net/html"
-	//"log"
+	//	"log"
 )
 
 type boilerpiper struct {
@@ -11,6 +11,7 @@ type boilerpiper struct {
 	keywords                 []string
 	description              string
 	content                  []*boilerpipe_score
+	images                   []boiler_image
 	words                    int
 	lines                    int
 	chars                    int
@@ -32,10 +33,10 @@ func new_boilerpiper(article *html.Node) *boilerpiper {
 	return &rtn
 }
 
-func boiler_clean_by_link_density(article *html.Node) *html.Node {
+func boiler_clean_by_link_density(article *html.Node) (*html.Node, []boiler_image) {
 	boiler := new_boilerpiper(article)
 	boiler.clean_by_link_density()
-	return article
+	return article, boiler.images
 }
 
 //http://www.l3s.de/~kohlschuetter/boilerplate/
@@ -112,11 +113,12 @@ const (
 func (this *boilerpiper) classify(prev *boilerpipe_score,
 	current *boilerpipe_score,
 	next *boilerpipe_score) {
-	ifpi := prev.element == nil && current.link_density() > 90 && current.tagged_imgs == 1
-	imgbtx := prev.is_content && current.link_density() > 90 && current.tagged_imgs >= 1 && current.tagged_imgs == current.imgs && current.imgs == current.anchor_imgs
+	// doc's picture
+	tagged_imgs := len(current.tagged_imgs)
+	ifpi := prev.element == nil && current.link_density() > 90 && tagged_imgs == 1
+	imgbtx := prev.is_content && current.link_density() > 90 && tagged_imgs >= 1 && tagged_imgs == current.imgs && current.imgs == current.anchor_imgs
 	if current.link_density() > 33 && !ifpi && !imgbtx {
 		current.is_content = false
-		//log.Println("link-density skip by ld", current.link_density(), current.words)
 	} else {
 		c := (prev.link_density() <= 55 &&
 			(current.words > 20 || next.words > 15 || prev.words > 8)) ||
@@ -140,6 +142,9 @@ func (this *boilerpiper) classify(prev *boilerpipe_score,
 	}
 	if current.forms > 0 && current.words == 0 {
 		current.is_content = false
+	}
+	if current.is_content == false {
+		this.images = append(this.images, current.tagged_imgs...)
 	}
 	//	fmt.Println(current.is_content, current.inner_text, current.img_score)
 }
