@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -27,19 +28,19 @@ type rss_channel struct {
 	UpdateFrequency uint       `xml:"http://purl.org/rss/1.0/modules/syndication/ updateFrequency,omityempty"`
 	TTL             uint       `xml:"ttl"` // minitues
 	Categories      []string   `xml:"category,omitempty"`
-	Image           rss_image  `xml:"image"` // a img can be displayed
+	Image           *rss_image `xml:"image,omitempty"` // a img can be displayed
 	Items           []rss_item `xml:"item"`
 }
 type rss_enclosure struct {
-	Url    string `xml:"url,attr"`
-	Length int64  `xml:"length,attr"` // bytes
-	Type   string `xml:"type,attr"`   // mime-type
+	Url    string `xml:"url,attr,omitempty"`
+	Length int64  `xml:"length,attr"`         // bytes
+	Type   string `xml:"type,attr,omitempty"` // mime-type
 }
 
 type rss_image struct {
-	Url   string `xml:"url, omitempty"`
-	Title string `xml:"title, omitempty"`
-	Link  string `xml:"link, omitempty"` // may be same as channel's link
+	Url   string `xml:"url,omitempty"`
+	Title string `xml:"title,omitempty"`
+	Link  string `xml:"link,omitempty"` // may be same as channel's link
 }
 
 // http://search.yahoo.com/mrss/
@@ -53,13 +54,13 @@ type rss_item struct {
 	Title       string          `xml:"title"`             // required
 	Link        string          `xml:"link"`              // required, http://nytimes.com/2004/12/07FEST.html
 	PubDate     string          `xml:"pubDate,omitempty"` // created or updated
-	Categories  []string        `xml:"category"`
-	Author      string          `xml:"author,omitempty"`    // email address of the author
-	Description string          `xml:"description"`         // required
-	Guid        string          `xml:"guid,omitempty"`      // dont care
-	Comments    string          `xml:"comments, omitempty"` // comments url
+	Categories  []string        `xml:"category,omitempty"`
+	Author      string          `xml:"author,omitempty"`   // email address of the author
+	Description string          `xml:"description"`        // required
+	Guid        string          `xml:"guid,omitempty"`     // dont care
+	Comments    string          `xml:"comments,omitempty"` // comments url
 	FullText    string          `xml:"http://purl.org/rss/1.0/modules/content/ encoded,omitmepty"`
-	Enclosure   rss_enclosure   `xml:"enclosure, omitempty"` //attachment
+	Enclosure   rss_enclosure   `xml:"enclosure,omitempty"` //attachment
 	Medias      []media_content `xml:"http://search.yahoo.com/mrss/ content,omitempty"`
 }
 
@@ -138,14 +139,9 @@ func (this rss_channel) to_source() FeedSource {
 		Tags:        this.Categories,
 		Description: this.Description,
 		WebSite:     this.website(),
-		Media:       nil,
 	}
-	if this.Image.Url != "" {
-		v.Media = &FeedMedia{
-			media_type: Feed_media_type_image,
-			Title:      this.Image.Title,
-			Uri:        this.Image.Url,
-		}
+	if this.Image != nil {
+		v.Logo = this.Image.Url
 	}
 	fmt.Println("rss:", this.Title)
 	return v
@@ -216,7 +212,17 @@ func (this rss_enclosure) to_feed_media(mt uint) FeedMedia {
 }
 
 func mime_to_feedmediatype(mime string) uint {
-	return Feed_media_type_none
+	t := Feed_media_type_none
+	types := strings.Split(mime, "/")
+	switch types[0] {
+	case "image":
+		t = Feed_media_type_image
+	case "video":
+		t = Feed_media_type_video
+	case "audio":
+		t = Feed_media_type_audio
+	}
+	return t
 }
 
 func (this rss_item) to_feed_entry(feed_url string) FeedEntry {
@@ -225,11 +231,10 @@ func (this rss_item) to_feed_entry(feed_url string) FeedEntry {
 		Type:    Feed_type_rss,
 		Uri:     this.Link,
 		PubDate: unixtime_nano_rfc822(this.PubDate),
-		//		Author:   FeedAuthor{Email: this.Author},
 		Summary: this.Description,
 		Tags:    this.Categories,
 		Title:   FeedTitle{Main: this.Title},
-		Content: this.save_content(),
+		Content: this.FullText,
 	}
 	if this.Author != "" {
 		v.Author = &FeedAuthor{Email: this.Author}
