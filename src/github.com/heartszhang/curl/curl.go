@@ -156,7 +156,7 @@ func mime_should_convert(mime, charset string, ignore_empty_mime bool) bool {
 	case "text":
 		return true
 	case "application":
-		is_xml := strings.Contains(types[1], "+xml")
+		is_xml := strings.Contains(types[1], "xml")
 		return is_xml
 	default:
 		return false
@@ -226,7 +226,7 @@ func xml_detect_content_type(head string) string {
 	if i == -1 {
 		return dft
 	}
-	return x2[:i]
+	return "text/xml; charset=" + x2[:i]
 }
 
 // DetectContentType will treat all xml as utf-8 encoded. so some extrac work should be done
@@ -279,7 +279,7 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 	}
 	// text or application/*+xml
 	if !mime_should_convert(v.Mime, v.Charset, true) {
-		return v, err
+		return v, fmt.Errorf("invalid-mime: %v, char: %v", v.Mime, v.Charset)
 	}
 	if v.Charset == "" {
 		ct := file_detect_content_type(v.Local, v.Mime)
@@ -288,7 +288,7 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 		if v.Mime == "" {
 			v.Mime = mime
 			if !mime_should_convert(mime, cs, false) {
-				return v, err
+				return v, fmt.Errorf("invalid-mime: %v, char: %v", mime, cs)
 			}
 		}
 	}
@@ -338,7 +338,7 @@ type curler_error struct {
 }
 
 func (this curler_error) Error() string {
-	return fmt.Sprintf("%v: %v", this.code, this.reason)
+	return fmt.Sprintf("%d: %v", this.code, this.reason)
 }
 
 func (this *curler) GetAsString(uri string) (rtn string, err error) {
