@@ -2,10 +2,15 @@ package feedfeed
 
 import (
 	"encoding/xml"
-	"fmt"
+	//	"fmt"
 	"os"
 )
 
+type feed_error string
+
+func (this feed_error) Error() string {
+	return string(this)
+}
 func MakeFeedSource(filepath string) (FeedSource, error) {
 	t := DetectFeedSourceType(filepath)
 	switch t {
@@ -14,7 +19,7 @@ func MakeFeedSource(filepath string) (FeedSource, error) {
 	case Feed_type_rss:
 		return feedsource_from_rss(filepath)
 	default:
-		return FeedSource{}, fmt.Errorf("invalid format")
+		return FeedSource{}, feed_error("invalid foramt")
 	}
 }
 func MakeFeedEntries(filepath string) ([]FeedEntry, error) {
@@ -25,7 +30,7 @@ func MakeFeedEntries(filepath string) ([]FeedEntry, error) {
 	case Feed_type_rss:
 		return feedentries_from_rss(filepath)
 	default:
-		return []FeedEntry{}, fmt.Errorf("invalid format")
+		return []FeedEntry{}, feed_error("invalid format")
 	}
 }
 
