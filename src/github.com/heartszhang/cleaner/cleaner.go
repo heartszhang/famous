@@ -557,5 +557,5 @@ func clean_fragment(cont, uri string) (string, *DocumentSummary) {
 
 	var buf bytes.Buffer
 	err = html.Render(&buf, body)
-	return buf.String(), new_docsummary(body)
+	return buf.String(), new_docsummary(body, nil)
 }
