@@ -137,7 +137,7 @@ func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err 
 	curler := curl.NewCurl(backend_config().FeedSourceFolder)
 	cache, err := curler.GetUtf8(uri)
 	ext := curl.MimeToExt(cache.Mime)
-	if ext != "xml" && ext != "atom+xml" {
+	if ext != "xml" && ext != "atom+xml" && ext != "rss+atom" {
 		return v, fmt.Errorf("unsupported mime: %v", cache.Mime)
 	}
 
@@ -186,9 +186,26 @@ func feedtag_all() ([]string, error) {
 	return fto.all()
 }
 
+const (
+	refer = "http://iweizhi2.duapp.com"
+)
+
+func feedsource_show(uri string) ([]feed.FeedSourceFindEntry, error) {
+	fs, _, err := google.NewGoogleFeedApi(refer, config.FeedSourceFolder).Load(uri, config.Language, 4, false)
+	if err != nil {
+		return nil, err
+	}
+	v := make([]feed.FeedSourceFindEntry, 1)
+	v[0].Summary = fs.Description
+	v[0].Title = fs.Name
+	v[0].Url = fs.Uri
+	v[0].Website = fs.WebSite
+	return v, err
+}
+
 func feedsource_find(q string) ([]feed.FeedSourceFindEntry, error) {
-	svc := google.NewGoogleFeedApi("http://iweizhi2.duapp.com", config.FeedSourceFolder)
-	v, err := svc.Find(q, "")
+	svc := google.NewGoogleFeedApi(refer, config.FeedSourceFolder)
+	v, err := svc.Find(q, config.Language)
 	if err != nil {
 		return v, err
 	}
