@@ -48,12 +48,13 @@ func new_docsummary_internal(n *html.Node, f hash.Hash64) *DocumentSummary {
 			rtn.Text += child.Data
 		case child.Data == "img":
 			rtn.Images = append(rtn.Images, make_mediasummary(child))
-			//			rtn.Images = append(rtn.Images, node_get_attribute(child, "src"))
 		case node_is_media(child):
 			rtn.Medias = append(rtn.Medias, make_mediasummary(child))
-			//			rtn.Medias = append(rtn.Medias, node_get_attribute(child, "src"))
 		case child.Data == "a":
 			rtn.LinkCount++
+			ac := new_docsummary_internal(child, f)
+			rtn.Images = append(rtn.Images, ac.Images...)
+			rtn.Medias = append(rtn.Medias, ac.Medias...)
 		default:
 			sc := new_docsummary_internal(child, f)
 			rtn.add(sc)
@@ -61,10 +62,13 @@ func new_docsummary_internal(n *html.Node, f hash.Hash64) *DocumentSummary {
 	})
 	return rtn
 }
-func new_docsummary(n *html.Node) *DocumentSummary {
+func new_docsummary(n *html.Node, images []boiler_image) *DocumentSummary {
 	f := fnv.New64()
 	rtn := new_docsummary_internal(n, f)
 	rtn.Hash = f.Sum64()
+	for _, img := range images {
+		rtn.Images = append(rtn.Images, MediaSummary{img.url, img.alt, img.width, img.height})
+	}
 	return rtn
 }
 
