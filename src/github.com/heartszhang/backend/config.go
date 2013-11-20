@@ -28,6 +28,8 @@ type FeedsBackendConfig struct {
 	SummaryMinWords       int    `json:"summary_minwords" bson:"summary_minwords"`
 	ThumbnailWidth        uint   `json:"thumbnail_width" bson:"thumbnail_width"`
 	SummaryDuplicateCount uint   `json:"summary_duplicatecount" bson:"summary_duplicatecount"`
+	LinkDensityThreshuld  uint   `json:"linkdensity_threshold" bson:"linkdensity_threshuld"`
+	Language              string `json:"language,omitempty" bson:"language,omitempty"`
 }
 
 func pwd() string {
@@ -63,6 +65,8 @@ func init() {
 	os.Mkdir(config.FailedFolder, 0644)
 	os.Mkdir(config.FlowDocumentFolder, 0644)
 	status.startat = time.Now()
+
+	config.Language = "zh-CN"
 }
 
 func (this FeedsBackendConfig) Address() string {
