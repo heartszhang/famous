@@ -56,21 +56,13 @@ type atom_feed struct { // to feed_source
 	Subtitle   string          `xml:"subtitle"`
 	Id         string          `xml:"id"`
 	Updated    string          `xml:"updated"` // rfc-822
+	Logo       string          `xml:"logo,omitempty"`
 	Links      []atom_link     `xml:"link"`
 	Authors    []atom_person   `xml:"author"`
 	Entries    []atom_entry    `xml:"entry"`
 	Categories []atom_category `xml:"category"`
 }
 
-/*
-func CreateFeedSourceAtom(filepath string) (FeedSource, error) {
-	return feed_source_create_atom(filepath)
-}
-
-func CreateFeedEntriesAtom(filepath string) ([]FeedEntry, error) {
-	return feed_entries_create_atom(filepath)
-}
-*/
 func feedsource_from_atom(filepath string) (FeedSource, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
@@ -101,13 +93,13 @@ func (this atom_feed) to_feed_soruce() FeedSource {
 		Uri:         this.docs(),
 		Local:       "",
 		Period:      _2hours,
+		Logo:        this.Logo,
 		Deadline:    unixtime_nano_rfc822(this.Updated) + int64(_2hours*time.Hour),
 		Type:        Feed_type_atom,
 		Disabled:    false,
 		EnableProxy: false,
 		Update:      unixtime_nano_rfc822(this.Updated),
 		WebSite:     this.link(),
-		Media:       nil,
 		Description: this.Subtitle,
 	}
 	f.Tags = make([]string, len(this.Categories))
@@ -155,7 +147,8 @@ func (this atom_entry) to_feed_entry() FeedEntry {
 		Summary: this.Summary.Body,
 	}
 	if this.Content.Body != "" {
-		e.Content = &FeedContent{FullText: this.Content.Body}
+		//		e.Content = &FeedContent{FullText: this.Content.Body}
+		e.Content = this.Content.Body
 	}
 	if len(this.Authors) > 0 {
 		auth := this.Authors[0].to_feedauthor()
