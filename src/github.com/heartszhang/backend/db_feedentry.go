@@ -95,10 +95,10 @@ func insert_entry(coll *mgo.Collection, entry feed.FeedEntry) (interface{}, erro
 }
 
 func (this feedentry_op) setcontent(uri, filepath string, words int, imgs []feed.FeedMedia) error {
-	status := feed.Feed_content_unresolved
+	status := feed.Feed_status_content_unresolved
 	imgc := len(imgs)
 	if len(filepath) > 0 && (words+imgc*128) > 192 {
-		status = feed.Feed_content_ready
+		status = feed.Feed_status_content_ready
 	}
 	cs := feed.FeedContent{Uri: uri, Local: filepath, Words: uint(words), Status: status, Images: imgs}
 
