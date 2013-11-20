@@ -28,20 +28,20 @@ func (this html_extractor) MakeFragmentReadable(doc *html.Node) (*html.Node, *Do
 	of, err = write_file(doc1, this.temp_dir)
 	log.Println("make-readable", of, err)
 
-	article = boiler_clean_by_link_density(article)
-	of, err = write_file(doc1, this.temp_dir)
-	log.Println("clean-by-density", of, err)
+	article, images := boiler_clean_by_link_density(article)
+	//of, err = write_file(doc1, this.temp_dir)
+	//log.Println("clean-by-density", of, err)
 
 	article = boiler_clean_form_prefix(article)
-	of, err = write_file(doc1, this.temp_dir)
-	log.Println("clean-form", of, err)
-	return article, new_docsummary(doc1), nil
+	//	of, err = write_file(doc1, this.temp_dir)
+	//	log.Println("clean-form", of, err)
+	return article, new_docsummary(doc1, images), nil
 }
 
 func (this html_extractor) CleanFragment(doc *html.Node) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_fragment(doc)
 	doc1, article := readabilitier_make_readable(article)
-	return article, new_docsummary(doc1), nil
+	return article, new_docsummary(doc1, nil), nil
 }
 
 // cleaned html
@@ -53,12 +53,12 @@ func (this html_extractor) MakeHtmlReadable(doc *html.Node, url string) (*html.N
 	doc1, article := readabilitier_make_readable(article)
 
 	//	s2, _ = WriteHtmlFile2(doc1)
-	article = boiler_clean_by_link_density(article)
+	article, images := boiler_clean_by_link_density(article)
 
 	//	h4ml, _ := WriteHtmlFile2(doc1)
 	article = boiler_clean_form_prefix(article)
 	//	h5ml, err := WriteHtmlFile2(doc1)
-	return article, new_docsummary(doc1), nil
+	return article, new_docsummary(doc1, images), nil
 }
 
 func write_file(doc *html.Node, temp string) (string, error) {
