@@ -22,21 +22,21 @@ namespace famousfront.controls
    */
   class ImageTipProviderBehavior : Behavior<UIElement>
   {
-    public static readonly DependencyProperty ImageUrlProperty =
-        DependencyProperty.RegisterAttached("ImageUrl", typeof(string), typeof(ImageTipProviderBehavior));
+    public static readonly DependencyProperty FeedImageProperty =
+        DependencyProperty.RegisterAttached("FeedImage", typeof(datamodels.FeedMedia), typeof(ImageTipProviderBehavior));
 
 
-    public static string GetImageUrl(DependencyObject obj)
+    public static datamodels.FeedMedia GetFeedImage(DependencyObject obj)
     {
       Debug.Assert(obj != null);
-      return obj.GetValue(ImageUrlProperty) as string;
+      return obj.GetValue(FeedImageProperty) as datamodels.FeedMedia;
     }
 
 
-    public static void SetImageUrl(DependencyObject obj, string value)
+    public static void SetFeedImage(DependencyObject obj, datamodels.FeedMedia value)
     {
       Debug.Assert(obj != null);
-      obj.SetValue(ImageUrlProperty, value);
+      obj.SetValue(FeedImageProperty, value);
     }
 
     int action_id;
@@ -49,8 +49,8 @@ namespace famousfront.controls
 
     async void ImageMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
-      var iu = GetImageUrl(AssociatedObject);
-      if (string.IsNullOrEmpty(iu))
+      var iu = GetFeedImage(AssociatedObject);
+      if (iu == null || (iu.width < ServiceLocator.Flags.ImageTipMinWidth && iu.height < ServiceLocator.Flags.ImageTipMinHeight))
         return;
       var prevaid = ++action_id;
       await Task.Delay(ServiceLocator.Flags.ImageTipHideDelay).ConfigureAwait(false);
@@ -60,14 +60,14 @@ namespace famousfront.controls
           return;
         if (action_id != prevaid)
           return;
-        Messenger.Default.Send(new ImageTipRequest { image_uri = iu, open = false });
+        Messenger.Default.Send(new ImageTipRequest { image = iu, open = false });
       }), System.Windows.Threading.DispatcherPriority.ContextIdle);
     }
 
     async void ImageMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
-      var iu = GetImageUrl(AssociatedObject);
-      if (string.IsNullOrEmpty(iu))
+      var iu = GetFeedImage(AssociatedObject);
+      if (iu == null || (iu.width < ServiceLocator.Flags.ImageTipMinWidth && iu.height < ServiceLocator.Flags.ImageTipMinHeight))
         return;
       var prevaid = ++action_id;
       await Task.Delay(ServiceLocator.Flags.ImageTipShowDelay).ConfigureAwait(false);
@@ -76,7 +76,7 @@ namespace famousfront.controls
         if (prevaid != action_id)
           return;
         if (AssociatedObject.IsMouseOver)
-          Messenger.Default.Send(new ImageTipRequest { image_uri = iu, open = true });
+          Messenger.Default.Send(new ImageTipRequest { image = iu, open = true });
       }), System.Windows.Threading.DispatcherPriority.ContextIdle);
     }
     protected override void OnDetaching()
@@ -87,28 +87,37 @@ namespace famousfront.controls
 
   class ImageTipServiceHostBehavior : Behavior<UIElement>
   {
-    public static readonly DependencyProperty ImageUrlProperty =
-        DependencyProperty.RegisterAttached("ImageUrl", typeof(string), typeof(ImageTipServiceHostBehavior),
+    public static readonly DependencyProperty FeedImageProperty =
+        DependencyProperty.RegisterAttached("FeedImage", typeof(datamodels.FeedMedia), typeof(ImageTipServiceHostBehavior),
         new FrameworkPropertyMetadata(null,FrameworkPropertyMetadataOptions.Inherits));
 
 
-    public static string GetImageUrl(DependencyObject obj)
+    public static datamodels.FeedMedia GetFeedImage(DependencyObject obj)
     {
       Debug.Assert(obj != null);
-      return obj.GetValue(ImageUrlProperty) as string;
+      return obj.GetValue(FeedImageProperty) as datamodels.FeedMedia;
     }
 
 
-    public static void SetImageUrl(DependencyObject obj, string value)
+    public static void SetFeedImage(DependencyObject obj, datamodels.FeedMedia value)
     {
       Debug.Assert(obj != null);
-      obj.SetValue(ImageUrlProperty, value);
+      obj.SetValue(FeedImageProperty, value);
     }
     protected override void OnAttached()
     {
       Messenger.Default.Register<ImageTipRequest>(this, OnImageTipRequest);
       base.OnAttached();
-      
+      AssociatedObject.MouseLeave += (new MouseEventHandler(OnImageTipMouseUp)).MakeWeakSpecial(eh => AssociatedObject.MouseLeave -= eh);
+    }
+    int action_id;
+    private async void OnImageTipMouseUp(object sender, MouseEventArgs e)
+    {
+      var prev = ++action_id;
+      await Task.Delay(1200);
+      if (prev != action_id)
+        return;
+      SetFeedImage(AssociatedObject, null);
     }
     protected override void OnDetaching()
     {
@@ -119,18 +128,19 @@ namespace famousfront.controls
     {
       await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
       {
-        var iu = GetImageUrl(AssociatedObject);
+        ++action_id;
+        var iu = GetFeedImage(AssociatedObject);
         if (msg.open)
         {
-          SetImageUrl(AssociatedObject, msg.image_uri);
+          SetFeedImage(AssociatedObject, msg.image);
           return;
         }
         if (AssociatedObject.IsMouseOver)
         {
           return;
         }
-        if (iu == msg.image_uri)
-          SetImageUrl(AssociatedObject, null);
+        if (iu == msg.image)
+          SetFeedImage(AssociatedObject, null);
       }), System.Windows.Threading.DispatcherPriority.ContextIdle);
     }
   }
