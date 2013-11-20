@@ -40,6 +40,7 @@
   <metro:Window.InputBindings>
     <KeyBinding Key="Q" Command="{Binding FindFeedSourceCommand}"/>
   </metro:Window.InputBindings>
+  <!--
   <metro:Window.ApplicationBar>
     <metro:ApplicationBar>
       <metro:CommandButton metro:ApplicationBar.Dock="Right" 
@@ -49,6 +50,7 @@
       </metro:CommandButton>
     </metro:ApplicationBar>
   </metro:Window.ApplicationBar>
+   -->
   <Grid
   params:General.ShadowBrush="{StaticResource ForegroundBrush}"
   params:General.TextFontSize="{StaticResource FiveTextSize}"
