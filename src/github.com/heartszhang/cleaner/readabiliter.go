@@ -24,7 +24,9 @@ func new_readabilitier(body *html.Node) *readabilitier {
 		body:       body}
 
 	r.extract_paragraphs(body)
-
+	if len(r.candidates) == 0 && len(r.content) > 0 {
+		r.candidates[body] = &r.content[0]
+	}
 	var top_candi *readability_score = nil
 	for _, candi := range r.candidates {
 		candi.content_score = candi.content_score * (100 - candi.link_density()) / 100
