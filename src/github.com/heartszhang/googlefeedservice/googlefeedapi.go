@@ -120,7 +120,7 @@ func loadresult_to_feedsource(x load_result) (*feedfeed.FeedSource, []feedfeed.F
 			Title:   feedfeed.FeedTitle{Main: e.Title},
 			Uri:     e.Link,
 			Summary: e.ContentSnippet,
-			Content: &feedfeed.FeedContent{FullText: e.Content},
+			Content: e.Content,
 			Tags:    e.Categories,
 		}
 		for _, m := range e.MediaGroups {
