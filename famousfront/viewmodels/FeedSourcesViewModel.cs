@@ -20,6 +20,8 @@ namespace famousfront.viewmodels
         internal FeedSourcesViewModel()
         {
             MessengerInstance.Register<DropFeedSource>(this, OnDropFeedSource);
+            MessengerInstance.Register<SubscribeFeedSource>(this, OnSubscribeFeedSource);
+            MessengerInstance.Register<UnsubscribeFeedSource>(this, OnUnsubscribeFeedSource);
         }
 
         private void OnDropFeedSource(DropFeedSource obj)
@@ -30,6 +32,23 @@ namespace famousfront.viewmodels
             {
                 _sources.Remove(obj.model);
             }));
+        }
+        private async void OnSubscribeFeedSource(SubscribeFeedSource msg)
+        {
+          await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
+          {
+            _sources.Add(new FeedSourceViewModel(msg.source));
+          }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        }
+        private async void OnUnsubscribeFeedSource(UnsubscribeFeedSource msg)
+        {
+          await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
+          {
+            var vm = _sources.First(s => s.Uri == msg.source);
+            if (vm != null)
+              _sources.Remove(vm);
+          }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+
         }
         FeedSources _sources = new FeedSources();
         ICollectionView _grouped_sources = null;

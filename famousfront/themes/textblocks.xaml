@@ -25,7 +25,8 @@
 
   <Style x:Key="TextBlockHeaderStyle" TargetType="{x:Type TextBlock}">
     <Setter Property="FontSize" Value="{StaticResource LittleThreeTextSize}"/>
-    <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
+    <Setter Property="FontFamily" Value="{StaticResource BoldFont}"/>
+    <Setter Property="FontWeight" Value="Bold"/>
   </Style>
 
   <Style x:Key="TextBlockContentStyle" TargetType="{x:Type TextBlock}">

@@ -52,6 +52,10 @@ namespace famousfront.viewmodels
     {
       get { return _.height > 0 ? (double)_.width / _.height : 0.0; }
     }
+    public FeedMedia Self
+    {
+      get { return _; }
+    }
     async Task DescribeImage()
     {
       if (_.width * _.height != 0)
@@ -78,7 +82,7 @@ namespace famousfront.viewmodels
     async void LoadImage()
     {
       IsBusying = true;
-      await DescribeImage();
+//      await DescribeImage();
       var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(_.uri);
       var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
       IsBusying = false;

@@ -37,13 +37,15 @@ namespace famousfront.messages
     internal class DropFeedSource : GenericMessage{
         internal FeedSourceViewModel model;
     }
+    internal class SubscribeFeedSource : GenericMessage { internal datamodels.FeedSource source;}
+    internal class UnsubscribeFeedSource : GenericMessage { internal string source;}
     internal class ShowFindFeedSourceView : GenericMessage
     {
 
     }
     internal class ImageTipRequest : GenericMessage
     {
-      internal string image_uri;
+      internal datamodels.FeedMedia image;
       internal bool open;
     }
 }

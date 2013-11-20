@@ -8,6 +8,7 @@ using System.Windows.Input;
 using GalaSoft.MvvmLight.Command;
 using famousfront.utils;
 using famousfront.messages;
+using System.Diagnostics;
 namespace famousfront.viewmodels
 {
     internal class FeedSourceViewModel : famousfront.core.ViewModelBase
@@ -65,6 +66,7 @@ namespace famousfront.viewmodels
         }
         async void ExecuteDropSelf()
         {
+          Debug.Assert(!string.IsNullOrEmpty(_.uri));
             var rel = "/api/feed_source/unsubscribe.json?uri=" + System.Uri.EscapeDataString(_.uri);
             var s = await HttpClientUtils.Get<famousfront.datamodels.BackendError>(ServiceLocator.BackendPath(rel));
             var code = s.code != 0 ? s.code : s.data.code;

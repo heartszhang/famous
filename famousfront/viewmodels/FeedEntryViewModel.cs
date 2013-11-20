@@ -9,6 +9,8 @@ using System.Windows.Markup;
 using System.Xml;
 using famousfront.core;
 using System.Diagnostics;
+using System.Windows.Input;
+using GalaSoft.MvvmLight.Command;
 namespace famousfront.viewmodels
 {
     class FeedEntryViewModel : famousfront.core.ViewModelBase
@@ -58,7 +60,11 @@ namespace famousfront.viewmodels
       {
         get { return (_.status & FeedStatuses.Feed_status_image_one) != 0; }
       }
-        public string Summary { get { return _.summary; } }
+      public string Summary 
+      { 
+        get { return _.summary; } 
+        protected set { var p = _.summary; _.summary = value; _.content = p; RaisePropertyChanged(); } 
+      }
         public string Title { get { return _.title.main; } }
 
         string _pub_day = null;
@@ -84,6 +90,31 @@ namespace famousfront.viewmodels
         public string Url
         {
           get { return _.uri; }
+        }
+        ICommand _toggle_expandsummary;
+        public ICommand ToggleExpandSummaryCommand
+        {
+          get { return _toggle_expandsummary ?? (_toggle_expandsummary = toggle_expandsummary()); }
+        }
+        ICommand toggle_expandsummary()
+        {
+          return new RelayCommand<MouseButtonEventArgs>(ExecuteToggleExpandSummary);
+        }
+        bool _expanded = true;
+        public bool IsExpanded
+        {
+          get { return _expanded; }
+          protected set { Set(ref _expanded, value); }
+        }
+        private void ExecuteToggleExpandSummary(MouseButtonEventArgs args)
+        {
+          args.Handled = true;
+          Summary = _.content;
+          IsExpanded = !IsExpanded;
+        }
+        public bool CanExpand
+        {
+          get { return (_.status & (FeedStatuses.Feed_status_content_empty | FeedStatuses.Feed_status_summary_empty)) == 0ul; }
         }
     }
 }

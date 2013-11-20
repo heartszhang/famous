@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace famousfront.viewmodels
 {
-    using famousfront.datamodels;
-    using famousfront.utils;
-    using GalaSoft.MvvmLight.Threading;
-    using System.ComponentModel;
-    using System.Net;
-    using System.Windows.Data;
-    using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntryViewModel>;
+  using famousfront.datamodels;
+  using famousfront.utils;
+  using GalaSoft.MvvmLight.Threading;
+  using System.ComponentModel;
+  using System.Diagnostics;
+  using System.Net;
+  using System.Windows.Data;
+  using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntryViewModel>;
     class FeedEntriesViewModel : famousfront.core.TaskViewModel
     {
         FeedSourceViewModel _parent;
@@ -39,7 +40,7 @@ namespace famousfront.viewmodels
         async void Reload()
         {
             IsBusying = true;
-            //http://localhost:8002//api/feed_entry/unread.json?uri=http://feed.feedsky.com/leica
+            Debug.Assert(!string.IsNullOrEmpty(_parent.Uri));
             var rel = "/api/feed_entry/unread.json?uri=" + Uri.EscapeDataString(_parent.Uri);//WebUtility.UrlEncode(_parent.Uri);
             var v = await HttpClientUtils.Get<FeedEntry[]>(ServiceLocator.BackendPath(rel));
             IsBusying = false;
