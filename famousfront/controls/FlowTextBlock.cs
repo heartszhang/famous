@@ -35,6 +35,11 @@ namespace famousfront.controls
             DependencyPropertyChangedEventArgs args)
         {
             RichTextBox rtb = (RichTextBox)obj ;
+            if (args.NewValue == null)
+            {
+              rtb.Document = null;
+              return;
+            }
             var fdoc = XamlReader.Load(new XmlTextReader(new System.IO.StringReader((string)args.NewValue))) as FlowDocument;
             var s = rtb.FindResource("FeedEntryFlowDocumentStyle") as Style;
             fdoc.Style = s;
