@@ -37,7 +37,7 @@ namespace famousfront.controls
             RichTextBox rtb = (RichTextBox)obj ;
             if (args.NewValue == null)
             {
-              rtb.Document = null;
+              rtb.Document = new FlowDocument();
               return;
             }
             var fdoc = XamlReader.Load(new XmlTextReader(new System.IO.StringReader((string)args.NewValue))) as FlowDocument;
