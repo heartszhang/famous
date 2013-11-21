@@ -58,7 +58,7 @@ namespace famousfront.viewmodels
     }
     async Task DescribeImage()
     {
-      if (_.width * _.height != 0)
+      if (_.width * _.height != 0 || string.IsNullOrEmpty(_.uri))
         return;
       var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(_.uri);
       var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
@@ -81,6 +81,8 @@ namespace famousfront.viewmodels
     }
     async void LoadImage()
     {
+      if (string.IsNullOrEmpty(_.uri))
+        return;
       IsBusying = true;
 //      await DescribeImage();
       var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(_.uri);
