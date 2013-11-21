@@ -104,9 +104,8 @@ func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
-// uri: /api/feed_entry/unread.json/{uri}/{count}/{page}
+// uri: /api/feed_entry/unread.json?uri=&count=&page=
 func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
-	//	category, err := strconv.ParseUint(r.URL.Query().Get("category"), 0, uint64_bits)
 	uri := r.URL.Query().Get("uri")
 	log.Println("feedentry-unread", uri)
 	count, _ := strconv.ParseUint(r.URL.Query().Get("count"), 0, 0)
