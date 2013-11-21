@@ -9,18 +9,4 @@ using System.Windows.Controls;
 
 namespace famousfront.views
 {
-  class FeedEntryTemplateSelector : DataTemplateSelector
-  {
-    public override DataTemplate SelectTemplate(object item, DependencyObject container)
-    {
-      var ws = item as FeedEntryViewModel;
-      if (ws == null)
-        return base.SelectTemplate(item, container);
-      var fe = container as FrameworkElement;
-      var mot = fe.FindResource("MediaOneTemplate") as DataTemplate;
-      if ((ws.HasImageOne || ws.HasVideo) && !ws.HasDocument)
-        return mot ?? base.SelectTemplate(item, container);
-      return base.SelectTemplate(item, container);
-    }
-  }
 }
