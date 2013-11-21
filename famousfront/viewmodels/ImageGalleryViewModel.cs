@@ -12,15 +12,17 @@ using System.Windows.Data;
 
 namespace famousfront.viewmodels
 {
+  using GalaSoft.MvvmLight.Command;
+  using System.Windows.Input;
   using FeedImages = System.Collections.ObjectModel.ObservableCollection<ImageUnitViewModel>;
-
-  class ImageGalleryViewModel : TaskViewModel
+  class ImagePanelViewModel : TaskViewModel
   {
     FeedMedia[] _;
-    internal ImageGalleryViewModel(FeedMedia[] imgs)
+
+    public ImagePanelViewModel(FeedMedia[] imgs)
     {
       _ = imgs;
-      LoadImages();
+      DescribeImages();
     }
     FeedImages _coll_images = null;
     ICollectionView _images = null;
@@ -29,10 +31,20 @@ namespace famousfront.viewmodels
       get { return _images; }
       private set { Set(ref _images, value); }
     }
-    async void LoadImages()
+    async void DescribeImages()
+    {
+      IsBusying = true;
+      await Task.WhenAll(_.Select(m => DescribeImage(m))).ConfigureAwait(false);
+      IsBusying = false;
+    }
+    bool _initialized;
+    internal async void LoadImages()
     {
       if (_ == null || _.Length == 0)
         return;
+      if (_initialized)
+        return;
+      _initialized = true;
       IsBusying = true;
 
       await Task.WhenAll(_.Select(m => DescribeImage(m))).ConfigureAwait(false);
@@ -61,8 +73,9 @@ namespace famousfront.viewmodels
     }
     async Task DescribeImage(FeedMedia img)
     {
+      if (img.width * img.height != 0)
+        return;
       var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(img.uri);
-//      var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(img.uri);
       var v = await HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
       if (v.code != 0)
       {
@@ -76,12 +89,49 @@ namespace famousfront.viewmodels
       img.mime = v.data.mime;
       img.local = v.data.origin;
       img.thumbanil = v.data.thumbnail;
-
-      // RaisePropertyChanged("Url");
-      //            await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
-      //            {
-      //            }), System.Windows.Threading.DispatcherPriority.ContextIdle); 
     }
-
+  }
+  class ImageGalleryViewModel : TaskViewModel
+  {
+    internal ImageGalleryViewModel(FeedMedia[] imgs) 
+    {
+      _panel = new ImagePanelViewModel(imgs);
+      _first = new ImageElementViewModel(imgs[0]);
+    }
+    ImagePanelViewModel _panel;
+    public ImagePanelViewModel ImagePanelViewModel
+    {
+      get { return _panel; }
+    }
+    ImageElementViewModel _first;
+    public ImageElementViewModel ImageElementViewModel
+    {
+      get { return _first; }
+    }
+    bool _show_panel;
+    public bool IsShowPanel 
+    {
+      get { return _show_panel; }
+      protected set { Set(ref _show_panel, value); }
+    }
+    ICommand _toggle_show_panel;
+    public ICommand ToggleShowPanelCommand
+    {
+      get { return _toggle_show_panel ?? (_toggle_show_panel = toggle_show_panel());}
+    }
+    ICommand toggle_show_panel()
+    {
+      return new RelayCommand(ExecuteToggleShowPanel);
+    }
+    bool _panel_initialized;
+    void ExecuteToggleShowPanel()
+    {
+      IsShowPanel = !IsShowPanel;
+      if (!_panel_initialized)
+      {
+        _panel_initialized = true;
+        ImagePanelViewModel.LoadImages();
+      }
+    }
   }
 }
