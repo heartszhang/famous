@@ -65,8 +65,8 @@ type rss_item struct {
 }
 
 type rss_link struct {
-	atom_link
-	Link string `xml:",chardata"`
+	atom_link `xml:",inline"`
+	Link      string `xml:",chardata"`
 }
 
 // private wrapper around the RssFeed which gives us the <rss>..</rss> xml
@@ -141,7 +141,7 @@ func (this rss_channel) to_source() FeedSource {
 		WebSite:     this.website(),
 	}
 	if this.Image != nil {
-		v.Logo = this.Image.Url
+		v.Logo = this.Image.Url // this may be relative
 	}
 	fmt.Println("rss:", this.Title)
 	return v
