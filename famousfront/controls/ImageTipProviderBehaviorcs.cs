@@ -50,7 +50,7 @@ namespace famousfront.controls
     async void ImageMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
       var iu = GetFeedImage(AssociatedObject);
-      if (iu == null || (iu.width < ServiceLocator.Flags.ImageTipMinWidth && iu.height < ServiceLocator.Flags.ImageTipMinHeight))
+      if (iu == null )
         return;
       var prevaid = ++action_id;
       await Task.Delay(ServiceLocator.Flags.ImageTipHideDelay).ConfigureAwait(false);
@@ -67,7 +67,7 @@ namespace famousfront.controls
     async void ImageMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
       var iu = GetFeedImage(AssociatedObject);
-      if (iu == null || (iu.width < ServiceLocator.Flags.ImageTipMinWidth && iu.height < ServiceLocator.Flags.ImageTipMinHeight))
+      if (iu == null )
         return;
       var prevaid = ++action_id;
       await Task.Delay(ServiceLocator.Flags.ImageTipShowDelay).ConfigureAwait(false);
