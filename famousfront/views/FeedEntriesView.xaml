@@ -18,9 +18,10 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/> 
         <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+        <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
         <Setter Property="Background" Value="Transparent"/>
       </Style>
-      <Style x:Key="FeedEntryItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+      <Style x:Key="FeedEntryItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">       
         <Setter Property="Margin" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
         <Setter Property="Padding" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
         <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
@@ -28,6 +29,7 @@
           <Setter.Value>
             <ControlTemplate TargetType="{x:Type ListBoxItem}">
               <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                
                 <Grid >
                   <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                 </Grid>
@@ -65,6 +67,7 @@
                      Style="{StaticResource FeedEntriesListStyle}">
         <i:Interaction.Behaviors>
           <ctrls:ListBoxScrollToTopBehavior />
+          <ctrls:ListBoxPreventRequestBringIntoViewBehavior/>
         </i:Interaction.Behaviors>
       </ListBox>
       <Grid VerticalAlignment="Top" x:Name="_indicator"
