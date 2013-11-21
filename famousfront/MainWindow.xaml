@@ -53,8 +53,8 @@
    -->
   <Grid
   params:General.ShadowBrush="{StaticResource ForegroundBrush}"
-  params:General.TextFontSize="{StaticResource FiveTextSize}"
-  params:General.ContentFontSize="{StaticResource LittleFourTextSize}"
+  params:General.TextFontSize="{StaticResource LittleFiveTextSize}"
+  params:General.ContentFontSize="{StaticResource FiveTextSize}"
   params:General.TitleFontSize="{StaticResource LittleThreeTextSize}"
   params:General.HeaderFontSize="{StaticResource ThreeTextSize}"    >
     <ContentPresenter x:Name="_content"/>
