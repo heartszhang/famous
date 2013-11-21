@@ -34,10 +34,22 @@ namespace famousfront.viewmodels
             {
                 Media = new ImageGalleryViewModel(_.images);
             }
-            if (media != 0)
+            if (_.videos != null)
             {
                 Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : null);
             }
+            else if (_.audios != null)
+            {
+              Media = new MediaElementViewModel(_.audios[0], (imgone | imgmany) != 0 ? _.images[0] : null);
+            }
+            
+        }
+        public DateTime PubDate
+        {
+          get 
+          {
+            return utime.AddMilliseconds(_.pubdate / 1e6); 
+          }
         }
         public bool HasMedia
         {
@@ -72,7 +84,7 @@ namespace famousfront.viewmodels
 
         string publish_day()
         {
-            var p = utime.AddMilliseconds(_.pubdate / 1000000);
+            var p = utime.AddMilliseconds(_.pubdate / 1e6);
             return p.ToString("D");
         }
         TaskViewModel _media;
@@ -98,23 +110,26 @@ namespace famousfront.viewmodels
         }
         ICommand toggle_expandsummary()
         {
-          return new RelayCommand<MouseButtonEventArgs>(ExecuteToggleExpandSummary);
+          return new RelayCommand(ExecuteToggleExpandSummary);
         }
-        bool _expanded = true;
+        bool _expanded ;
         public bool IsExpanded
         {
           get { return _expanded; }
           protected set { Set(ref _expanded, value); }
         }
-        private void ExecuteToggleExpandSummary(MouseButtonEventArgs args)
+        private void ExecuteToggleExpandSummary()
         {
-          args.Handled = true;
           Summary = _.content;
           IsExpanded = !IsExpanded;
         }
         public bool CanExpand
         {
-          get { return (_.status & (FeedStatuses.Feed_status_content_empty | FeedStatuses.Feed_status_summary_empty)) == 0ul; }
+          get 
+          {
+            var flag = FeedStatuses.Feed_status_content_empty | FeedStatuses.Feed_status_summary_empty;
+            return (_.status & flag) == 0ul; 
+          }
         }
     }
 }
