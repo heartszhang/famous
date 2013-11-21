@@ -32,6 +32,10 @@ func unixtime_nano_rfc822(t string, formats ...string) int64 {
 	if err == nil {
 		return x.UnixNano()
 	}
+	x, err = time.Parse(time.RFC822, t) // RSS 2.0 spec
+	if err == nil {
+		return x.UnixNano()
+	}
 	for _, f := range formats {
 		x, err := time.Parse(f, t)
 		if err == nil {
