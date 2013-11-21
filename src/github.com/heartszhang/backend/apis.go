@@ -144,7 +144,10 @@ func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err 
 	if cache.LocalUtf8 != "" {
 		v, err = feed.MakeFeedSource(cache.LocalUtf8)
 	}
-	if err == nil {
+	if v.Uri == "" {
+		v.Uri = uri
+	}
+	if err == nil && v.Uri != "" {
 		err = fso.upsert(&v)
 	}
 	return v, err
