@@ -16,6 +16,7 @@ using famousfront.utils;
 
 namespace famousfront.controls
 {
+
     class ListBoxScrollToTopBehavior : Behavior<ListBox>
     {
         protected override void OnAttached()
@@ -31,29 +32,45 @@ namespace famousfront.controls
         }
         void OnItemsSourceChanged(object o, EventArgs args)
         {
-            var sc = GetVisualChild<ScrollViewer>(AssociatedObject) as ScrollViewer;
+          var sc = VisualTreeExtensions.FindVisualChild<ScrollViewer>(AssociatedObject) as ScrollViewer;
             if (sc == null)
                 return;
             sc.ScrollToTop();
         }
-        private T GetVisualChild<T>(DependencyObject parent) where T : Visual
-        {
-            T child = default(T);
-            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < numVisuals; i++)
-            {
-                Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
-                child = v as T;
-                if (child == null)
-                {
-                    child = GetVisualChild<T>(v);
-                }
-                if (child != null)
-                {
-                    break;
-                }
-            }
-            return child;
-        }
     }
-}
+    class ListBoxPreventRequestBringIntoViewBehavior : Behavior<ListBox>
+    {
+      protected override void OnAttached()
+      {
+        base.OnAttached();
+        TryHook();
+        AssociatedObject.Loaded += new RoutedEventHandler(OnAssociatedObject).MakeWeakSpecial(eh=>AssociatedObject.Loaded -= eh);
+      }
+      bool _hooked;
+      void OnAssociatedObject(object sender, RoutedEventArgs e)
+      {
+        if (_hooked)
+          return;
+        TryHook();
+      }
+      void TryHook()
+      {
+        var scp = VisualTreeExtensions.FindVisualChild<ScrollContentPresenter>(AssociatedObject);
+        if (scp == null)
+          return;
+        _hooked = true;
+        scp.RequestBringIntoView += new RequestBringIntoViewEventHandler(PreventRequestBringIntoView).MakeWeakSpecial(eh =>
+        {
+          scp.RequestBringIntoView -= eh;
+        });
+      }
+      void PreventRequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+      {
+        e.Handled = true;
+      }
+    }
+    class ScrollViewerPreventRequestBringIntoViewBehavior : Behavior<ScrollViewer>
+    {
+
+    }
+  }
