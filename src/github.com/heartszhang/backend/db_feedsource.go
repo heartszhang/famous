@@ -17,6 +17,9 @@ func (this feedsource_op) save(feeds []feed.FeedSource) (inserted []feed.FeedSou
 	inserted = make([]feed.FeedSource, 0)
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
 		for _, f := range feeds {
+			if f.Uri == "" {
+				return db_error("feedsource.uri cannot be null")
+			}
 			ci, err := coll.Upsert(bson.M{"uri": f.Uri}, bson.M{"$setOnInsert": f})
 			if err != nil {
 				return err
@@ -78,7 +81,7 @@ func (this feedsource_op) findbatch(uris []string) ([]feed.FeedSource, error) {
 func (this feedsource_op) all() (feds []feed.FeedSource, err error) {
 	feds = make([]feed.FeedSource, 0)
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"disabled": false, "uri": bson.M{"$not": ""}}).All(&feds)
+		return coll.Find(bson.M{"disabled": false, "uri": bson.M{"$ne": ""}}).All(&feds)
 	})
 	return
 }
@@ -95,4 +98,10 @@ func (this feedsource_op) touch(uri string, ttl int) error {
 	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"due_at": dl}})
 	})
+}
+
+type db_error string
+
+func (this db_error) Error() string {
+	return string(this)
 }
