@@ -13,7 +13,8 @@ namespace famousfront.viewmodels
 {
     internal class FeedSourceViewModel : famousfront.core.ViewModelBase
     {
-        FeedSource _ = null;
+      static readonly System.DateTime utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+      FeedSource _ = null;
         internal FeedSourceViewModel(FeedSource val)
         {
             _ = val;
@@ -39,6 +40,13 @@ namespace famousfront.viewmodels
         {
             get { return _.unreaded; } 
             private set { if (_.unreaded == value) return; _.unreaded = value; RaisePropertyChanged(); } 
+        }
+        public DateTime PubDate
+        {
+          get
+          {
+            return utime.AddMilliseconds(_.update / 1e6);
+          }
         }
 
         string _category = null;
