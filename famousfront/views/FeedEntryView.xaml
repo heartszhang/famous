@@ -12,6 +12,24 @@
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" d:IsDesignTimeCreatable="false">
     <DataTemplate.Resources>
+      <Style x:Key="DropDownCommandButtonSimpleStyle" TargetType="{x:Type metro:DropDownCommandButton}" BasedOn="{StaticResource {x:Type metro:DropDownCommandButton}}">
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type metro:DropDownCommandButton}">
+              <Grid Background="Transparent" RenderOptions.ClearTypeHint="{TemplateBinding RenderOptions.ClearTypeHint}" TextElement.Foreground="{TemplateBinding Foreground}" TextElement.FontWeight="{TemplateBinding FontWeight}" TextElement.FontStyle="{TemplateBinding FontStyle}" TextElement.FontStretch="{TemplateBinding FontStretch}" TextElement.FontSize="{TemplateBinding FontSize}" TextElement.FontFamily="{TemplateBinding FontFamily}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" TextOptions.TextRenderingMode="{TemplateBinding TextOptions.TextRenderingMode}" TextOptions.TextFormattingMode="{TemplateBinding TextOptions.TextFormattingMode}">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="*"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Ellipse x:Name="PART_Decor" Visibility="Collapsed"/>
+                <ContentPresenter x:Name="PART_ContentHost" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="Center" Margin="{TemplateBinding Padding}" Grid.Row="0" RecognizesAccessKey="True" VerticalAlignment="Center"/>
+                <ContentPresenter x:Name="PART_HeaderHost" ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" ContentStringFormat="{TemplateBinding HeaderStringFormat}" HorizontalAlignment="Center" Margin="{TemplateBinding Padding}" Grid.Row="1"/>
+                <Popup x:Name="PART_Popup" AllowsTransparency="True" IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" MaxHeight="{TemplateBinding MaxDropDownHeight}" Placement="Left" Grid.Row="1" StaysOpen="False" VerticalOffset="{TemplateBinding ActualHeight}" HorizontalOffset="{TemplateBinding ActualWidth}"/>
+              </Grid>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
       <Style TargetType="{x:Type FlowDocument}" x:Key="FeedEntryFlowDocumentStyle">
         <Style.Resources>
           <Style TargetType="{x:Type Image}">
@@ -24,7 +42,7 @@
         <Setter Property="Block.LineHeight" Value="{Binding Flags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
       </Style>
     </DataTemplate.Resources>
-    <StackPanel metro:ApplicationBar.PreventsOpen="true" Background="Transparent">
+    <StackPanel x:Name="_root" metro:ApplicationBar.PreventsOpen="true" Background="Transparent">
       <!--
       <i:Interaction.Triggers>
         <i:EventTrigger EventName="MouseLeftButtonUp">
@@ -33,13 +51,57 @@
       </i:Interaction.Triggers>
       -->
       <StackPanel.ContextMenu>
-        <ContextMenu>
-          <MenuItem Header="Expand/Unexpand Body" Command="{Binding ToggleExpandSummaryCommand}" IsCheckable="{Binding CanExpand,Mode=OneWay}" IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
+        <ContextMenu x:Name="_menu">
+          <MenuItem Header="Expand/Unexpand Body" 
+                    Command="{Binding ToggleExpandSummaryCommand}" 
+                    IsEnabled="{Binding CanExpand,Mode=OneWay}" 
+                    IsCheckable="{Binding CanExpand,Mode=OneWay}" 
+                    IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
           <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
           <MenuItem Header="Unsubscribe this" />
         </ContextMenu>
       </StackPanel.ContextMenu>
-      <TextBlock x:Name="_title" Text="{Binding Title}" Style="{StaticResource TextBlockHeaderStyle}" TextWrapping="WrapWithOverflow"/>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+      <TextBlock x:Name="_title" 
+                 Text="{Binding Title}" 
+                 Style="{StaticResource TextBlockHeaderStyle}" TextWrapping="WrapWithOverflow" TextTrimming="CharacterEllipsis"/>
+        <Grid Grid.Column="1" params:General.ContentFontSize="{StaticResource FiveTextSize}"
+              Visibility="{Binding IsMouseOver,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}, ElementName=_root,FallbackValue=Collapsed}" 
+              TextElement.FontFamily="{StaticResource SymbolFont}">
+ <!--         <TextBlock Background="Transparent" Text="&#xe015;" 
+                     HorizontalAlignment="Center" Padding="12,0" x:Name="_tools"/>-->
+          <metro:DropDownCommandButton Content="&#xe015;" Padding="0" 
+                                       Style="{DynamicResource DropDownCommandButtonSimpleStyle}">
+            <metro:DropDownCommandButton.Submenu>
+              <metro:Submenu>
+                <MenuItem Header="Expand/Unexpand Body" 
+                    Command="{Binding ToggleExpandSummaryCommand}" 
+                    IsEnabled="{Binding CanExpand,Mode=OneWay}" 
+                    IsCheckable="{Binding CanExpand,Mode=OneWay}" 
+                    IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
+                <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
+                <MenuItem Header="Unsubscribe this" />
+              </metro:Submenu>
+            </metro:DropDownCommandButton.Submenu>
+          </metro:DropDownCommandButton>
+        </Grid>
+      </Grid>
+      <Grid x:Name="_headnote">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid TextElement.Foreground="{StaticResource PaleBrush}">
+          <TextBlock VerticalAlignment="Center" Text="{Binding PubDate,Mode=OneWay}" />
+        </Grid>
+        <StackPanel Grid.Column="1"
+          Orientation="Horizontal" params:General.ContentFontSize="{StaticResource LittleFiveTextSize}">
+        </StackPanel>
+      </Grid>
       <Grid x:Name="_media_room" Margin="0,8" 
             Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
         <ContentPresenter Content="{Binding Media}"/>
@@ -53,14 +115,6 @@
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
       </Grid>
     </StackPanel>
-
-  </DataTemplate>
-
-  <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" x:Key="MediaOneTemplate">
-    <Grid x:Name="_media_room"
-            Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
-      <ContentPresenter Content="{Binding Media}"/>
-    </Grid>
   </DataTemplate>
 
 </ResourceDictionary>
