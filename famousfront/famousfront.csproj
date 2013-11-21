@@ -108,6 +108,7 @@
     <Compile Include="controls\ListBoxScrollToTopBehavior.cs" />
     <Compile Include="utils\HyperlinkOptions.cs" />
     <Compile Include="utils\ElementOptions.cs" />
+    <Compile Include="utils\VisualTreeExtensions.cs" />
     <Compile Include="viewmodels\FeedSourceFindEntryViewModel.cs" />
     <Compile Include="viewmodels\FeedSourceFindViewModel.cs" />
     <Compile Include="viewmodels\ImageBaseViewModel.cs" />
