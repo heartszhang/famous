@@ -5,7 +5,7 @@ import (
 )
 
 func TestMakeFeedSource(t *testing.T) {
-	fp := `E:\SOURCESAFE\famous\src\github.com\heartszhang\backend\run\data\sources\xml.054210088`
+	fp := `g:\a.xml`
 	fs, err := MakeFeedSource(fp)
 	t.Log(fs, err)
 	if err != nil {
