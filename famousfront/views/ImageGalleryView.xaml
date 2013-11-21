@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:ctrl="clr-namespace:famousfront.controls"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
-  <DataTemplate DataType="{x:Type vm:ImageGalleryViewModel}">
+  <DataTemplate DataType="{x:Type vm:ImagePanelViewModel}">
     <Grid>
       <ItemsControl ItemsSource="{Binding Images}" >
         <ItemsControl.ItemsPanel>
@@ -17,5 +17,23 @@
         </ItemsControl.ItemContainerStyle>
       </ItemsControl>
     </Grid>    
+  </DataTemplate>
+  <DataTemplate DataType="{x:Type vm:ImageGalleryViewModel}">
+    <Grid Background="Transparent">
+      <Grid.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="ShowGallery" 
+                    Command="{Binding ToggleShowPanelCommand}" 
+                    IsCheckable="True" 
+                    IsChecked="{Binding IsShowPanel,Mode=OneWay}"/>
+        </ContextMenu>
+      </Grid.ContextMenu>
+      <ContentPresenter Content="{Binding ImageElementViewModel}" x:Name="_content"/>
+    </Grid>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding IsShowPanel}" Value="True">
+        <Setter Property="Content" Value="{Binding ImagePanelViewModel}" TargetName="_content"/>
+      </DataTrigger>
+    </DataTemplate.Triggers>
   </DataTemplate>
 </ResourceDictionary>
