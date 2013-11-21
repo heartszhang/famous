@@ -5,6 +5,7 @@ import (
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/markhtml"
 	"io/ioutil"
 	"log"
 	"sync"
@@ -58,6 +59,8 @@ func feedentry_make_flowdoc(frag *html.Node, words, linkwords int, medias, imgs 
 		v = empty_flowdocument
 		s |= emptyflag
 	case medias < 4: // a little images
+		v = make_flowdocument(frag, true)
+	case medias > 5:
 		v = make_flowdocument(frag, true)
 	case medias > 1 && imgs > 0 && medias > imgs: // has au/video
 		v = make_flowdocument(frag, true)
@@ -147,13 +150,13 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 		}
 		if entry.Status&feed.Feed_status_text_empty != 0 {
 			d := entry.Title.Main
-			if entry.Status&feed.Feed_status_image_one != 0 && len(entry.Images[0].Description) == 0 {
-				entry.Images[0].Description = d
-			}
-			if entry.Status&feed.Feed_status_media_one != 0 && len(entry.Videos[0].Description) == 0 {
+			if len(entry.Videos) > 0 && entry.Videos[0].Description == "" {
 				entry.Videos[0].Description = d
 			}
-			if entry.Status&feed.Feed_status_image_many != 0 && len(entry.Images[0].Description) == 0 {
+			if len(entry.Audios) > 0 && entry.Audios[0].Description == "" {
+				entry.Audios[0].Description = d
+			}
+			if len(entry.Images) > 0 && entry.Images[0].Description == "" {
 				entry.Images[0].Description = d
 			}
 		}
@@ -219,7 +222,9 @@ func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 		entry.Status |= feed.Feed_status_summary_empty
 		return
 	}
-	score := feedentry_eval_text(entry, entry.Summary, feed.Feed_status_summary_empty, feed.Feed_status_summary_ready, feed.Feed_status_summary_duplicated, feed.Feed_status_summary_mediainline, true)
+	txt := markhtml.TransferText(entry.Summary)
+
+	score := feedentry_eval_text(entry, txt, feed.Feed_status_summary_empty, feed.Feed_status_summary_ready, feed.Feed_status_summary_duplicated, feed.Feed_status_summary_mediainline, true)
 	entry.Summary = score.flowdoc
 	entry.Status |= score.status
 	if entry.Words < uint(score.WordCount) {
@@ -236,15 +241,18 @@ func feedentry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	}
 	backup := entry.Summary
 	entry.Status |= feed.Feed_status_content_inline
+	//	txt := markhtml.TransferText(entry.Content)
 	score := feedentry_eval_text(entry, entry.Content, feed.Feed_status_content_empty, feed.Feed_status_content_ready, feed.Feed_status_content_duplicated, feed.Feed_status_content_mediainline, false)
 	entry.Status |= score.status
-	if entry.Words < uint(score.WordCount) {
-		entry.Summary = score.flowdoc
+	if entry.Status&feed.Feed_status_content_empty == 0 {
 		entry.Words = uint(score.WordCount)
 		entry.Density = uint(score.LinkWordCount * 100 / score.WordCount)
-		entry.Content = backup
-	} else {
-		entry.Content = score.flowdoc
+		if entry.Status&feed.Feed_status_summary_empty != 0 {
+			entry.Summary = score.flowdoc
+			entry.Content = backup
+		} else {
+			entry.Content = score.flowdoc
+		}
 	}
 }
 
