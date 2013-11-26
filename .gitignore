@@ -64,3 +64,4 @@ sample_*/
 data/
 *.xml
 *.opml
+.idea/
