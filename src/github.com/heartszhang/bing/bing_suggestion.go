@@ -1,4 +1,4 @@
-package bingsearchservice
+package bing
 
 import (
 	"github.com/heartszhang/curl"
