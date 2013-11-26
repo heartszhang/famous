@@ -6,18 +6,7 @@ import (
 	"io"
 	"os"
 	"strings"
-	"time"
 )
-
-/*
-func CreateFeedSourceRss2(rss2file string) (FeedSource, error) {
-	return feed_source_create_rss2(rss2file)
-}
-
-func CreateFeedEntriesRss2(rss2file string) ([]FeedEntry, error) {
-	return feed_entries_create_rss2(rss2file)
-}
-*/
 
 type rss_channel struct {
 	Title           string     `xml:"title,omityempty"` // required  unique?
@@ -76,6 +65,28 @@ type rss struct {
 	Version string      `xml:"version,attr"` // 2.0
 }
 
+func feed_from_rss(filepath string) (FeedSource, []FeedEntry, error) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return FeedSource{}, nil, err
+	}
+	defer f.Close()
+
+	decoder := xml.NewDecoder(f)
+	decoder.CharsetReader = charset_reader_passthrough
+
+	var (
+		v   rss
+		fs  FeedSource
+		fes []FeedEntry
+	)
+	err = decoder.Decode(&v)
+	fs = v.Channel.to_source()
+	fes = v.Channel.to_entries()
+
+	return fs, fes, err
+}
+
 // file has already converted to utf-8
 func feedsource_from_rss(filepath string) (FeedSource, error) {
 	f, err := os.Open(filepath)
@@ -92,7 +103,9 @@ func feedsource_from_rss(filepath string) (FeedSource, error) {
 		fs FeedSource
 	)
 	err = decoder.Decode(&v)
-	fs = v.Channel.to_source()
+	if err == nil {
+		fs = v.Channel.to_source()
+	}
 	return fs, err
 }
 
@@ -131,7 +144,6 @@ func (this rss_channel) to_source() FeedSource {
 		Uri:         this.self(),
 		Local:       "", // filled later
 		Period:      this.ttl(),
-		Deadline:    unixtime_nano_rfc822(this.LastBuildDate) + int64(this.ttl())*int64(time.Hour),
 		Type:        Feed_type_rss,
 		Disabled:    false,
 		EnableProxy: false,
