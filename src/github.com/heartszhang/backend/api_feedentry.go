@@ -1,9 +1,10 @@
 package backend
-import(
-	feed "github.com/heartszhang/feedfeed"
+
+import (
 	"fmt"
-	"github.com/heartszhang/curl"
 	"github.com/heartszhang/cleaner"
+	"github.com/heartszhang/curl"
+	feed "github.com/heartszhang/feedfeed"
 )
 
 // since_unixtime , 0: from now
@@ -45,12 +46,12 @@ func feedentry_umark(uri string, flags uint) (uint, error) {
 }
 
 // /feed/entry/full_text.json/{url}/{entry_id}
-func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err error) {
+func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err error) {
 	c := curl.NewCurl(config.DocumentFolder)
 	cache, err := c.GetUtf8(uri)
 	v.Uri = uri
 	v.Local = cache.LocalUtf8
-	v.Length = cache.LengthUtf8
+	//	v.Length = cache.LengthUtf8
 	if err != nil {
 		return v, err
 	}
@@ -69,9 +70,9 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedLink, err erro
 		v.Images[idx].Height = int(img.Height)
 		v.Images[idx].Description = img.Alt
 	}
-	v.Words = sum.WordCount
-	v.Links = sum.LinkCount
-	v.CleanedLocal, err = html_write_file(article, config.DocumentFolder)
+	v.Words = uint(sum.WordCount)
+	v.Links = uint(sum.LinkCount)
+	v.Local, err = html_write_file(article, config.DocumentFolder)
 	return v, err
 }
 
