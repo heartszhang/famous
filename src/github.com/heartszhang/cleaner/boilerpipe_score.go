@@ -99,13 +99,6 @@ func (this *boilerpipe_score) add(rhs boilerpipe_score) {
 	//  this.forms += rhs.forms
 }
 
-func int_min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 //有链接链接文字的情况，认为全部是图片链接
 func (this *boilerpipe_score) link_density() int {
 	switch {

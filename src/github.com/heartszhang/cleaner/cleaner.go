@@ -1,3 +1,7 @@
+// 清理html中的不可见元素，例如css/script/comment/br/meta/
+// 清理显而易见的非正文内容，如0长宽的img/不可见elementNode/form/nav/menu
+// 平面化html，将嵌套的block展开成block列表；每个block仅允许inline类型的element
+
 package cleaner
 
 import (
@@ -125,6 +129,7 @@ func html_clean_root(root *html.Node, uribase string) *html.Node {
 	return cleaner.article
 }
 
+//discuzz和phpwnd论坛页面以table构成，这种页面通过table中的文字数量判定原帖正文。如果原帖内容很少会可能造成误判
 func (this *html_cleaner) try_catch_phpwnd() {
 	// have not table, or some  content not in table
 	if len(this.tds) == 0 || this.table_words*100/(this.text_words+1) < 33 {
@@ -139,7 +144,7 @@ func (this *html_cleaner) try_catch_phpwnd() {
 	if top.element == nil {
 		return
 	}
-	//remove_decentant(top.element, "table")
+
 	this.article = top.element
 }
 
@@ -148,7 +153,7 @@ var (
 )
 
 //清除所有的脚本，css和Link等等不能显示的内容
-//多文档结构进行统计
+//对文档结构进行统计
 func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n *html.Node) {
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
 		if child.Type == html.CommentNode {
@@ -161,10 +166,9 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 			if unlikely.MatchString(idc) {
 				drop = true
 				*dropping = append(*dropping, child)
-				//				log.Println("dropping by class-id", idc, ", of ", child.Data)
 			} else {
 				switch child.Data {
-				case "script", "link", "iframe", "nav", "aside", "noscript", "style", "input", "textarea", "marquee":
+				case "script", "link", "iframe", "nav", "aside", "noscript", "style", "input", "textarea", "marquee", "menu":
 					*dropping = append(*dropping, child)
 					drop = true
 				case "meta":
@@ -207,18 +211,19 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 				case "option":
 					child.Data = "a"
 				case "img":
-					cleaner.imgs++
-					if node_is_ownered_by_a(child) {
-						cleaner.link_imgs++
-					}
-					//					log.Println(get_attribute(child, "src"))
 					drop = trim_small_image(child)
 					if !drop {
 						drop = trim_invisible_image(child)
 					}
 					if drop {
 						*dropping = append(*dropping, child)
+					} else {
+						cleaner.imgs++
+						if node_is_in_a(child) {
+							cleaner.link_imgs++
+						}
 					}
+
 				case "a":
 					cleaner.links++
 					cleaner.fix_a_href(child)
@@ -237,7 +242,7 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 			child.Data = merge_tail_spaces(child.Data)
 			l := new_boilerpipe_score(child).words
 			cleaner.text_words += l
-			if node_is_ownered_by_a(child) {
+			if node_is_in_a(child) {
 				cleaner.anchor_words += l
 			}
 		}
@@ -292,28 +297,18 @@ func trim_invisible_image(img *html.Node) (drop bool) {
 	}
 	return
 }
-func remove_children(a *html.Node) {
-	for a.FirstChild != nil {
-		a.RemoveChild(a.FirstChild)
-	}
-}
-
-func trim_display_none(n *html.Node) {
-	st := node_get_attribute(n, "style")
-	if strings.Contains(st, "display") && (strings.Contains(st, "none")) {
-		//		log.Println("hide-node display:none", n.Data)
-		n.Data = "input"
-	}
-}
 
 // reserve id, class, href, src, width, height, alt
+// class,id会用于后面正文内容的判定
+// width/height/alt会用于判定image时候是正文
 func (this *html_cleaner) clean_attributes(n *html.Node) {
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
 		this.clean_attributes(child)
 	}
-	attrs := []html.Attribute{}
+	var attrs []html.Attribute
 	for _, attr := range n.Attr {
-		if attr.Key == "id" || attr.Key == "class" || attr.Key == "href" || attr.Key == "src" || attr.Key == "width" || attr.Key == "height" || attr.Key == "alt" {
+		switch attr.Key {
+		case "id", "class", "href", "src", "width", "height", "alt":
 			attrs = append(attrs, attr)
 		}
 	}
@@ -397,9 +392,7 @@ func (this *html_cleaner) flatten_inline_node(n *html.Node) []*html.Node {
 		switch {
 		case i.Type == html.TextNode:
 			fallthrough
-		case i.Data == "img":
-			fallthrough
-		case i.Data == "object" || i.Data == "video" || i.Data == "audio" || i.Data == "embed":
+		case strings_find([]string{"img", "obj", "video", "audio", "embed"}, i.Data):
 			inlines = append(inlines, i)
 		case node_is_block(i) == true:
 			fallthrough
@@ -416,17 +409,6 @@ func (this *html_cleaner) flatten_inline_node(n *html.Node) []*html.Node {
 	}
 	return inlines
 }
-
-/*
-func (this *html_cleaner) clean_form() {
-	if this.forms == nil || len(this.forms) == 0 {
-		return
-	}
-	for _, form := range this.forms {
-		form.Parent.RemoveChild(form)
-	}
-}
-*/
 
 //节点中没有可显示内容，也没有form等等后续需要处理的节点就是空节点
 func (this *html_cleaner) clean_empty_nodes(n *html.Node) {
@@ -473,7 +455,7 @@ func (this *html_cleaner) trim_empty_spaces(n *html.Node) {
 }
 
 const (
-	link_img_as_words_c = 4
+	link_img_as_words_c = 4 // 没有使用img的width和alt属性，不能过分提高img的权重
 )
 
 func (this *html_cleaner) link_density() int {
@@ -504,13 +486,6 @@ func (this *html_cleaner) String() string {
 		", h3:", len(this.header3s))
 }
 
-/*
-func new_html_cleaner(u string) *html_cleaner {
-	rtn := &html_cleaner{}
-	rtn.current_url, _ = url.Parse(u)
-	return rtn
-}
-*/
 func (cleaner *html_cleaner) grab_keywords(meta *html.Node) {
 }
 
@@ -527,7 +502,6 @@ func (this *html_cleaner) fix_forms() {
 		if pcnt > 33 {
 			form.Data = "div"
 		}
-		//		log.Println("fix form", pcnt, form)
 	}
 }
 
@@ -544,7 +518,7 @@ func (this *html_cleaner) fix_a_href(a *html.Node) {
 	node_update_attribute(a, "href", abs.String())
 }
 
-//return local_filepath, words, images
+//return content and docsummary
 func clean_fragment(cont, uri string) (string, *DocumentSummary) {
 	doc, err := html.Parse(strings.NewReader(cont))
 	if err != nil {

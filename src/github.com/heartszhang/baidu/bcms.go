@@ -52,6 +52,7 @@ type BaiduMessageQueue interface {
 	FetchOneAsJson(v interface{}) error
 }
 
+// via bcms rest api
 func NewBcms(qname, accesstoken, clientid, clientsecret string) BaiduMessageQueue {
 	return bcms_queue{
 		queue_name:    qname,
@@ -61,6 +62,8 @@ func NewBcms(qname, accesstoken, clientid, clientsecret string) BaiduMessageQueu
 	}
 }
 
+// via iweizhi2.duapp.com/popup.json
+// only support popup_one
 func NewBcmsProxy(popaddress string) BaiduMessageQueue {
 	return bcms_proxy{popaddress}
 }
@@ -75,6 +78,7 @@ type bcms_queue struct {
 	client_secret string
 }
 
+// bcms rest api common parameters
 type bcms_common struct {
 	method       string `param:"method"`
 	timestamp    uint   `param:"timestamp"`
@@ -91,14 +95,6 @@ type bcms_fetch struct {
 	fetch_num *uint `param:"fetch_num"`
 }
 
-func unix_current() uint {
-	return uint(time.Now().Unix())
-}
-
-func (this bcms_proxy) FetchAny(msgid, fetch_num *uint) ([]string, error) {
-	panic("not implemented yet")
-}
-
 func (this bcms_queue) FetchAny(msgid, fetch_num *uint) ([]string, error) {
 	v := make([]string, 0)
 	var err error
@@ -113,7 +109,7 @@ func (this bcms_queue) FetchAny(msgid, fetch_num *uint) ([]string, error) {
 		fetch_num: fetch_num,
 	}
 
-	bcmsr := struct {
+	var bcmsr struct {
 		RequestId int64 `json:"request_id"`
 		Response  struct {
 			MessageNum int `json:"message_num"`
@@ -122,10 +118,9 @@ func (this bcms_queue) FetchAny(msgid, fetch_num *uint) ([]string, error) {
 				Message string `json:"message"`
 			} `json:"messages,omitempty"`
 		} `json:"response_params"`
-	}{}
+	}
 	uri := bcms_urlbase + this.queue_name
-	sign := bcms_sign("POST", uri, q, this.client_secret)
-	q.sign = sign
+	q.sign = bcms_sign("POST", uri, q, this.client_secret) // use client_secret to sign post-params
 	vals := oauth2.HttpQueryValues(q)
 	c := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
 	err = c.PostFormAsJson(uri, vals, &bcmsr)
@@ -136,10 +131,6 @@ func (this bcms_queue) FetchAny(msgid, fetch_num *uint) ([]string, error) {
 		}
 	}
 	return v, err
-}
-
-func (this bcms_proxy) FetchAnyAsJson(msgid, fetchnum *uint, v interface{}) error {
-	panic("not implemented yet")
 }
 
 func (this bcms_queue) FetchAnyAsJson(msgid, fetchnum *uint, v interface{}) error {
@@ -170,21 +161,12 @@ func (this bcms_queue) FetchAnyAsJson(msgid, fetchnum *uint, v interface{}) erro
 	return err
 }
 
-func (this bcms_proxy) FetchOne() (string, error) {
-	panic("not implemented yet")
-}
-
 func (this bcms_queue) FetchOne() (string, error) {
 	v, err := this.FetchAny(nil, nil)
 	if len(v) > 0 {
 		return v[0], err
 	}
 	return "", err
-}
-
-func (this bcms_proxy) FetchOneAsJson(v interface{}) error {
-	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
-	return client.GetAsJson(this.uri, v)
 }
 
 func (this bcms_queue) FetchOneAsJson(v interface{}) error {
@@ -195,4 +177,24 @@ func (this bcms_queue) FetchOneAsJson(v interface{}) error {
 
 	err = json.Unmarshal([]byte(m), v)
 	return err
+}
+
+func (this bcms_proxy) FetchOneAsJson(v interface{}) error {
+	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
+	return client.GetAsJson(this.uri, v)
+}
+
+func (this bcms_proxy) FetchOne() (string, error) {
+	panic("not implemented yet")
+}
+func (this bcms_proxy) FetchAnyAsJson(msgid, fetchnum *uint, v interface{}) error {
+	panic("not implemented yet")
+}
+
+func unix_current() uint {
+	return uint(time.Now().Unix())
+}
+
+func (this bcms_proxy) FetchAny(msgid, fetch_num *uint) ([]string, error) {
+	panic("not implemented yet")
 }

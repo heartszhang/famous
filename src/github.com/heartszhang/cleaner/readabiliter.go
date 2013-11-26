@@ -1,3 +1,4 @@
+// nreadability algorithm
 package cleaner
 
 import (
@@ -50,7 +51,7 @@ func (this *readabilitier) create_article() (*html.Node, *html.Node) {
 	if this.article == nil {
 		return doc, article
 	}
-	threshold := max(10, this.article.content_score/5)
+	threshold := int_max(10, this.article.content_score/5)
 
 	class_name := node_get_attribute(this.article.element, "class")
 
@@ -66,17 +67,14 @@ func (this *readabilitier) create_article() (*html.Node, *html.Node) {
 			cn := node_get_attribute(neib, "class")
 			if len(cn) > 0 && cn == class_name {
 				append = true
-				//				log.Println("append same class", ext)
 			}
 			if ext.content_score > threshold {
 				append = true
-				//				log.Println("append high score neib", ext)
 			}
 		} else if neib.Type == html.ElementNode && neib.Data == "p" {
 			sc := new_boilerpipe_score(neib)
 			if sc.words > 65 && sc.link_density() < 22 {
 				append = true
-				//				log.Println("append high p", neib)
 			}
 		}
 		if append {
@@ -123,8 +121,8 @@ func (this *readabilitier) make_readability_score(n *html.Node) *readability_sco
 	bc := new_boilerpipe_score(n)
 	score := bc.commas + 1
 	// wrap lines
-	score += min(bc.lines(), 3)
-	score += min(bc.imgs*3, 3)
+	score += int_min(bc.lines(), 3)
+	score += int_min(bc.imgs*3, 3)
 	rtn.content_score += score
 
 	if pext != nil {

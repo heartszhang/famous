@@ -1,3 +1,4 @@
+// cleaner export functions
 package cleaner
 
 import (
@@ -19,19 +20,25 @@ type html_extractor struct {
 func NewExtractor(tmpdir string) Extractor {
 	return html_extractor{temp_dir: tmpdir}
 }
+
+//doc可能没有html/body父节点
 func (this html_extractor) MakeFragmentReadable(doc *html.Node) (*html.Node, *DocumentSummary, error) {
+	//清理确定无疑的非正文内容
 	article := html_clean_fragment(doc)
 	of, err := write_file(doc, this.temp_dir)
 	log.Println("clean-fragment", of, err)
 
+	//查找文档正文节点，并将其平面化
 	doc1, article := readabilitier_make_readable(article)
 	of, err = write_file(doc1, this.temp_dir)
 	log.Println("make-readable", of, err)
 
+	// 去除正文中的广告群
 	article, images := boiler_clean_by_link_density(article)
 	//of, err = write_file(doc1, this.temp_dir)
 	//log.Println("clean-by-density", of, err)
 
+	// 对于以table为主的论坛页面，取出其中的正文table节点
 	article = boiler_clean_form_prefix(article)
 	//	of, err = write_file(doc1, this.temp_dir)
 	//	log.Println("clean-form", of, err)

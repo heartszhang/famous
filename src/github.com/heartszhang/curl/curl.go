@@ -19,14 +19,16 @@ import (
 )
 
 type Cache struct {
-	Length      int64
-	Mime        string
-	Charset     string
-	Local       string
-	Disposition string
-	LocalUtf8   string
-	LengthUtf8  int64
-	StatusCode  int
+	Length       int64
+	Mime         string
+	Charset      string
+	Local        string
+	Disposition  string
+	LocalUtf8    string
+	LastModified string
+	ETag         string
+	LengthUtf8   int64
+	StatusCode   int
 }
 
 const (
@@ -39,7 +41,6 @@ type Curler interface {
 	Get(uri string) (Cache, error)
 	GetUtf8(uri string) (Cache, error)
 	GetAsJson(uri string, val interface{}) error
-	//	GetLocalAsJson(uri string, val interface{}) (Cache, error)
 	GetAsString(uri string) (string, error)
 	PostForm(uri string, form url.Values) (int, error)
 	PostFormAsString(uri string, form url.Values) (string, error)
@@ -74,7 +75,7 @@ func NewCurlerDetail(datadir string, proxypolicy, dialtimeo int, intercepter Cur
 
 const (
 	connection_speedup_timeout = 4
-	connection_timeout         = 14 //seconds
+	connection_timeout         = 14 // seconds
 	response_timeout           = 20 // seconds
 )
 
@@ -332,7 +333,7 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 		return v, err
 	}
 	defer in.Close()
-	in2, err := NewUtf8Reader(v.Charset, in)
+	in2, err := new_utf8_reader(v.Charset, in)
 	if err != nil {
 		return v, err
 	}
@@ -395,7 +396,7 @@ func (this *curler) PostFormAsString(uri string, form url.Values) (string, error
 		return "", curler_error{resp.StatusCode, resp.Status}
 	}
 	_, cs, _ := extract_charset(resp.Header.Get("content-type"))
-	ireader, err := NewUtf8Reader(cs, resp.Body)
+	ireader, err := new_utf8_reader(cs, resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -414,7 +415,7 @@ func (this *curler) GetAsString(uri string) (rtn string, err error) {
 	}
 
 	_, cs, _ := extract_charset(resp.Header.Get("content-type"))
-	ireader, err := NewUtf8Reader(cs, resp.Body)
+	ireader, err := new_utf8_reader(cs, resp.Body)
 	x, err := ioutil.ReadAll(ireader)
 	if err != nil {
 		return
@@ -450,6 +451,8 @@ func (this *curler) Get(uri string) (Cache, error) {
 	if resp.StatusCode != http.StatusOK {
 		return v, curler_error{resp.StatusCode, resp.Status}
 	}
+	v.ETag = resp.Header.Get("etag")
+	v.LastModified = resp.Header.Get("last-modified")
 	mime, cs, err := extract_charset(resp.Header.Get("content-type"))
 	if err == nil {
 		v.Mime = strings.ToLower(mime)
@@ -500,6 +503,7 @@ func mime_to_ext(typesubtype, dispose string) string {
 	return typesubtype
 }
 
+// only process type/subtype, without parameters
 func MimeToExt(typesubtype string) string {
 	types := strings.Split(typesubtype, "/")
 	switch len(types) > 1 {
@@ -509,12 +513,12 @@ func MimeToExt(typesubtype string) string {
 	return typesubtype
 }
 
-type Utf8ReadCloser struct {
+type utf8_readcloser struct {
 	iconv.Iconv
 	*iconv.Reader
 }
 
-func NewUtf8Reader(charset string, in io.Reader) (io.ReadCloser, error) {
+func new_utf8_reader(charset string, in io.Reader) (io.ReadCloser, error) {
 	if charset == "utf-8" || charset == "" {
 		return ioutil.NopCloser(in), nil
 	}
@@ -523,14 +527,14 @@ func NewUtf8Reader(charset string, in io.Reader) (io.ReadCloser, error) {
 		return nil, err
 	}
 	ireader := iconv.NewReader(converter, in, 0)
-	return &Utf8ReadCloser{converter, ireader}, nil
+	return &utf8_readcloser{converter, ireader}, nil
 }
 
-func (this *Utf8ReadCloser) Read(p []byte) (n int, err error) {
+func (this *utf8_readcloser) Read(p []byte) (n int, err error) {
 	return this.Reader.Read(p)
 }
 
-func (this *Utf8ReadCloser) Close() error {
+func (this *utf8_readcloser) Close() error {
 	return this.Iconv.Close()
 }
 

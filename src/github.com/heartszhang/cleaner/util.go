@@ -8,6 +8,9 @@ import (
 	"unicode"
 )
 
+// 空节点： 文本长度0
+// from/input/textarea
+// 由空节点组成的节点
 func node_is_not_empty(n *html.Node) bool {
 	switch n.Type {
 	case html.TextNode:
@@ -58,6 +61,7 @@ func node_is_inline(n *html.Node) bool {
 	return rtn
 }
 
+// li可能包含div节点，这个时候li节点是block节点
 func node_is_inline_element(n *html.Node) bool {
 	switch n.Data {
 	case "a", "font", "small", "span", "strong", "em", "dt", "dd", "br", "cite":
@@ -69,19 +73,17 @@ func node_is_inline_element(n *html.Node) bool {
 	}
 }
 
+//img 按照object计算
+
 func node_is_object(n *html.Node) bool {
-	switch n.Data {
-	default:
-		return false
-	case "img", "embed", "object", "video", "audio":
-		return true
-	}
+	return strings_find([]string{"img", "embed", "object", "video", "audio"}, n.Data)
 }
 
 func node_is_media(n *html.Node) bool {
-	return n.Data == "embed" || n.Data == "audio" || n.Data == "video"
+	return strings_find([]string{"embed", "audio", "video"}, n.Data)
 }
 
+// 不考虑object节点
 // ignorable: form
 // block-level: div, p, h1-h6, body, html, object, embed, table, ol, ul, dl, video
 // inline-level: a, span, strong, br, img, small, font, i
@@ -104,7 +106,9 @@ func node_is_block(n *html.Node) bool {
 }
 
 var (
-	rex *regexp.Regexp = regexp.MustCompile(`\w+|\d+|[\W\D\S]`)
+	continue_spaces                = regexp.MustCompile("[ \t]+$")
+	lb_spaces                      = regexp.MustCompile("[ \t]*[\r\n]+[ \t]*")
+	rex             *regexp.Regexp = regexp.MustCompile(`\w+|\d+|[\W\D\S]`)
 )
 
 // number
@@ -143,33 +147,34 @@ func node_get_attribute(n *html.Node, name string) string {
 	return ""
 }
 
-var (
-	continue_spaces = regexp.MustCompile("[ \t]+$")
-	lb_spaces       = regexp.MustCompile("[ \t]*[\r\n]+[ \t]*")
-)
-
 func merge_tail_spaces(txt string) string {
 	txt = continue_spaces.ReplaceAllString(txt, "")
 	txt = lb_spaces.ReplaceAllString(txt, "\n")
 	return txt
 }
 
-func get_inner_text(n *html.Node) string {
+func node_inner_text_length(n *html.Node) int {
 	if n.Type == html.TextNode {
-		return n.Data
+		return len(n.Data)
 	}
-
+	if node_is_object(n) {
+		w, h := media_get_dim(n)
+		alt := node_get_attribute(n, "alt")
+		if alt != "" || w*h > 320*240 { // 图片设置了大小，或者alt，可以认为图片为正文内容
+			return 140
+		}
+	}
 	// all comments has been removed
-	rtn := ""
+	var rtn int
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
-		rtn += get_inner_text(child)
+		rtn += node_inner_text_length(child)
 	}
 	return rtn
 }
 
-func for_each_child(n *html.Node, f func(*html.Node)) {
+func foreach_child(n *html.Node, dof func(*html.Node)) {
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
-		f(child)
+		dof(child)
 	}
 }
 
@@ -191,6 +196,7 @@ func string_count_words(txt string) (tokens int, words int, commas int) {
 	return
 }
 
+// without atom
 func create_element(name string) (node *html.Node) {
 	return &html.Node{Type: html.ElementNode, Data: name}
 }
@@ -205,12 +211,12 @@ func li_is_inline_mode(li *html.Node) bool {
 		return false
 	}
 	lis := 0
-	txt := ""
+	var txtlen int
 	foreach_child(li.Parent, func(n *html.Node) {
-		txt += get_inner_text(n)
+		txtlen += node_inner_text_length(n)
 		lis++
 	})
-	return len(txt) < 60
+	return txtlen < 60
 }
 
 func node_get_element_by_tag_name2(n *html.Node, tag string, set []*html.Node) []*html.Node {
@@ -224,10 +230,7 @@ func node_get_element_by_tag_name2(n *html.Node, tag string, set []*html.Node) [
 	return set
 }
 
-func get_element_by_tag_name(n *html.Node, tag string) []*html.Node {
-	return node_get_element_by_tag_name2(n, tag, []*html.Node{})
-}
-
+/*
 func clean_element_before_header(body *html.Node, name string) {
 	child := body.FirstChild
 	for child != nil {
@@ -240,24 +243,26 @@ func clean_element_before_header(body *html.Node, name string) {
 		}
 	}
 }
-
+*/
+// 通过header节点向上查找文本内容超过141的节点
+// 如果正文以图片为主，这里就有可能找不到
 func find_article_via_header_i(h *html.Node) *html.Node {
 	parent := h.Parent
 	pcl := 0
 	if parent != nil {
-		pcl = len(get_inner_text(parent))
+		pcl = node_inner_text_length(parent)
 	} else {
 		return nil
 	}
-	// 内容超过3行才行，每行大概又65个字符
-	if pcl > 195 {
+	// 内容超过3行才行，每行大概47个字符
+	if pcl > 141 {
 		return parent
 	}
 	return find_article_via_header_i(parent)
 }
 
 func node_is_unflatten(b *html.Node) bool {
-	return b.Data == "form" || b.Data == "textarea" || b.Data == "input" || b.Data == "embed" || b.Data == "audio" || b.Data == "video"
+	return strings_find([]string{"form", "textarea", "input", "embed", "audio", "video"}, b.Data)
 }
 
 func deep_clone_element(n *html.Node) (inline *html.Node) {
@@ -277,35 +282,30 @@ func shallow_clone_element(n *html.Node) (inline *html.Node) {
 	return
 }
 
-func foreach_child(n *html.Node, dof func(*html.Node)) {
-	for child := n.FirstChild; child != nil; child = child.NextSibling {
-		dof(child)
-	}
-}
-
-func append_children(src *html.Node, target *html.Node) {
+func node_append_children(src *html.Node, target *html.Node) {
 	foreach_child(src, func(child *html.Node) {
 		switch {
 		case child.Type == html.TextNode:
 			target.AppendChild(create_text(child.Data))
-		case child.Data == "a" || child.Data == "img" || node_is_object(child):
+		case child.Data == "a" || node_is_object(child):
 			// ommit all children elements
 			a := shallow_clone_element(child)
-			append_children(child, a)
+			node_append_children(child, a)
 			target.AppendChild(a)
 		default:
-			append_children(child, target)
+			node_append_children(child, target)
 		}
 	})
 }
 
 func create_p_with_child(n *html.Node) (p *html.Node) {
 	p = create_element("p")
-	append_children(n, p)
+	node_append_children(n, p)
 	return
 }
 
-func try_update_class_attr(b *html.Node, class string) {
+/*
+func node_update_class_attr(b *html.Node, class string) {
 	if len(class) > 0 {
 		ca := make([]html.Attribute, len(b.Attr)+1)
 		copy(ca, b.Attr)
@@ -313,7 +313,7 @@ func try_update_class_attr(b *html.Node, class string) {
 		b.Attr = ca
 	}
 }
-
+*/
 func node_cat_class(b *html.Node, class string) (rtn string) {
 	c := node_get_attribute(b, "class")
 	id := node_get_attribute(b, "id")
@@ -340,6 +340,7 @@ func create_html_sketch() (doc *html.Node, body *html.Node, article *html.Node) 
 	return
 }
 
+/*
 func node_clear_decendant_by_type(n *html.Node, tag string) {
 	child := n.FirstChild
 	for child != nil {
@@ -353,35 +354,20 @@ func node_clear_decendant_by_type(n *html.Node, tag string) {
 		}
 	}
 }
-
-func node_is_ownered_by_a(a *html.Node) bool {
-	for p := a.Parent; p != nil; p = p.Parent {
-		if p.Type == html.ElementNode && p.Data == "a" {
-			return true
-		}
-	}
-	return false
-}
-
-func max(l int, r int) int {
+*/
+func int_max(l int, r int) int {
 	if l > r {
 		return l
 	}
 	return r
 }
 
-func min(l int, r int) int {
+func int_min(l int, r int) int {
 	if l < r {
 		return l
 	}
 	return r
 }
-
-/*
-func node_get_classid(n *html.Node) string {
-	return node_get_attribute(n, "class") + ":" + node_get_attribute(n, "id")
-}
-*/
 
 // update only, attribute must exist already
 func node_update_attribute(n *html.Node, key string, val string) {
@@ -410,7 +396,30 @@ func media_get_dim(img *html.Node) (w, h int64) {
 
 func node_is_in_a(n *html.Node) bool {
 	for p := n.Parent; p != nil; p = p.Parent {
-		if p.Data == "a" {
+		if p.Type == html.ElementNode && p.Data == "a" {
+			return true
+		}
+	}
+	return false
+}
+
+/*
+func node_clear_children(a *html.Node) {
+	for a.FirstChild != nil {
+		a.RemoveChild(a.FirstChild)
+	}
+}
+*/
+func trim_display_none(n *html.Node) {
+	st := node_get_attribute(n, "style")
+	if strings.Contains(st, "display") && (strings.Contains(st, "none")) {
+		n.Data = "input"
+	}
+}
+
+func strings_find(set []string, val string) bool {
+	for _, i := range set {
+		if i == val {
 			return true
 		}
 	}

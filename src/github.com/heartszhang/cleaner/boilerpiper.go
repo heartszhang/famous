@@ -1,8 +1,9 @@
+// 通过链接密度，判定链接群及前后修辞，将正文中内嵌的广告群去除
+// 此算法处理图片能力欠妥，特别是对以图片为主的网页，会将图片去除
 package cleaner
 
 import (
 	"code.google.com/p/go.net/html"
-	//	"log"
 )
 
 type boilerpiper struct {
@@ -106,9 +107,10 @@ const (
 	w_prev_line_l         = 8
 )
 
-//链接密度高于0.33的段落，直接认为不是正文
-//当前段不多于一定字符，后续段落的链接密度很高，认为这一段落是后续段落的标题，可以进行清除
-//form组成的段落，直接抛弃
+// 链接密度高于0.33的段落，直接认为不是正文
+// 第一段是一个图片链接，图片大小确定或者有alt属性的情况下，这个图片是正文内容
+// 当前段不多于一定字符，后续段落的链接密度很高，认为这一段落是后续段落的标题，可以进行清除
+// form组成的段落，直接抛弃
 // many magic numbers in this function
 func (this *boilerpiper) classify(prev *boilerpipe_score,
 	current *boilerpipe_score,
@@ -124,7 +126,7 @@ func (this *boilerpiper) classify(prev *boilerpipe_score,
 			(current.words > 20 || next.words > 15 || prev.words > 8)) ||
 			(prev.link_density() > 55 && (current.words > 40 || next.words > 17))
 		current.is_content = current.is_content || c
-		//log.Println("linkd check context", current.is_content, current.words, next.words, prev.words)
+
 		//images between content paragraphs
 		if prev.link_density() <= 33 && next.link_density() <= 33 &&
 			current.words == 0 && current.imgs > 0 && current.anchor_imgs == 0 {
@@ -146,5 +148,4 @@ func (this *boilerpiper) classify(prev *boilerpipe_score,
 	if current.is_content == false {
 		this.images = append(this.images, current.tagged_imgs...)
 	}
-	//	fmt.Println(current.is_content, current.inner_text, current.img_score)
 }
