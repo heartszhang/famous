@@ -3,8 +3,6 @@ package curl
 import (
 	"bytes"
 	"code.google.com/p/go.net/html"
-	"compress/flate"
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/qiniu/iconv"
@@ -14,6 +12,7 @@ import (
 	"mime"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -40,18 +39,12 @@ type Curler interface {
 	Get(uri string) (Cache, error)
 	GetUtf8(uri string) (Cache, error)
 	GetAsJson(uri string, val interface{}) error
-	GetLocalAsJson(uri string, val interface{}) (Cache, error)
+	//	GetLocalAsJson(uri string, val interface{}) (Cache, error)
 	GetAsString(uri string) (string, error)
+	PostForm(uri string, form url.Values) (int, error)
+	PostFormAsString(uri string, form url.Values) (string, error)
+	PostFormAsJson(uri string, form url.Values, val interface{}) error
 }
-type CurlerRoundTrip interface {
-	RoundTrip(*http.Request)
-}
-type roundtrip_wrapper func(*http.Request)
-
-func (this roundtrip_wrapper) RoundTrip(r *http.Request) {
-	this(r)
-}
-
 type curler struct {
 	data_dir     string
 	proxy_policy int
@@ -91,15 +84,9 @@ func new_timeout_dialer(timeo int) func(string, string) (net.Conn, error) {
 	}
 }
 
-/*
-func timeout_dialer(network, addr string) (net.Conn, error) {
-	return net.DialTimeout(network, addr, time.Duration(connection_timeout*time.Second))
-}
-*/
 func client_do_get(client *http.Client, uri string, interceptor CurlerRoundTrip) (resp *http.Response, err error) {
 	req, err := http.NewRequest("GET", uri, nil)
 	if err == nil {
-		req.Header.Add("accept-encoding", "gzip,deflate")
 		if interceptor != nil {
 			interceptor.RoundTrip(req)
 		}
@@ -110,6 +97,41 @@ func client_do_get(client *http.Client, uri string, interceptor CurlerRoundTrip)
 
 func do_get(uri string, useproxy int, interceptor CurlerRoundTrip) (*http.Response, error) {
 	return do_get_timeo(uri, useproxy, connection_timeout, interceptor)
+}
+
+func client_do_post(client *http.Client, uri string, form url.Values, interceptor CurlerRoundTrip) (resp *http.Response, err error) {
+	resp, err = client.PostForm(uri, form)
+	return
+}
+
+func do_post(uri string, form url.Values, useproxy, timeo int, interceptor CurlerRoundTrip) (*http.Response, error) {
+	trans := &post_transport{
+		http.Transport{
+			Dial: new_timeout_dialer(timeo),
+			ResponseHeaderTimeout: time.Duration(response_timeout) * time.Second,
+		},
+		interceptor,
+	}
+
+	noretry := true
+	switch useproxy {
+	case CurlProxyPolicyNoProxy:
+		trans.Proxy = nil
+	case CurlProxyPolicyAlwayseProxy:
+		trans.Proxy = http.ProxyFromEnvironment
+	case CurlProxyPolicyUseProxy:
+		fallthrough
+	default:
+		noretry = false
+	}
+	client := &http.Client{Transport: trans}
+	resp, err := client_do_post(client, uri, form, interceptor)
+	if err != nil && noretry == false {
+		fmt.Println("try again with proxy", uri, err)
+		trans.Proxy = http.ProxyFromEnvironment
+		resp, err = client_do_post(client, uri, form, interceptor)
+	}
+	return resp, err
 }
 
 func do_get_timeo(uri string, useproxy int, timeo int, interceptor CurlerRoundTrip) (*http.Response, error) {
@@ -138,6 +160,7 @@ func do_get_timeo(uri string, useproxy int, timeo int, interceptor CurlerRoundTr
 	}
 	return resp, err
 }
+
 func extract_charset(mime_header string) (mediatype, charset string, err error) {
 	mediatype, params, err := mime.ParseMediaType(mime_header)
 	charset = params["charset"]
@@ -251,6 +274,7 @@ func file_detect_content_type(local, mime string) string {
 	return ct
 }
 
+/*
 func (this *curler) GetLocalAsJson(uri string, v interface{}) (Cache, error) {
 	c, err := this.GetUtf8(uri)
 	if err != nil {
@@ -265,7 +289,7 @@ func (this *curler) GetLocalAsJson(uri string, v interface{}) (Cache, error) {
 	err = decoder.Decode(v)
 	return c, err
 }
-
+*/
 // detect content-type via http://mimesniff.spec.whatwg.org/ if charset isn't declared
 // treat gb2312 as gbk
 // convert text/* and application/*+xml to utf-8
@@ -302,11 +326,17 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 		v.LengthUtf8 = v.Length
 		return v, err
 	}
-	converter, err := iconv.Open("utf-8", v.Charset)
+
+	in, err := os.Open(v.Local)
 	if err != nil {
 		return v, err
 	}
-	defer converter.Close()
+	defer in.Close()
+	in2, err := NewUtf8Reader(v.Charset, in)
+	if err != nil {
+		return v, err
+	}
+	defer in2.Close()
 
 	out, err := ioutil.TempFile(this.data_dir, "u-"+mime_to_ext(v.Mime, v.Disposition))
 	if err != nil {
@@ -314,17 +344,9 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 	}
 	defer out.Close()
 
-	in, err := os.Open(v.Local)
-	if err != nil {
-		return v, err
-	}
-	defer in.Close()
-
 	log.Println(v.Local, " =>", out.Name())
 
-	reader := iconv.NewReader(converter, in, 0)
-
-	v.LengthUtf8, err = io.Copy(out, reader)
+	v.LengthUtf8, err = io.Copy(out, in2)
 
 	if err == nil {
 		v.LocalUtf8 = out.Name()
@@ -341,35 +363,58 @@ func (this curler_error) Error() string {
 	return fmt.Sprintf("%d: %v", this.code, this.reason)
 }
 
-func (this *curler) GetAsString(uri string) (rtn string, err error) {
+func (this *curler) PostForm(uri string, form url.Values) (int, error) {
+	resp, err := do_post(uri, form, this.proxy_policy, this.dial_timeo, this.interceptor)
+	if err != nil {
+		return -1, err
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode, err
+}
+func (this *curler) PostFormAsJson(uri string, form url.Values, val interface{}) error {
+	resp, err := do_post(uri, form, this.proxy_policy, this.dial_timeo, this.interceptor)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return curler_error{resp.StatusCode, resp.Status} // content is ignored
+	}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(val)
+	return err
+}
 
+func (this *curler) PostFormAsString(uri string, form url.Values) (string, error) {
+	resp, err := do_post(uri, form, this.proxy_policy, this.dial_timeo, this.interceptor)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", curler_error{resp.StatusCode, resp.Status}
+	}
+	_, cs, _ := extract_charset(resp.Header.Get("content-type"))
+	ireader, err := NewUtf8Reader(cs, resp.Body)
+	if err != nil {
+		return "", err
+	}
+	d, err := ioutil.ReadAll(ireader)
+	return string(d), err
+}
+
+func (this *curler) GetAsString(uri string) (rtn string, err error) {
 	resp, err := do_get(uri, this.proxy_policy, this.interceptor)
 	if err != nil {
 		return
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
 		return rtn, curler_error{resp.StatusCode, resp.Status}
 	}
 
-	reader, err := uncompress(resp)
-	if err != nil {
-		return
-	}
-	defer reader.Close()
-	if resp.Body != reader {
-		defer resp.Body.Close()
-	}
-	_, cs, err := extract_charset(resp.Header.Get("content-type"))
-	if err != nil {
-		return
-	}
-	converter, err := iconv.Open("utf-8", cs)
-	if err != nil {
-		return
-	}
-	defer converter.Close()
-	ireader := iconv.NewReader(converter, reader, 0)
+	_, cs, _ := extract_charset(resp.Header.Get("content-type"))
+	ireader, err := NewUtf8Reader(cs, resp.Body)
 	x, err := ioutil.ReadAll(ireader)
 	if err != nil {
 		return
@@ -382,20 +427,11 @@ func (this *curler) GetAsJson(uri string, val interface{}) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
 		return curler_error{resp.StatusCode, resp.Status}
 	}
-
-	reader, err := uncompress(resp)
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-	if resp.Body != reader {
-		defer resp.Body.Close()
-	}
-	decoder := json.NewDecoder(reader)
+	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(val)
 	return err
 }
@@ -409,9 +445,9 @@ func (this *curler) Get(uri string) (Cache, error) {
 	if err != nil {
 		return v, err
 	}
+	defer resp.Body.Close()
 	v.StatusCode = resp.StatusCode
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
 		return v, curler_error{resp.StatusCode, resp.Status}
 	}
 	mime, cs, err := extract_charset(resp.Header.Get("content-type"))
@@ -421,24 +457,28 @@ func (this *curler) Get(uri string) (Cache, error) {
 	}
 	v.Disposition = resp.Header.Get("content-disposition")
 
-	reader, err := uncompress(resp)
-	if err != nil {
-		return v, err
-	}
-	defer reader.Close()
-	if reader != resp.Body {
-		defer resp.Body.Close()
-	}
 	out, err := ioutil.TempFile(this.data_dir, mime_to_ext(v.Mime, v.Disposition))
 	if err != nil {
 		return v, err
 	}
 	defer out.Close()
 
-	v.Length, err = io.Copy(out, reader)
+	v.Length, err = io.Copy(out, resp.Body)
 	v.Local = out.Name()
 
 	return v, nil
+}
+
+type post_transport struct {
+	http.Transport
+	interceptor CurlerRoundTrip
+}
+
+func (this *post_transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	if this.interceptor != nil {
+		this.interceptor.RoundTrip(req)
+	}
+	return this.Transport.RoundTrip(req)
 }
 
 // Content-Disposition: attachment; filename=genome.jpeg;
@@ -469,7 +509,50 @@ func MimeToExt(typesubtype string) string {
 	return typesubtype
 }
 
-// process gzip/deflate
+type Utf8ReadCloser struct {
+	iconv.Iconv
+	*iconv.Reader
+}
+
+func NewUtf8Reader(charset string, in io.Reader) (io.ReadCloser, error) {
+	if charset == "utf-8" || charset == "" {
+		return ioutil.NopCloser(in), nil
+	}
+	converter, err := iconv.Open("utf-8", charset)
+	if err != nil {
+		return nil, err
+	}
+	ireader := iconv.NewReader(converter, in, 0)
+	return &Utf8ReadCloser{converter, ireader}, nil
+}
+
+func (this *Utf8ReadCloser) Read(p []byte) (n int, err error) {
+	return this.Reader.Read(p)
+}
+
+func (this *Utf8ReadCloser) Close() error {
+	return this.Iconv.Close()
+}
+
+func init() {
+	k := "HTTP_PROXY"
+	pxy := os.Getenv(k)
+	if pxy == "" {
+		os.Setenv(k, "http://localhost:8087") // use goagent as default
+	}
+}
+
+type CurlerRoundTrip interface {
+	RoundTrip(*http.Request)
+}
+type roundtrip_wrapper func(*http.Request)
+
+func (this roundtrip_wrapper) RoundTrip(r *http.Request) {
+	this(r)
+}
+
+// process gzip/deflatej
+/*
 func uncompress(resp *http.Response) (v io.ReadCloser, err error) {
 	encoding := resp.Header.Get("content-encoding")
 	switch encoding {
@@ -482,11 +565,4 @@ func uncompress(resp *http.Response) (v io.ReadCloser, err error) {
 	}
 	return
 }
-
-func init() {
-	k := "HTTP_PROXY"
-	pxy := os.Getenv(k)
-	if pxy == "" {
-		os.Setenv(k, "http://localhost:8087") // use goagent as default
-	}
-}
+*/
