@@ -3,16 +3,13 @@ package feedfeed
 import (
 	"encoding/xml"
 	"os"
-	"time"
 )
 
 //<head><title/></head> is omitted
-type opml struct { // version=1.0
-	Body opml_body `xml:"body,omitempty" json:"-" bson:"-"`
-}
-
-type opml_body struct {
-	Outline []opml_outline `xml:"outline" bson:"outline,omitempty" json:"outline,omitempty"`
+type opml struct{
+	Body struct{
+		Outline []opml_outline `xml:"outline" bson:"outline,omitempty" json:"outline,omitempty"`
+	} `xml:"body,omitempty" json:"-" bson:"-"`
 }
 
 type opml_outline struct {
@@ -43,7 +40,7 @@ func feeds_category_create_opml(filepath string) ([]FeedSource, error) {
 	d.CharsetReader = charset_reader_passthrough
 
 	err = d.Decode(&o)
-	return o.Body.to_feedscategory(), err
+	return o.to_feedscategory(), err
 }
 
 func (this opml_outline) name() string {
@@ -60,7 +57,6 @@ func (this opml_outline) export_feedsource(v []FeedSource) []FeedSource {
 			Uri:         this.Docs,
 			Local:       "",
 			Period:      _2hours,
-			Deadline:    unixtime_now() + int64(_2hours*time.Hour),
 			Type:        Feed_type_feed, // may be atom?
 			Disabled:    false,
 			EnableProxy: false,
@@ -76,12 +72,12 @@ func (this opml_outline) export_feedsource(v []FeedSource) []FeedSource {
 	return v
 }
 
-func (this opml_body) to_feedscategory() []FeedSource {
+func (this opml) to_feedscategory() []FeedSource {
 	v := []FeedSource{}
-	if len(this.Outline) == 0 {
+	if len(this.Body.Outline) == 0 {
 		return v
 	}
-	for _, outline := range this.Outline {
+	for _, outline := range this.Body.Outline {
 		v = outline.export_feedsource(v)
 	}
 	return v

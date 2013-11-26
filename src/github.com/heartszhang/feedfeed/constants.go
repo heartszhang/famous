@@ -86,12 +86,11 @@ type FeedLink struct {
 	Links        int    `json:"links" bson:"links"`                                     // links after cleaned
 	Density      int    `json:"density" bson:"density"`                                 // density of original doc
 	Length       int64  `json:"length" bson:"length"`
-	Readable     bool   `json:"readable" bson:"readable"` // cleaned doc has perfect content
+//	Readable     bool   `json:"readable" bson:"readable"` // cleaned doc has perfect content
 
-	Images []FeedMedia `json:"images,omitempty" bson:"images,omitempty"`
-	Videos []FeedMedia `json:"videos,omitempty" bson:"videos,omitempty"`
-	Audios []FeedMedia `json:"audios,omitempty" bson:"audios,omitempty"`
-	//	TTL    time.Time   `json:"ttl" bson:"ttl"`
+//	Images []FeedMedia `json:"images,omitempty" bson:"images,omitempty"`
+//	Videos []FeedMedia `json:"videos,omitempty" bson:"videos,omitempty"`
+//	Audios []FeedMedia `json:"audios,omitempty" bson:"audios,omitempty"`
 }
 
 type FeedMedia struct {
@@ -151,7 +150,6 @@ type FeedEntry struct {
 	Density    uint        `json:"density" bson:"density"` // percent
 	Status     uint64      `json:"status" bson:"status"`
 	Categories []string    `json:"categories,omitempty" bson:"category,omitempty"`
-	//	TTL        time.Time    `json:"ttl" bson:"ttl"`
 }
 
 const (
@@ -161,19 +159,21 @@ const (
 type FeedSource struct {
 	Name        string   `json:"name,omitempty" bson:"name,omitempty"`
 	Uri         string   `json:"uri,omitempty" bson:"uri,omitempty"` // rss/atom url
-	Local       string   `json:"local" bson:"local"`
-	Period      uint     `json:"period" bson:"period"`     // minutes
-	Deadline    int64    `json:"deadline" bson:"deadline"` // unixtime_nano
-	Type        uint     `json:"type" bson:"type"`         // feed_type...
-	Disabled    bool     `json:"disabled" bson:"disabled"` //auto refresh enabled
+	Local       string   `json:"local,omitempty" bson:"local,omitempty"`
+	Period      uint     `json:"period" bson:"period"` // minutes
+	Type        uint     `json:"type" bson:"type"`     // feed_type...
 	EnableProxy bool     `json:"enable_proxy" bson:"enable_proxy"`
 	Update      int64    `json:"update" bson:"update"`                       // the last time, we refreshed, unix-time
 	WebSite     string   `json:"website,omitempty" bson:"website,omitempty"` // home
 	Tags        []string `json:"tags,omitempty" bson:"tags,omitempty"`
 	Categories  []string `json:"categories,omitempty" bson:"categories,omitempty"`
-	Unreaded    int      `json:"unreaded" bson:"unreaded"`
 	Description string   `json:"description,omitempty" bson:"description,omitempty"`
 	Logo        string   `json:"logo,omitempty" bson:"logo,omitempty"`
+	Disabled    bool     `json:"disabled" bson:"disabled"` //auto refresh enabled
+	UnreadCount int      `json:"unreaded" bson:"unreaded"`
+	LastTouch   int64    `json:"last_touch" bson:"last_touch"`
+	NextTouch   int64    `json:"next_touch" bson:"next_touch"`
+	LastUpdate  int64    `json:"last_update" bson:"last_update"`
 }
 
 type FeedCategory struct {

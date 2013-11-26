@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	//	"fmt"
 	"os"
+	"time"
 )
 
 type feed_error string
@@ -11,27 +12,34 @@ type feed_error string
 func (this feed_error) Error() string {
 	return string(this)
 }
-func MakeFeedSource(filepath string) (FeedSource, error) {
+
+func MakeFeed(filepath string) (FeedSource, []FeedEntry, error) {
+	var (
+		fs  FeedSource
+		fes []FeedEntry
+		err error
+	)
 	t := DetectFeedSourceType(filepath)
 	switch t {
 	case Feed_type_atom:
-		return feedsource_from_atom(filepath)
+		fs, fes, err = feed_from_atom(filepath)
 	case Feed_type_rss:
-		return feedsource_from_rss(filepath)
+		fs, fes, err = feed_from_rss(filepath)
 	default:
-		return FeedSource{}, feed_error("invalid foramt")
+		fs, fes, err = FeedSource{}, nil, feed_error("invalid format")
 	}
+	fs.LastTouch = time.Now().Unix()
+	fs.LastUpdate = fs.Update
+	fs.NextTouch = int64(fs.Period)*60 + fs.LastTouch
+	return fs, fes, err
+}
+func MakeFeedSource(filepath string) (FeedSource, error) {
+	fs, _, err := MakeFeed(filepath)
+	return fs, err
 }
 func MakeFeedEntries(filepath string) ([]FeedEntry, error) {
-	t := DetectFeedSourceType(filepath)
-	switch t {
-	case Feed_type_atom:
-		return feedentries_from_atom(filepath)
-	case Feed_type_rss:
-		return feedentries_from_rss(filepath)
-	default:
-		return []FeedEntry{}, feed_error("invalid format")
-	}
+	_, fes, err := MakeFeed(filepath)
+	return fes, err
 }
 
 type feed_sketch struct {

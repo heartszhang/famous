@@ -3,7 +3,7 @@ package feedfeed
 import (
 	"encoding/xml"
 	"os"
-	"time"
+	//	"time"
 )
 
 const (
@@ -64,9 +64,14 @@ type atom_feed struct { // to feed_source
 }
 
 func feedsource_from_atom(filepath string) (FeedSource, error) {
+	x, _, err := feed_from_atom(filepath)
+	return x, err
+}
+
+func feed_from_atom(filepath string) (FeedSource, []FeedEntry, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
-		return FeedSource{}, err
+		return FeedSource{}, nil, err
 	}
 	defer f.Close()
 
@@ -76,7 +81,8 @@ func feedsource_from_atom(filepath string) (FeedSource, error) {
 
 	err = decoder.Decode(&v)
 	x := v.to_feed_soruce()
-	return x, err
+	fes := v.extract_entries()
+	return x, fes, err
 }
 
 func (this atom_feed) link() string {
@@ -94,7 +100,6 @@ func (this atom_feed) to_feed_soruce() FeedSource {
 		Local:       "",
 		Period:      _2hours,
 		Logo:        this.Logo,
-		Deadline:    unixtime_nano_rfc822(this.Updated) + int64(_2hours*time.Hour),
 		Type:        Feed_type_atom,
 		Disabled:    false,
 		EnableProxy: false,
@@ -110,21 +115,7 @@ func (this atom_feed) to_feed_soruce() FeedSource {
 }
 
 func feedentries_from_atom(filepath string) ([]FeedEntry, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return []FeedEntry{}, err
-	}
-	defer f.Close()
-	decoder := xml.NewDecoder(f)
-	decoder.CharsetReader = charset_reader_passthrough
-	var (
-		v   atom_feed
-		fes []FeedEntry
-	)
-	err = decoder.Decode(&v)
-	if err == nil {
-		fes = v.extract_entries()
-	}
+	_, fes, err := feed_from_atom(filepath)
 	return fes, err
 }
 
