@@ -23,7 +23,7 @@ type FeedsBackendConfig struct {
 	CleanFolder           string `json:"clean,omitempty"`
 	FailedFolder          string `json:"fails,omitempty"`
 	FlowDocumentFolder    string `json:"flowdocs,omitempty"`
-	Proxy                 string `json:"proxy, omitempty"` // "127.0.0.1:8087"
+	ProxyAddress          string `json:"proxy, omitempty"` // "127.0.0.1:8087"
 	SummaryThreshold      uint   `json:"summary_threshold" bson:"summary_threshuld"`
 	SummaryMinWords       int    `json:"summary_minwords" bson:"summary_minwords"`
 	ThumbnailWidth        uint   `json:"thumbnail_width" bson:"thumbnail_width"`

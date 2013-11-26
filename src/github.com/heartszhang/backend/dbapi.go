@@ -15,6 +15,9 @@ type feedentry_operator interface {
 	setcontent(link string, filepath string, words int, imgs []feed.FeedMedia) error
 }
 
+type feedentrytag_operator interface {
+}
+
 type imagecache_operator interface {
 	find(uri string) (feed.FeedImage, error)
 	save(uri string, v feed.FeedImage) error

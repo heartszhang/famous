@@ -55,7 +55,12 @@ func (this feedsource_op) update(f *feed.FeedSource) error {
 	return do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Update(bson.M{"uri": f.Uri},
 			bson.M{
-				"$set":      bson.M{"period": f.Period},
+				"$set": bson.M{
+					"period":      f.Period,
+					"last_touch":  f.LastTouch,
+					"last_update": f.LastUpdate,
+					"next_touch":  f.NextTouch,
+				},
 				"$addToSet": bson.M{"tags": bson.M{"$each": f.Tags}}})
 	})
 }

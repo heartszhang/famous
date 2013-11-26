@@ -1,7 +1,7 @@
 package backend
 
 import (
-	bing "github.com/heartszhang/bingsearchservice"
+	"github.com/heartszhang/bing"
 )
 
 func suggest_bing(q string) ([]string, error) {

@@ -21,7 +21,6 @@ func (this image_op) find(uri string) (v feed.FeedImage, err error) {
 }
 
 func (this image_op) save(uri string, v feed.FeedImage) error {
-	//	wv := ImageCacheW{v, uri}
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		_, err := coll.Upsert(bson.M{"uri": uri}, bson.M{"$setOnInsert": &v})
 		return err
