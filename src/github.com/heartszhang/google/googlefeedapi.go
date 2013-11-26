@@ -1,4 +1,4 @@
-package googlefeedservice
+package google
 
 import (
 	"code.google.com/p/go.net/html"
@@ -21,10 +21,8 @@ func (this googlefeed_error) Error() string {
 }
 
 type find_result struct {
-	//	Error *GoogleFeedApiError
 	ResponseDetails string `json:"responseDetails,omitempty"`
 	ResponseStatus  int    `json:"responseStatus"`
-	//	ResponseData    *GoogleFeedApiFindData `json:"responseData,omitempty"`
 	ResponseData *struct {
 		Query   string `json:"query,omitempty"`
 		Entries []struct {
@@ -152,66 +150,6 @@ func loadresult_to_feedsource(x load_result) (*feedfeed.FeedSource, []feedfeed.F
 	}
 	return &s, v, nil
 }
-
-/*
-type GoogleFeedApiLoadData struct {
-	Feed *GoogleFeedApiFeed `json:"feed,omitempty"`
-}
-
-type GoogleFeedApiFeed struct {
-	FeedUrl     string                   `json:"feedUrl,omitempty"`
-	Title       string                   `json:"title,omitempty"`
-	Website     string                   `json:"link,omitempty"`
-	Author      string                   `json:"author,omitempty"`
-	Description string                   `json:"description,omitempty"`
-	Type        string                   `json:"type,omitempty"`
-	Entries     []GoogleFeedApiFeedEntry `json:"entries,omitempty"`
-}
-
-type GoogleFeedApiFeedEntry struct {
-	MediaGroups    []GoogleFeedApiMediaGroup `json:"mediaGroups,omitempty"`
-	Title          string                    `json:"title,omitempty"`
-	Link           string                    `json:"link,omitempty"`
-	Author         string                    `json:"author,omitempty"`
-	PublishedDate  string                    `json:"publishedDate"`
-	ContentSnippet string                    `json:"contentSnippet,omitempty"`
-	Content        string                    `json:"content,omitempty"`
-	Categories     []string                  `json:"categories,omitempty"`
-}
-
-type GoogleFeedApiMediaGroup struct {
-	Contents []GoogleFeedApiMediaContent `json:"contents,omitempty"`
-}
-
-type GoogleFeedApiMediaContent struct {
-	Url         string                        `json:"url,omitempty"`
-	Type        string                        `json:"type,omitempty"`
-	Medium      string                        `json:"medium,omitempty"`
-	Height      uint                          `json:"height"`
-	Width       uint                          `json:"width"`
-	IsDefault   *bool                         `json:"isDefault,omitempty"`
-	Title       string                        `json:"title,omitempty"`
-	Description string                        `json:"description,omitempty"`
-	Keywords    string                        `json:"keywords,omitempty"`
-	Thumbnails  []GoogleFeedApiMediaThumbnail `json:"thumbnail,omitempty"`
-	Categories  []string                      `json:"category,omitempty"`
-	//	Player      *GoogleFeedApiMediaPlayer     `json:"player,omitempty"`
-	//	Embed       *GoogleFeedApiMediaEmbed      `json:"embed,omitempty"`
-}
-
-type GoogleFeedApiMediaThumbnail struct {
-	Url    string `json:"url,omitempty"`
-	Height uint   `json:"height"`
-	Width  uint   `json:"width"`
-	Time   string `json:"time,omitempty"`
-}
-
-type GoogleFeedApiMediaPlayer struct {
-	Url    string `json:"url,omitempty"`
-	Height uint   `json:"height"`
-	Width  uint   `json:"width"`
-}
-*/
 type GoogleFeedApiService interface {
 	Find(q, hl string) ([]feedfeed.FeedSourceFindEntry, error)
 	Load(uri, hl string, num int, scoring bool) (*feedfeed.FeedSource, []feedfeed.FeedEntry, error)
@@ -224,7 +162,7 @@ type google_feedapi struct {
 
 func NewGoogleFeedApi(refer, tmp string) GoogleFeedApiService {
 	if refer == "" {
-		refer = "http://iweizhi2.duapp.com"
+		refer = "https://heartszhang.github.com/google"
 	}
 	return &google_feedapi{temp_folder: tmp, refer: refer}
 }
@@ -242,8 +180,7 @@ func (this google_feedapi) Find(q, hl string) ([]feedfeed.FeedSourceFindEntry, e
 	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this)
 	v := find_result{}
 	uri := find_url + "?" + oauth2.HttpQueryEncode(p)
-	cache, err := c.GetLocalAsJson(uri, &v)
-	fmt.Println(cache, err)
+	err := c.GetAsJson(uri, &v)
 	if err != nil {
 		return nil, err
 	}
@@ -273,8 +210,8 @@ func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (*feedfee
 	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this)
 	v := load_result{}
 	url := load_url + "?" + oauth2.HttpQueryEncode(p)
-	cache, err := c.GetLocalAsJson(url, &v)
-	fmt.Println(cache, err)
+	err := c.GetAsJson(url, &v)
+
 	if err != nil {
 		return nil, nil, err
 	}
