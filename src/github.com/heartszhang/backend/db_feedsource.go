@@ -51,17 +51,19 @@ func (this feedsource_op) disable(uri string, dis bool) error {
 	})
 }
 
-func (this feedsource_op) update(f *feed.FeedSource) error {
+func (this feedsource_op) save_one(f feed.FeedSource) error {
 	return do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Update(bson.M{"uri": f.Uri},
-			bson.M{
-				"$set": bson.M{
-					"period":      f.Period,
-					"last_touch":  f.LastTouch,
-					"last_update": f.LastUpdate,
-					"next_touch":  f.NextTouch,
-				},
-				"$addToSet": bson.M{"tags": bson.M{"$each": f.Tags}}})
+		return coll.Update(bson.M{"uri": f.Uri}, bson.M{"$set": &f})
+		/*		return coll.Update(bson.M{"uri": f.Uri},
+				bson.M{
+					"$set": bson.M{
+						"period":      f.Period,
+						"last_touch":  f.LastTouch,
+						"last_update": f.LastUpdate,
+						"next_touch":  f.NextTouch,
+					},
+					"$addToSet": bson.M{"tags": bson.M{"$each": f.Tags}}})
+		*/
 	})
 }
 
@@ -83,19 +85,20 @@ func (this feedsource_op) findbatch(uris []string) ([]feed.FeedSource, error) {
 	return rtn, err
 }
 
+func (this feedsource_op) expired(beforeunxtime int64) ([]feed.FeedSource, error) {
+	var rtn []feed.FeedSource
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
+		err := coll.Find(bson.M{"next_touch": bson.M{"$lt": beforeunxtime}}).All(&rtn)
+		return err
+	})
+	return rtn, err
+}
 func (this feedsource_op) all() (feds []feed.FeedSource, err error) {
 	feds = make([]feed.FeedSource, 0)
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"disabled": false, "uri": bson.M{"$ne": ""}}).All(&feds)
 	})
 	return
-}
-func (this feedsource_op) expired() ([]feed.FeedSource, error) {
-	rtn := make([]feed.FeedSource, 0)
-	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"disabled": false, "due_at": bson.M{"$lt": feed.UnixTimeNow()}}).All(&rtn)
-	})
-	return rtn, err
 }
 
 func (this feedsource_op) touch(uri string, ttl int) error {

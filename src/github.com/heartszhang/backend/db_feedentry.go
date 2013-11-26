@@ -28,6 +28,32 @@ func (this feedentry_op) umark(uri string, markbit uint) error {
 	})
 }
 
+func (this feedentry_op) umark_category(category string, markbit uint) error {
+	mask := ^markbit
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Update(bson.M{"categories": category}, bson.M{"$bit": bson.M{"flags": bson.M{"$and": mask}}})
+	})
+}
+
+func (this feedentry_op) mark_category(category string, newmark uint) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Update(bson.M{"categories": category}, bson.M{"$bit": bson.M{"flags": bson.M{"$or": newmark}}})
+	})
+}
+
+func (this feedentry_op) umark_source(source string, markbit uint) error {
+	mask := ^markbit
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Update(bson.M{"src": source}, bson.M{"$bit": bson.M{"flags": bson.M{"$and": mask}}})
+	})
+}
+
+func (this feedentry_op) mark_source(source string, newmark uint) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Update(bson.M{"src": source}, bson.M{"$bit": bson.M{"flags": bson.M{"$or": newmark}}})
+	})
+}
+
 func (this feedentry_op) save(entries []feed.FeedEntry) ([]feed.FeedEntry, error) {
 	inserted := make([]feed.FeedEntry, 0)
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
@@ -53,6 +79,51 @@ func (this feedentry_op) save_one(entry feed.FeedEntry) (uid interface{}, err er
 	return uid, err
 }
 
+func (this feedentry_op) unread_count(source string) (int, error) {
+	var rtn int
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
+		var err error
+		rtn, err = coll.Find(bson.M{"src": source, "readed": false}).Count()
+		return err
+	})
+	return rtn, err
+}
+
+func (this feedentry_op) unread_count_category(cate string) (int, error) {
+	var rtn int
+	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
+		var err error
+		rtn, err = coll.Find(bson.M{"categories": cate, "readed": false}).Count()
+		return err
+	})
+	return rtn, err
+}
+
+//	unread_count_sources(uris []string) ([]feedsource_unread, error)
+func (this feedentry_op) unread_count_sources() (v []feedentry_unreadcount, err error) {
+	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
+		job := &mgo.MapReduce{
+			Map:    "function() { emit(this.src, 1) }",
+			Reduce: "function(key, values) { return Array.sum(values) }",
+		}
+		_, err := coll.Find(bson.M{"readed": false}).MapReduce(job, &v)
+		return err
+	})
+	return
+}
+
+//	unread_count_sources(uris []string) ([]feedsource_unread, error)
+func (this feedentry_op) unread_count_categories() (v []feedentry_unreadcount, err error) {
+	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
+		job := &mgo.MapReduce{
+			Map:    `function() { for(var c in this.categories){emit(c,1);} }`,
+			Reduce: "function(key, values) { return Array.sum(values) }",
+		}
+		_, err := coll.Find(bson.M{"readed": false}).MapReduce(job, &v)
+		return err
+	})
+	return
+}
 func (this feedentry_op) topn(skip, limit int) ([]feed.FeedEntry, error) {
 	rtn := make([]feed.FeedEntry, 0)
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {

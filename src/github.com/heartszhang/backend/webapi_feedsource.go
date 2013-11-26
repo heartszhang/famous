@@ -1,22 +1,18 @@
 package backend
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 	"net/url"
 )
-func init(){
+
+func init() {
 
 	http.HandleFunc("/api/feed_source/all.json", webapi_feedsource_all)
 	http.HandleFunc("/api/feed_source/subscribe.json", webapi_feedsource_subscribe)
 	http.HandleFunc("/api/feed_source/unsubscribe.json", webapi_feedsource_unsubscribe)
-	http.HandleFunc("/api/feed_source/entry/unread.json", webapi_assert) // same as feed_entry/unread
-	http.HandleFunc("/api/feed_source/entry/mark_read.json", webapi_assert) // ?source=
-	http.HandleFunc("/api/feed_source/entry/mark_read_all.json", webapi_assert) // ?sources=
-	http.HandleFunc("/api/feed_source/source/unread_count.json", webapi_assert) // ?source=
-	http.HandleFunc("/api/feed_source/sources/unread_count.json", webapi_assert) // ?sources=
-	http.HandleFunc("/api/feed_source/find.json", webapi_feedsource_find) // ?q=
-	http.HandleFunc("/api/feed_source/show.json", webapi_feedsource_find) // ?q=
+	http.HandleFunc("/api/feed_source/find.json", webapi_feedsource_find)                              // ?q=
+	http.HandleFunc("/api/feed_source/show.json", webapi_feedsource_find)                              // ?q=
 }
 
 func webapi_feedsource_show(w http.ResponseWriter, r *http.Request) {

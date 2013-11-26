@@ -46,7 +46,7 @@ func feedentries_updated() (*feedfeed.FeedSource, []feedfeed.FeedEntry, error) {
 	}
 	if err == nil {
 		fes = feedentry_filter(fes)
-		err = new_feedsource_operator().update(&fs)
+		err = new_feedsource_operator().save_one(fs)
 	}
 	return &fs, fes, err
 }

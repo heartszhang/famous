@@ -10,12 +10,6 @@ func init() {
 	http.HandleFunc("/api/feed_category/all.json", webapi_feedcategory_all)
 	http.HandleFunc("/api/feed_category/create.json", webapi_feedcategory_create)
 	http.HandleFunc("/api/feed_category/drop.json", webapi_feedcategory_drop)
-	http.HandleFunc("/api/feed_category/entry/unread.json", webapi_assert) // ?category=
-	http.HandleFunc("/api/feed_category/entry/unread_categories.json", webapi_assert)// ?categories=
-	http.HandleFunc("/api/feed_category/entry/mark_read.json", webapi_assert)  //?category=
-	http.HandleFunc("/api/feed_category/entry/mark_read_categories.json", webapi_assert)  //?categories
-	http.HandleFunc("/api/feed_category/categories/unread_count.json", webapi_assert)  //?categories
-	http.HandleFunc("/api/feed_category/category/unread_count.json", webapi_assert)  //?category
 }
 // uri : /api/feed_category/all.json
 func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {

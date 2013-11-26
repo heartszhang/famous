@@ -2,9 +2,12 @@ package backend
 
 import (
 	"fmt"
+	feed "github.com/heartszhang/feedfeed"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -73,20 +76,25 @@ func (this FeedsBackendConfig) Address() string {
 	return fmt.Sprintf("%v:%d", this.BackendIp, this.BackendPort)
 }
 
-type FeedsStatus struct {
+type feed_status struct {
 	startat time.Time `json:"-"`
-	Runned  int64     `json:"runned"` // seconds
 	Error   string    `json:"error,omitempty"`
 }
+type feed_tick struct {
+	Tick  int64         `json:"tick"`
+	Feeds []feed_update `json:"feeds,omitempty"`
+}
 
-func (this FeedsStatus) runned_nano() int64 {
+func (this feed_status) runned_nano() int64 {
 	return int64(time.Since(this.startat).Seconds())
 }
 
 var (
-	locker sync.Mutex
-	config FeedsBackendConfig
-	status FeedsStatus
+	locker       sync.Mutex
+	config       FeedsBackendConfig
+	status       feed_status
+	working      int64
+	feed_updates = make([]feed_update, 0)
 )
 
 func backend_config() FeedsBackendConfig {
@@ -95,12 +103,57 @@ func backend_config() FeedsBackendConfig {
 	return config
 }
 
-func BackendConfig() FeedsBackendConfig {
-	return backend_config()
-}
+const (
+	update_period = 5 * 60 //seconds
+)
 
-func backend_status() FeedsStatus {
+func backend_tick() feed_tick {
 	locker.Lock()
 	defer locker.Unlock()
-	return FeedsStatus{Runned: status.runned_nano()}
+	u := feed_updates
+	feed_updates = nil
+	r := status.runned_nano()
+	if r > update_period {
+		go update_work()
+	}
+	return feed_tick{Tick: r, Feeds: u}
+}
+
+func backend_push_update(fs feed.FeedSource, fes []feed.FeedEntry, err error) {
+	if err != nil {
+		return
+	}
+	// locker has been locked
+	feed_updates = append(feed_updates, feed_update{fs, fes})
+}
+
+func update_work() {
+	locker.Lock()
+	defer locker.Unlock()
+	w := atomic.AddInt64(&working, 1)
+	defer atomic.AddInt64(&working, -1)
+	if w != 1 {
+		return
+	}
+	fss, err := feedsource_expired(time.Now().Unix())
+	if err != nil || len(fss) == 0 {
+		return
+	}
+	idx := rand.Intn(len(fss))
+	fs := fss[idx]
+	newfs, fes, err := feed_fetch(fs.Uri)
+	newfs.Type = fs.Type
+	newfs.EnableProxy = fs.EnableProxy
+	newfs.Categories = append(newfs.Categories, fs.Categories...)
+	if newfs.Logo == "" {
+		newfs.Logo = fs.Logo
+	}
+
+	newfs.Disabled = fs.Disabled
+	newfs.LastTouch = time.Now().Unix()
+	newfs.LastUpdate = newfs.LastTouch
+	newfs.NextTouch = int64(newfs.Period) + newfs.LastTouch
+	err = feedsource_save(newfs)
+	fes = feedentry_filter(fes)
+	backend_push_update(newfs, fes, err)
 }

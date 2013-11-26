@@ -12,7 +12,20 @@ type feedentry_operator interface {
 	topn_by_feedsource(skip, limit int, feed string) ([]feed.FeedEntry, error)
 	mark(link string, newmark uint) error
 	umark(uri string, markbit uint) error
+	umark_category(category string, markbit uint) error
+	mark_category(category string, newmark uint) error
+	umark_source(category string, markbit uint) error
+	mark_source(category string, newmark uint) error
 	setcontent(link string, filepath string, words int, imgs []feed.FeedMedia) error
+	unread_count(uri string) (int, error)
+	unread_count_sources() ([]feedentry_unreadcount, error)
+	unread_count_category(category string) (int, error)
+	unread_count_categories() ([]feedentry_unreadcount, error)
+}
+
+type feedentry_unreadcount struct {
+	Source string `json:"source" bson:"_id"`
+	Count  int    `json:"count" bson:"value"`
 }
 
 type feedentrytag_operator interface {
@@ -33,13 +46,13 @@ type feedsource_operator interface {
 	save(feeds []feed.FeedSource) ([]feed.FeedSource, error)
 	upsert(f *feed.FeedSource) error
 	find(uri string) (*feed.FeedSource, error)
-	expired() ([]feed.FeedSource, error)
 	all() ([]feed.FeedSource, error)
 	touch(uri string, ttl int) error
 	drop(uri string) error
 	disable(uri string, dis bool) error
-	update(f *feed.FeedSource) error
+	save_one(f feed.FeedSource) error
 	findbatch(uris []string) ([]feed.FeedSource, error)
+	expired(beforeunxtime int64) ([]feed.FeedSource, error)
 }
 
 type feedcontent_operator interface {

@@ -15,11 +15,11 @@ func init() {
 	http.HandleFunc("/api/update/popup.json", webapi_meta) // no param
 	http.HandleFunc("/api/meta.json", webapi_meta)
 	http.HandleFunc("/api/meta/cleanup.json", webapi_meta_cleanup)
-
+	http.HandleFunc("/api/update/popup.json", webapi_update_popup)
 	http.HandleFunc("/api/feed_tag/all.json", webapi_feedtag_all)
 
-	http.HandleFunc("/api/link/origin.json", webapi_link_origin)          // ?uri=
-	http.HandleFunc("/api/suggest/bing.json", webapi_suggest_bing)        // ?q=
+	http.HandleFunc("/api/link/origin.json", webapi_link_origin)   // ?uri=
+	http.HandleFunc("/api/suggest/bing.json", webapi_suggest_bing) // ?q=
 }
 
 const uint64_bits int = 64
@@ -44,10 +44,10 @@ func webapi_suggest_bing(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func webapi_assert(w http.ResponseWriter, r *http.Request) {
 	webapi_write_error(w, backend_error{"not implemented yet", -1})
 }
+
 // uri: /meta.json
 func webapi_meta(w http.ResponseWriter, r *http.Request) {
 	m, err := meta()
@@ -60,18 +60,26 @@ func webapi_meta(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 }
 
-// uri: /tick.json
 func webapi_tick(w http.ResponseWriter, r *http.Request) {
-	v, err := tick()
-	if err != nil {
+	log.Println(r.URL.RequestURI())
+	switch v, err := tick(); err {
+	case nil:
 		webapi_write_error(w, err)
-	} else {
+	default:
 		webapi_write_as_json(w, v)
 	}
-	log.Println(r.URL.RequestURI())
 }
 
-// uri: /meta/cleanup.json
+func webapi_update_popup(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.RequestURI())
+	switch v, err := update_popup(); err {
+	case nil:
+		webapi_write_error(w, err)
+	default:
+		webapi_write_as_json(w, v)
+	}
+}
+
 func webapi_meta_cleanup(w http.ResponseWriter, r *http.Request) {
 	err := meta_cleanup()
 	webapi_write_error(w, err)

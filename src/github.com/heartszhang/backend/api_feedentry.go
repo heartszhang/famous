@@ -38,11 +38,27 @@ func feedentry_mark(uri string, flags uint) (uint, error) {
 	return flags, err
 }
 
+func feedentry_category_mark(cate string, flags uint) error {
+	dbo := new_feedentry_operator()
+	err := dbo.mark_category(cate, flags)
+	return err
+}
+
+func feedentry_source_mark(src string, flags uint) error {
+	err := new_feedentry_operator().mark_source(src, flags)
+	return err
+}
+
 // /feed/entry/umark.json/{id}/{flags}
 func feedentry_umark(uri string, flags uint) (uint, error) {
 	dbo := new_feedentry_operator()
 	err := dbo.mark(uri, flags)
 	return flags, err
+}
+
+func feedentry_category_umark(category string, flags uint) error {
+	err := new_feedentry_operator().umark_category(category, flags)
+	return err
 }
 
 // /feed/entry/full_text.json/{url}/{entry_id}

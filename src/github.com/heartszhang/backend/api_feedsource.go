@@ -2,35 +2,48 @@ package backend
 
 import (
 	"fmt"
-	feed "github.com/heartszhang/feedfeed"
 	"github.com/heartszhang/curl"
+	feed "github.com/heartszhang/feedfeed"
 	"github.com/heartszhang/google"
 )
+
 func feedsource_all() ([]feed.FeedSource, error) {
 	dbo := new_feedsource_operator()
 	fs, err := dbo.all()
 	return fs, err
 }
-
+func feed_fetch(uri string) (v feed.FeedSource, fes []feed.FeedEntry, err error) {
+	cache, err := curl.NewCurl(backend_config().FeedSourceFolder).GetUtf8(uri)
+	if err != nil {
+		return
+	}
+	ext := curl.MimeToExt(cache.Mime)
+	if ext != "xml" && ext != "atom+xml" && ext != "rss+atom" {
+		return v, nil, fmt.Errorf("unsupported mime: %v", cache.Mime)
+	} else if cache.LocalUtf8 == "" {
+		return v, nil, fmt.Errorf("unrecognized encoding %v", cache.Local)
+	}
+	v, fes, err = feed.MakeFeed(cache.LocalUtf8)
+	if v.Uri == "" {
+		v.Uri = uri
+	}
+	return
+}
+func feedsource_expired(beforeunx int64) ([]feed.FeedSource, error) {
+	return new_feedsource_operator().expired(beforeunx)
+}
+func feedsource_save(fs feed.FeedSource) error {
+	return new_feedsource_operator().save_one(fs)
+}
 func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err error) {
 	fso := new_feedsource_operator()
 	fs, err := fso.find(uri)
 	if err == nil {
 		return *fs, nil
 	}
-	curler := curl.NewCurl(backend_config().FeedSourceFolder)
-	cache, err := curler.GetUtf8(uri)
-	ext := curl.MimeToExt(cache.Mime)
-	if ext != "xml" && ext != "atom+xml" && ext != "rss+atom" {
-		return v, fmt.Errorf("unsupported mime: %v", cache.Mime)
-	}
+	v, _, err = feed_fetch(uri)
+	v.Type = source_type
 
-	if cache.LocalUtf8 != "" {
-		v, err = feed.MakeFeedSource(cache.LocalUtf8)
-	}
-	if v.Uri == "" {
-		v.Uri = uri
-	}
 	if err == nil && v.Uri != "" {
 		err = fso.upsert(&v)
 	}
