@@ -8,8 +8,20 @@ import (
 	"github.com/heartszhang/markhtml"
 	"io/ioutil"
 	"log"
+	"strings"
 	"sync"
 )
+
+func feedentry_filter(v []feed.FeedEntry) []feed.FeedEntry {
+	v = feed_entries_downloaded(v) // clean readed entries
+	v = feed_entries_clean(v)
+	v = feed_entries_clean_summary(v)
+	v = feed_entries_clean_fulltext(v)
+	v = feed_entries_autotag(v)
+	v = feed_entries_statis(v)
+	v = feed_entries_backup(v)
+	return v
+}
 
 type text_score struct {
 	*cleaner.DocumentSummary
@@ -23,7 +35,7 @@ func feedentry_eval_text(entry *feed.FeedEntry, text string,
 	dupflag,
 	inlineflag uint64, disableinline bool) text_score {
 	frag, _ := html_create_fragment(text)
-	frag, score, _ := cleaner.NewExtractor(config.CleanFolder).MakeFragmentReadable(frag)
+	frag, score, _ := cleaner.NewExtractor(backend_context.config.CleanFolder).MakeFragmentReadable(frag)
 	entry.Images = feedmedia_append_unique(entry.Images, feedmedias_from_docsummary(score.Images)...)
 	entry.Videos = feedmedia_append_unique(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
 	if len(entry.Videos) > 0 {
@@ -32,26 +44,23 @@ func feedentry_eval_text(entry *feed.FeedEntry, text string,
 	}
 	mc := len(entry.Images) + len(entry.Videos) + len(entry.Audios)
 	imgs := len(entry.Images)
-	ext := feedentry_content_exists(score.Hash) && text != ""
 
-	if score.WordCount < config.SummaryMinWords && mc == 0 {
-		log.Println("clean-failed", text, score.Text)
-		entry.Title.Others = append(entry.Title.Others, score.Text)
+	if score.WordCount < backend_context.config.SummaryMinWords && mc == 0 {
+		entry.Title.Others = text_unique_append(entry.Title.Others, score.Text)
 	}
-	flowdoc, s := feedentry_make_flowdoc(frag, score.WordCount, score.LinkWordCount, mc, imgs, ext, emptyflag, readyflag, dupflag, inlineflag, disableinline)
+	flowdoc, s := feedentry_make_flowdoc(frag, score.WordCount, score.LinkWordCount, mc, imgs, emptyflag, readyflag, inlineflag, disableinline)
+	if feedentry_content_exists(score.Hash) && text != "" {
+		s |= dupflag
+	}
 	return text_score{score, flowdoc, s}
 }
 
-func feedentry_make_flowdoc(frag *html.Node, words, linkwords int, medias, imgs int, dup bool, emptyflag, readyflag, dupflag, inlineflag uint64, disableinline bool) (v string, s uint64) {
+func feedentry_make_flowdoc(frag *html.Node, words, linkwords int, medias, imgs int, emptyflag, readyflag, inlineflag uint64, disableinline bool) (v string, s uint64) {
 	s = feed.Feed_status_format_flowdocument
 	dh := words > 0 && linkwords*100/words > 50
-	wm := words < config.SummaryMinWords
+	wm := words < backend_context.config.SummaryMinWords
 	switch {
-	case dup == true:
-		v = empty_flowdocument
-		s |= emptyflag | dupflag
 	case medias == 0 && wm == true: // no video/audio/image/text
-		//v = node_extract_text(frag)
 		v = empty_flowdocument
 	case medias == 0 && wm == false: // no vi/audio/image, has text
 		v = make_flowdocument(frag, true)
@@ -77,8 +86,23 @@ func feedentry_make_flowdoc(frag *html.Node, words, linkwords int, medias, imgs 
 	return
 }
 
-func feed_entries_unreaded(entries []feed.FeedEntry) []feed.FeedEntry {
-	return entries
+func feed_entries_downloaded(entries []feed.FeedEntry) []feed.FeedEntry {
+	result := make(map[string]feed.FeedEntry)
+	var hashs []string
+	for _, entry := range entries {
+		hash := entry.Uri + "|" + entry.Title.Main
+		result[hash] = entry
+		hashs = append(hashs, hash)
+	}
+	hashs, err := new_feedentrytouch_operator().touch(hashs)
+	if err != nil {
+		return entries
+	}
+	var v []feed.FeedEntry
+	for _, hash := range hashs {
+		v = append(v, result[hash])
+	}
+	return v
 }
 
 func feed_entries_clean(entries []feed.FeedEntry) []feed.FeedEntry {
@@ -114,12 +138,6 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 	count := len(entries)
 	for i := 0; i < count; i++ {
 		entry := &entries[i]
-		switch entry.Words < uint(config.SummaryMinWords) {
-		case true:
-			entry.Status |= feed.Feed_status_text_empty
-		default:
-			entry.Status |= feed.Feed_status_text_many
-		}
 		if entry.Status&feed.Feed_status_summary_empty != 0 && entry.Status&feed.Feed_status_content_empty != 0 {
 			entry.Status |= feed.Feed_status_text_empty
 		}
@@ -142,22 +160,31 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 		default:
 			entry.Status |= feed.Feed_status_image_many
 		}
-		switch entry.Density < config.LinkDensityThreshuld {
+		switch entry.Density < backend_context.config.LinkDensityThreshuld {
 		case true:
 			entry.Status |= feed.Feed_status_linkdensity_low
 		default:
 			entry.Status |= feed.Feed_status_linkdensity_high
 		}
 		if entry.Status&feed.Feed_status_text_empty != 0 {
-			d := entry.Title.Main
-			if len(entry.Videos) > 0 && entry.Videos[0].Description == "" {
-				entry.Videos[0].Description = d
+			d := strings.Join(entry.Title.Others, "\n")
+			if d == "" {
+				d = entry.Title.Main
 			}
-			if len(entry.Audios) > 0 && entry.Audios[0].Description == "" {
-				entry.Audios[0].Description = d
+			for i := len(entry.Videos) - 1; i >= 0; i = i - 1 {
+				if entry.Videos[i].Description == "" {
+					entry.Videos[i].Description = d
+				}
 			}
-			if len(entry.Images) > 0 && entry.Images[0].Description == "" {
-				entry.Images[0].Description = d
+			for i := len(entry.Audios) - 1; i >= 0; i = i - 1 {
+				if entry.Audios[i].Description == "" {
+					entry.Audios[i].Description = d
+				}
+			}
+			for i := len(entry.Images) - 1; i >= 0; i = i - 1 {
+				if entry.Images[i].Description == "" {
+					entry.Images[i].Description = d
+				}
 			}
 		}
 	}
@@ -181,8 +208,11 @@ const (
 func feedentry_content_exists(hash uint64) bool {
 	co := new_feedcontent_operator()
 	cnt, err := co.touch(int64(hash))
-	log.Println("touch-hash", cnt, hash, err)
-	return cnt > config.SummaryDuplicateCount
+	if err != nil {
+		log.Println("feedcontent-hashs failed", err)
+		return false
+	}
+	return cnt > backend_context.config.SummaryDuplicateCount
 }
 
 func feedmedia_append_unique(set []feed.FeedMedia, v ...feed.FeedMedia) []feed.FeedMedia {
@@ -200,7 +230,7 @@ func feedmedia_append_unique(set []feed.FeedMedia, v ...feed.FeedMedia) []feed.F
 }
 
 func feedentry_write_flowdoc(text string) {
-	of, err := ioutil.TempFile(config.FlowDocumentFolder, "xaml.")
+	of, err := ioutil.TempFile(backend_context.config.FlowDocumentFolder, "xaml.")
 	if err != nil {
 		return
 	}
@@ -208,7 +238,7 @@ func feedentry_write_flowdoc(text string) {
 	of.WriteString(text)
 }
 func feedentry_write_fails(text string) {
-	of, err := ioutil.TempFile(config.FailedFolder, "text.")
+	of, err := ioutil.TempFile(backend_context.config.FailedFolder, "text.")
 	if err != nil {
 		return
 	}
@@ -227,10 +257,7 @@ func feed_entry_summary_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	score := feedentry_eval_text(entry, txt, feed.Feed_status_summary_empty, feed.Feed_status_summary_ready, feed.Feed_status_summary_duplicated, feed.Feed_status_summary_mediainline, true)
 	entry.Summary = score.flowdoc
 	entry.Status |= score.status
-	if entry.Words < uint(score.WordCount) {
-		entry.Words = uint(score.WordCount)
-		entry.Density = uint(score.LinkWordCount * 100 / score.WordCount)
-	}
+	entry.SummaryWords = score.WordCount
 }
 
 func feedentry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
@@ -239,21 +266,16 @@ func feedentry_content_clean(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 		entry.Status |= feed.Feed_status_content_empty
 		return
 	}
-	backup := entry.Summary
+
 	entry.Status |= feed.Feed_status_content_inline
 	//	txt := markhtml.TransferText(entry.Content)
 	score := feedentry_eval_text(entry, entry.Content, feed.Feed_status_content_empty, feed.Feed_status_content_ready, feed.Feed_status_content_duplicated, feed.Feed_status_content_mediainline, false)
 	entry.Status |= score.status
-	if entry.Status&feed.Feed_status_content_empty == 0 {
-		entry.Words = uint(score.WordCount)
+	entry.ContentWords = score.WordCount
+	if score.WordCount > 0 {
 		entry.Density = uint(score.LinkWordCount * 100 / score.WordCount)
-		if entry.Status&feed.Feed_status_summary_empty != 0 {
-			entry.Summary = score.flowdoc
-			entry.Content = backup
-		} else {
-			entry.Content = score.flowdoc
-		}
 	}
+	entry.Content = score.flowdoc
 }
 
 const (
@@ -278,4 +300,13 @@ func feedmedias_from_docsummary(medias []cleaner.MediaSummary) []feed.FeedMedia 
 		v[idx].Description = ms.Alt
 	}
 	return v
+}
+
+func text_unique_append(set []string, txt string) []string {
+	for _, s := range set {
+		if s == txt {
+			return set
+		}
+	}
+	return append(set, txt)
 }
