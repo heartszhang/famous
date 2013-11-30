@@ -23,6 +23,9 @@ type feedentry_operator interface {
 	unread_count_categories() ([]feedentry_unreadcount, error)
 }
 
+type feedentrytouch_operator interface {
+	touch(hashes []string) ([]string, error)
+}
 type feedentry_unreadcount struct {
 	Source string `json:"source" bson:"_id"`
 	Count  int    `json:"count" bson:"value"`
@@ -47,7 +50,7 @@ type feedsource_operator interface {
 	upsert(f *feed.FeedSource) error
 	find(uri string) (*feed.FeedSource, error)
 	all() ([]feed.FeedSource, error)
-	touch(uri string, ttl int) error
+	touch(uri string, last, next, period int64) error
 	drop(uri string) error
 	disable(uri string, dis bool) error
 	save_one(f feed.FeedSource) error

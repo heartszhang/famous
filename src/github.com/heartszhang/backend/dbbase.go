@@ -11,7 +11,7 @@ var (
 func clone_session() (*mgo.Session, error) {
 	if session == nil {
 		//		var err error
-		if s, err := mgo.Dial(config.DbAddress); err != nil {
+		if s, err := mgo.Dial(backend_context.config.DbAddress); err != nil {
 			return nil, err
 		} else {
 			session = s
@@ -35,7 +35,7 @@ func do_in_session(collection string, act func(*mgo.Collection) error) error {
 	}
 	defer sess.Close()
 
-	c := sess.DB(config.DbName).C(collection)
+	c := sess.DB(backend_context.config.DbName).C(collection)
 	return act(c)
 }
 

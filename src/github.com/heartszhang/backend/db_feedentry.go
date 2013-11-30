@@ -16,7 +16,6 @@ func new_feedentry_operator() feedentry_operator {
 
 func (this feedentry_op) mark(uri string, newmark uint) error {
 	return do_in_session(this.coll, func(coll *mgo.Collection) error {
-		//	return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"flags": newmark}})
 		return coll.Update(bson.M{"uri": uri}, bson.M{"$bit": bson.M{"flags": bson.M{"$or": newmark}}})
 	})
 }
@@ -59,11 +58,11 @@ func (this feedentry_op) save(entries []feed.FeedEntry) ([]feed.FeedEntry, error
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		for _, entry := range entries {
 			iid, err := insert_entry(coll, entry)
-			if err != nil {
-				return err
-			}
 			if iid != nil {
 				inserted = append(inserted, entry)
+			}
+			if err != nil {
+				return err
 			}
 		}
 		return nil
@@ -99,7 +98,6 @@ func (this feedentry_op) unread_count_category(cate string) (int, error) {
 	return rtn, err
 }
 
-//	unread_count_sources(uris []string) ([]feedsource_unread, error)
 func (this feedentry_op) unread_count_sources() (v []feedentry_unreadcount, err error) {
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
 		job := &mgo.MapReduce{
@@ -112,7 +110,6 @@ func (this feedentry_op) unread_count_sources() (v []feedentry_unreadcount, err 
 	return
 }
 
-//	unread_count_sources(uris []string) ([]feedsource_unread, error)
 func (this feedentry_op) unread_count_categories() (v []feedentry_unreadcount, err error) {
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
 		job := &mgo.MapReduce{
@@ -133,9 +130,10 @@ func (this feedentry_op) topn(skip, limit int) ([]feed.FeedEntry, error) {
 }
 
 func (this feedentry_op) topn_by_feedsource(skip, limit int, source string) ([]feed.FeedEntry, error) {
-	rtn := make([]feed.FeedEntry, 0)
+	log.Println("topn-source", source, skip, limit)
+	var rtn []feed.FeedEntry
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"readed": false, "source": source}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
+		return coll.Find(bson.M{"readed": false, "src": source}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }

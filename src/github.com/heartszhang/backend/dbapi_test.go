@@ -1,26 +1,26 @@
 package backend
 
 import (
-	//	"github.com/heartszhang/feedfeed"
+	"fmt"
+	"github.com/heartszhang/feedfeed"
 	"testing"
 )
 
-/*
 func TestFeedSoruceImport(t *testing.T) {
-	t.Skip("import skippted")
+	t.Skip()
 	fs, err := feedfeed.CreateFeedsCategoryOpml("feedly.opml")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	dbo := NewFeedSourceOperator()
-	fs, err = dbo.Save(fs)
+	dbo := new_feedsource_operator()
+
+	fs, err = dbo.save(fs)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(fs)
 }
-*/
 
 func TestFeedSourceOps(t *testing.T) {
 	t.Skip()
@@ -51,4 +51,17 @@ func TestFeedContentTouch(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log("current touch", x)
+}
+
+func ExampleFeedEntries_unread() {
+	dbo := new_feedentry_operator()
+	fss, err := dbo.unread_count_sources()
+	fmt.Println(fss, err)
+	//Output:
+}
+func ExampleFeedEntry_unread() {
+	dbo := new_feedentry_operator()
+	fss, err := dbo.unread_count("http://feeds.feedburner.com/chinadigitaltimes/ThSg")
+	fmt.Println(fss, err)
+	//Output:
 }
