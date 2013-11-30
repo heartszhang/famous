@@ -14,6 +14,7 @@ using System.Windows.Data;
 namespace famousfront.viewmodels
 {
     using FeedSources = ObservableCollection<FeedSourceViewModel>;
+  using famousfront.datamodels;
     
     class FeedSourcesViewModel : famousfront.core.TaskViewModel
     {
@@ -22,6 +23,15 @@ namespace famousfront.viewmodels
             MessengerInstance.Register<DropFeedSource>(this, OnDropFeedSource);
             MessengerInstance.Register<SubscribeFeedSource>(this, OnSubscribeFeedSource);
             MessengerInstance.Register<UnsubscribeFeedSource>(this, OnUnsubscribeFeedSource);
+            MessengerInstance.Register<FeedEntity>(this, OnFeedEntity);
+        }
+
+        private void OnFeedEntity(FeedEntity obj)
+        {
+          var s = _sources.FirstOrDefault(v => obj.uri == v.Uri);
+          if (s == null)
+            return;          
+          s.AddUnreadCount(obj.entries.Length);
         }
 
         private void OnDropFeedSource(DropFeedSource obj)
@@ -81,7 +91,7 @@ namespace famousfront.viewmodels
             v.GroupDescriptions.Add(new PropertyGroupDescription("Category"));
             return v;
         }
-        internal async void Reload()
+        internal async Task Reload()
         {
           IsBusying = true;
           var fs = await HttpClientUtils.Get<famousfront.datamodels.FeedSource[]>(ServiceLocator.BackendPath("/api/feed_source/all.json"));

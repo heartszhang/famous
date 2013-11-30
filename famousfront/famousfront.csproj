@@ -63,12 +63,6 @@
     <Reference Include="GalaSoft.MvvmLight.WPF45">
       <HintPath>packages\MvvmLightLibs.4.2.30.0\lib\net45\GalaSoft.MvvmLight.WPF45.dll</HintPath>
     </Reference>
-    <Reference Include="MetroLog">
-      <HintPath>packages\MetroLog.0.8.5-beta\lib\net45\MetroLog.dll</HintPath>
-    </Reference>
-    <Reference Include="MetroLog.NetFx">
-      <HintPath>packages\MetroLog.0.8.5-beta\lib\net45\MetroLog.NetFx.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation">
       <HintPath>packages\CommonServiceLocator.1.0\lib\NET35\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
@@ -104,8 +98,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="controls\GooglePlusPanel.cs" />
     <Compile Include="controls\ImageTipProviderBehaviorcs.cs" />
     <Compile Include="controls\ListBoxScrollToTopBehavior.cs" />
+    <Compile Include="utils\HttpQueryParameter.cs" />
     <Compile Include="utils\HyperlinkOptions.cs" />
     <Compile Include="utils\ElementOptions.cs" />
     <Compile Include="utils\VisualTreeExtensions.cs" />
@@ -115,7 +111,7 @@
     <Compile Include="viewmodels\ImageTipViewModel.cs" />
     <Compile Include="views\FeedEntryTemplateSelector.cs" />
     <Compile Include="controls\FlowTextBlock.cs" />
-    <Compile Include="controls\GooglePlusPanel.cs" />
+    <Compile Include="controls\GooglePlusPicturePanel.cs" />
     <Compile Include="converters\BoolToVisibilityConverter.cs" />
     <Compile Include="core\DialogViewModel.cs" />
     <Compile Include="core\Flags.cs" />

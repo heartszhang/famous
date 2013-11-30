@@ -47,9 +47,10 @@ namespace famousfront.core
         ImageTipShowDelay = 150;
         ImageTipHideDelay = 800;
         ImageTipMaxWidth = 500.0;
-        FlowDocumentBlockLineHeight = 23d;
+        FlowDocumentBlockLineHeight = 23.667d;
         ImageTipMinHeight = 600d;
         ImageTipMinWidth = 500d;
+        FeedUpdateInterval = 5.0;
       }
         [DataMember(Name="backend")]
         public string Backend
@@ -137,6 +138,8 @@ namespace famousfront.core
         public double ImageTipMinWidth{ get; set; }// milliseconds
         [DataMember(Name = "imagetip_minheight")]
         public double ImageTipMinHeight{ get; set; }// milliseconds
+        [DataMember(Name = "feedupdate_interval")]
+        public double FeedUpdateInterval { get; set; }// minutes
     }
 
 }

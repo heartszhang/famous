@@ -151,9 +151,7 @@ namespace famousfront.converters
       {
         var width = System.Convert.ToDouble(parameter);
         var scale = System.Convert.ToDouble(value);
-        //var scale = (double)value;  //width / height = scale => width / scale
-        //var width = (double)parameter;
-        return scale.zero() ? 0 : width / scale;
+        return scale.zero() || width.let(0.0) || scale.let(0.0)? 0 : width / scale;
       }
 
       public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -13,123 +13,168 @@ using System.Windows.Input;
 using GalaSoft.MvvmLight.Command;
 namespace famousfront.viewmodels
 {
-    class FeedEntryViewModel : famousfront.core.ViewModelBase
+  class FeedEntryViewModel : famousfront.core.ViewModelBase
+  {
+    static readonly System.DateTime utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+    FeedEntry _ = new FeedEntry();
+
+    internal FeedEntryViewModel(FeedEntry v)
     {
-        static readonly System.DateTime utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-        FeedEntry _ = new FeedEntry();
-
-        internal FeedEntryViewModel(FeedEntry v)
-        {
-            _ = v;
-            _pub_day = publish_day();
-            HasDocument = (_.status & FeedStatuses.Feed_status_text_empty) == 0;
-            var inline = _.status & FeedStatuses.Feed_status_media_inline;
-            var imgone = _.status & FeedStatuses.Feed_status_image_one;
-            var imgmany = _.status & FeedStatuses.Feed_status_image_many;
-            var media = _.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many);
-            if (imgone != 0 && inline == 0 && media == 0) {
-                Media = new ImageElementViewModel(_.images[0]);
-            }
-            else if (imgmany != 0 && inline == 0 && media == 0)
-            {
-                Media = new ImageGalleryViewModel(_.images);
-            }
-            if (_.videos != null)
-            {
-                Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : null);
-            }
-            else if (_.audios != null)
-            {
-              Media = new MediaElementViewModel(_.audios[0], (imgone | imgmany) != 0 ? _.images[0] : null);
-            }
-            
-        }
-        public DateTime PubDate
-        {
-          get 
-          {
-            return utime.AddMilliseconds(_.pubdate / 1e6); 
-          }
-        }
-        public bool HasMedia
-        {
-          get { return Media != null; }
-        }
-        bool is_media_inline()
-        {
-          var inline = _.status & FeedStatuses.Feed_status_media_inline;
-          return inline != 0;
-        }
-        public bool HasImageGallery
-        {
-          get { return  !is_media_inline() && (_.status & FeedStatuses.Feed_status_image_many) != 0; }
-        }
-        public bool HasVideo
-        {
-          get { return !is_media_inline() && (_.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many)) != 0; }
-        }
-      public bool HasImageOne
+      _ = v;
+      HasDocument = (_.status & FeedStatuses.Feed_status_text_empty) == 0;
+      var inline = _.status & FeedStatuses.Feed_status_media_inline;
+      var imgone = _.status & FeedStatuses.Feed_status_image_one;
+      var imgmany = _.status & FeedStatuses.Feed_status_image_many;
+      var media = _.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many);
+      if (imgone != 0 && inline == 0 && media == 0)
       {
-        get { return (_.status & FeedStatuses.Feed_status_image_one) != 0; }
+        Media = new ImageElementViewModel(_.images[0]);
       }
-      public string Summary 
-      { 
-        get { return _.summary; } 
-        protected set { var p = _.summary; _.summary = value; _.content = p; RaisePropertyChanged(); } 
+      else if (imgmany != 0 && inline == 0 && media == 0)
+      {
+        Media = new ImageGalleryViewModel(_.images);
       }
-        public string Title { get { return _.title.main; } }
+      if (_.videos != null)
+      {
+        Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : null);
+      }
+      else if (_.audios != null)
+      {
+        Media = new MediaElementViewModel(_.audios[0], (imgone | imgmany) != 0 ? _.images[0] : null);
+      }
 
-        string _pub_day = null;
-        public string PubDay { get { return _pub_day ; } }
-
-        string publish_day()
-        {
-            var p = utime.AddMilliseconds(_.pubdate / 1e6);
-            return p.ToString("D");
-        }
-        TaskViewModel _media;
-        public TaskViewModel Media
-        {
-            get { return _media; }
-            private set {Set(ref _media, value);}
-        }
-        bool _has_document = true;
-        public bool HasDocument
-        {
-            get { return _has_document; }
-            private set { Set(ref _has_document, value); }
-        }
-        public string Url
-        {
-          get { return _.uri; }
-        }
-        ICommand _toggle_expandsummary;
-        public ICommand ToggleExpandSummaryCommand
-        {
-          get { return _toggle_expandsummary ?? (_toggle_expandsummary = toggle_expandsummary()); }
-        }
-        ICommand toggle_expandsummary()
-        {
-          return new RelayCommand(ExecuteToggleExpandSummary);
-        }
-        bool _expanded ;
-        public bool IsExpanded
-        {
-          get { return _expanded; }
-          protected set { Set(ref _expanded, value); }
-        }
-        private void ExecuteToggleExpandSummary()
-        {
-          Summary = _.content;
-          IsExpanded = !IsExpanded;
-        }
-        public bool CanExpand
-        {
-          get 
-          {
-            var flag = FeedStatuses.Feed_status_content_empty | FeedStatuses.Feed_status_summary_empty;
-            return (_.status & flag) == 0ul; 
-          }
-        }
     }
+    public DateTime PubDate
+    {
+      get
+      {
+        return utime.AddSeconds(_.pubdate);
+      }
+    }
+    public bool HasMedia
+    {
+      get { return Media != null; }
+    }
+    bool is_media_inline()
+    {
+      var inline = _.status & FeedStatuses.Feed_status_media_inline;
+      return inline != 0;
+    }
+    public bool HasImageGallery
+    {
+      get { return !is_media_inline() && (_.status & FeedStatuses.Feed_status_image_many) != 0; }
+    }
+    public bool HasVideo
+    {
+      get { return !is_media_inline() && (_.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many)) != 0; }
+    }
+    public bool HasImageOne
+    {
+      get { return (_.status & FeedStatuses.Feed_status_image_one) != 0; }
+    }
+    public string Summary
+    {
+      get { return _.summary; }
+      protected set { var p = _.summary; _.summary = value; _.content = p; RaisePropertyChanged(); }
+    }
+    public string Title { get { return _.title.main; } }
+
+    public string PubDay { get { return publish_day().ToString(); } }
+
+    FriendlyDateTime publish_day()
+    {
+      var p = utime.AddSeconds(_.pubdate);
+      return new FriendlyDateTime(p);
+    }
+    TaskViewModel _media;
+    public TaskViewModel Media
+    {
+      get { return _media; }
+      private set { Set(ref _media, value); }
+    }
+    bool _has_document = true;
+    public bool HasDocument
+    {
+      get { return _has_document; }
+      private set { Set(ref _has_document, value); }
+    }
+    public string Url
+    {
+      get { return _.uri; }
+    }
+    ICommand _toggle_expandsummary;
+    public ICommand ToggleExpandSummaryCommand
+    {
+      get { return _toggle_expandsummary ?? (_toggle_expandsummary = toggle_expandsummary()); }
+    }
+    ICommand toggle_expandsummary()
+    {
+      return new RelayCommand(ExecuteToggleExpandSummary);
+    }
+    bool _expanded;
+    public bool IsExpanded
+    {
+      get { return _expanded; }
+      protected set { Set(ref _expanded, value); }
+    }
+    private void ExecuteToggleExpandSummary()
+    {
+      Summary = _.content;
+      IsExpanded = !IsExpanded;
+    }
+    public bool CanExpand
+    {
+      get
+      {
+        //var flag = FeedStatuses.Feed_status_content_empty | FeedStatuses.Feed_status_summary_empty;
+        //return (_.status & flag) == 0ul;
+        return true;
+      }
+    }
+  }
+  internal class FriendlyDateTime 
+  {
+    DateTime _;
+    internal FriendlyDateTime(DateTime t)
+    {
+      _ = t;
+    }
+    public static implicit operator DateTime(FriendlyDateTime t)
+    {
+      return t._;
+    }
+    public override string ToString()
+    {
+      var p = _;
+      var now = DateTime.Now;
+      var v = p.ToString("D");
+      if (p.Year != now.Year)
+        return v;
+      var diff = (now - p).Days;
+      var dw = (int)p.DayOfWeek - 1;
+      var ndw = (int)now.DayOfWeek -1;
+
+      if (dw < 0)
+        dw = 6;      
+      if (ndw < 0)
+        ndw = 6;
+
+      var firstdthisweek = now.AddDays(-(int)ndw);
+      var prevweek = firstdthisweek.AddDays(-7d);
+      var ns = new[] { "今天", "昨天", "前天", "大前天" };
+      var cws = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
+      if (diff >= 0 && diff < ns.Length)
+      {
+        v = ns[diff];
+      }else if (p >= firstdthisweek)
+      {
+        v = cws[dw];
+      }
+      else if (p >= prevweek)
+      {
+        v = "上" + cws[dw];
+      }
+      return v;
+    }
+  }
 }

@@ -5,7 +5,7 @@ using famousfront.utils;
 using famousfront.viewmodels;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
-using MetroLog;
+//using MetroLog;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ namespace famousfront
 {       
     internal class ServiceLocator
     {
-        private static ILogger _log = LogManagerFactory.DefaultLogManager.GetLogger<ServiceLocator>();
+//        private static ILogger _log = LogManagerFactory.DefaultLogManager.GetLogger<ServiceLocator>();
         private static MainViewModel _main;
 
         private static SettingsViewModel _settings;

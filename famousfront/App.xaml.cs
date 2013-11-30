@@ -1,4 +1,4 @@
-﻿using MetroLog;
+﻿//using MetroLog;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,13 +18,13 @@ namespace famousfront
     /// </summary>
     public partial class App : Application
     {
-      private ILogger Log ;
+//      private ILogger Log ;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new StreamingFileTarget { PathUnderAppData = "famous" });
-            Log = LogManagerFactory.DefaultLogManager.GetLogger<Application>();
+//            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new StreamingFileTarget { PathUnderAppData = "famous" });
+//            Log = LogManagerFactory.DefaultLogManager.GetLogger<Application>();
             WireUnhandledExceptionHandlers();
             ServiceLocator.Startup();
             this.Apply(Elysium.Theme.Light);
@@ -65,17 +65,17 @@ namespace famousfront
         }
         static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-          ((App)App.Current).Log.Fatal("Unhandled TaskScheduler Exception", e.Exception);
+//          ((App)App.Current).Log.Fatal("Unhandled TaskScheduler Exception", e.Exception);
         }
 
         static void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-          ((App)App.Current).Log.Fatal("Unhandled Dispatcher Exception", e.Exception);
+//          ((App)App.Current).Log.Fatal("Unhandled Dispatcher Exception", e.Exception);
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-          ((App)App.Current).Log.Fatal("Unhandled AppDomain Exception", e.ExceptionObject as Exception);
+          //((App)App.Current).Log.Fatal("Unhandled AppDomain Exception", e.ExceptionObject as Exception);
         }
     }
 }

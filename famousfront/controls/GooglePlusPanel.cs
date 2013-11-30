@@ -8,96 +8,132 @@ using System.Windows.Controls;
 using famousfront.utils;
 namespace famousfront.controls
 {
-    public class GooglePlusPanel : Panel
+  public class GooglePlusPanel : Panel
+  {
+    public class PanelOptions
     {
-        public GooglePlusPanel()
-        {
-            WidthThreshold = 320;
-            HeightThreshold = 240;
-        }
-        public double WidthThreshold { get; set; }
-        public double HeightThreshold { get; set; }
-        protected override Size MeasureOverride(Size avail)
-        {
-            var mheight = 0.0;
-            var unit_width = 0.0;
-            var row = new List<UIElement>();
-            foreach (UIElement child in InternalChildren)
-            {
-                row.Add(child);
-                var scale = child.GetScale();
-                if (scale.lt(0.0))
-                {
-                    child.Measure(new Size(avail.Width, HeightThreshold));
-                    scale = child.DesiredSize.Height.zero() ? -1.0 : (child.DesiredSize.Width / child.DesiredSize.Height);
-                    child.SetScale(scale);
-                }
-                unit_width += scale;
-                if (HeightThreshold * unit_width > avail.Width)
-                {
-                    var cheight = avail.Width / unit_width;
-                    do_row_measure(0, mheight, cheight, row);
-                    mheight += cheight;
-                    unit_width = 0.0;
-                    row.Clear();
-                }
-            }
-            if (row.Count > 0)
-            {
-                do_row_measure(0, mheight, HeightThreshold, row);
-                mheight += HeightThreshold;
-            }
-            return new Size(avail.Width, mheight);
-        }
-
-        void do_row_measure(double x, double y, double row_height, IEnumerable<UIElement> row)
-        {
-            foreach (var ue in row)
-            {
-                var scale = ue.GetScale();
-                var w = row_height * scale;
-                var pos = new Rect(x, y, w, row_height);
-                x += w;
-                ue.SetPosition(pos);
-            }
-        }
-        protected override Size ArrangeOverride(Size finalsz)
-        {
-            foreach (UIElement child in InternalChildren)
-            {
-                var rect = child.GetPosition();
-                child.Arrange(rect);
-            }
-
-            return finalsz;
-        }
+      public int ColumnCount = 2;
+      public int DefaultColumnWidth = 320;
+      public double LineHeight = 30d;
     }
-    internal static class GooglePlusPanelProperties
+    public PanelOptions Options { get; set; }
+
+    public GooglePlusPanel()
     {
-        public static readonly DependencyProperty ScaleProperty = DependencyProperty.RegisterAttached("Scale",
-            typeof(double), typeof(GooglePlusPanelProperties), new PropertyMetadata(-1.0));
-
-        public static readonly DependencyProperty PositionProperty = DependencyProperty.RegisterAttached("Position",
-            typeof(Rect), typeof(GooglePlusPanelProperties));
-
-        public static void SetScale(this UIElement ue, double val)
-        {
-            ue.SetValue(ScaleProperty, val);
-        }
-
-        public static double GetScale(this UIElement ue)
-        {
-            return (double)ue.GetValue(ScaleProperty);
-        }
-
-        public static void SetPosition(this UIElement ue, Rect val)
-        {
-            ue.SetValue(PositionProperty, val);
-        }
-
-        public static Rect GetPosition(this UIElement ue)
-        {
-            return (Rect)ue.GetValue(PositionProperty);
-        }
+      Options = new PanelOptions();
     }
+
+    protected override Size MeasureOverride(Size avail)
+    {
+      var sz = avail;
+      if (double.IsInfinity(sz.Width))
+        sz.Width = Options.ColumnCount * Options.DefaultColumnWidth;
+      var colwidth = sz.Width / Options.ColumnCount;
+      var colheights = new double[Options.ColumnCount];
+      var enable_span = new bool[Options.ColumnCount];
+      var lastitems = new UIElement[Options.ColumnCount];
+
+      foreach (UIElement child in InternalChildren)
+      {
+        var col = child.GetColumnIndex();
+        int span_count = child.GetColumnSpan();
+        double offset;
+        if (col < 0)
+          col = select_column(colheights, enable_span, out span_count, out offset);
+        else
+        {
+          offset = colheights[col];
+        }
+        var itemsz = new Size(colwidth * (span_count + 1), double.PositiveInfinity);
+        child.Measure(itemsz);
+        var rect = new Rect(col * colwidth, offset, colwidth * (span_count + 1), child.DesiredSize.Height);
+        child.SetPosition(rect);
+
+        update_colheight(colheights, col, span_count, child.DesiredSize.Height, enable_span, offset);
+        update_lastitem_layout(lastitems, col, span_count, offset, child);
+      }
+      sz.Height = columns_height(colheights);
+      return sz;
+    }
+    void update_lastitem_layout(IList<UIElement> lastitems, int col, int span_count, double offset, UIElement child)
+    {
+      if (span_count > 0)
+      {
+        for (var i = 0; i <= span_count; i++)
+        {
+          var item = lastitems[col + i];
+          if (item == null)
+          {
+            continue;
+          }
+          var rc = item.GetPosition();
+          item.SetPosition(new Rect(rc.Left, rc.Top, rc.Width, offset - rc.Top));
+        }
+      }
+
+      lastitems[col] = child;
+      for (var i = 1; i <= span_count; i++)
+      {
+        lastitems[col + i] = null;
+      }
+
+    }
+
+    static double columns_height(IEnumerable<double> columns)
+    {
+      return columns.Max();
+    }
+    protected override Size ArrangeOverride(Size finalsz)
+    {
+      foreach (UIElement child in InternalChildren)
+      {
+        var pos = child.GetPosition();
+        child.Arrange(pos);
+      }
+      return finalsz;
+    }
+
+    private void update_colheight(double[] columns, int col_start, int span_count, double height, bool[] enable_span, double offset)
+    {
+      for (var i = 0; i <= span_count; ++i)
+      {
+        columns[col_start + i] = offset + height;
+      }
+      enable_span[col_start] = span_count == 0;
+    }
+    private int select_column(IList<double> columns, bool[] enable_span, out int span_count, out double offset)
+    {
+      span_count = 0;
+      var min = double.PositiveInfinity;
+      var idx = 0;
+      var cnt = columns.Count();
+      for (var i = 0; i < cnt; ++i)
+      {
+        var h = Math.Ceiling(columns[i] / Options.LineHeight);
+        if (h.lt(min))
+        {
+          idx = i;
+          min = h;
+        }
+      }
+      offset = columns[idx];
+
+      if (!enable_span[idx])
+        return idx;
+      for (var i = idx + 1; i < cnt; ++i)
+      {
+        var h = Math.Ceiling(columns[i] / Options.LineHeight);
+        if (h.eq(min))
+        {
+          offset = Math.Max(offset, columns[i]);
+          ++span_count;
+        }
+        else
+        {
+          break;
+        }
+      }
+      return idx;
+    }
+  }
 }

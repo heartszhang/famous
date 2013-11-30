@@ -2,6 +2,10 @@ using System.Runtime.Serialization;
 
 namespace famousfront.datamodels
 {
+  internal class BackendConstans
+  {
+    public const int EntryDefaultPageCount = 10;
+  }
 internal class FeedMediaTypes
 {
   public const uint Feed_media_type_none = 0;
@@ -503,14 +507,19 @@ internal class FeedsBackendConfig
     public uint thumbnail_width { get; set; }
 }
 [DataContract]
-internal class FeedsStatus
+internal class BackendTick
 {
     [DataMember(EmitDefaultValue = false)]
-    public ulong runned { get; set; }
+    public long tick { get; set; }  // nano seconds
     [DataMember(EmitDefaultValue = false)]
-    public string error { get; set; }
+    public FeedEntity[] feeds { get; set; }
 }
-
+[DataContract]
+internal class FeedEntity : FeedSource
+{
+  [DataMember(EmitDefaultValue = false)]
+  public FeedEntry[] entries { get; set; }
+}
 [DataContract]
 internal class FeedImage  // => ImageCache
 {

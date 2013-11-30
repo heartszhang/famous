@@ -16,10 +16,12 @@ namespace famousfront.viewmodels
   using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntryViewModel>;
     class FeedEntriesViewModel : famousfront.core.TaskViewModel
     {
+      int _page;
         FeedSourceViewModel _parent;
         FeedEntries _entries = new FeedEntries();
         internal FeedEntriesViewModel(FeedSourceViewModel p)
         {
+          _page = p.Page;
             _parent = p;
             Reload();
         }
@@ -41,7 +43,8 @@ namespace famousfront.viewmodels
         {
             IsBusying = true;
             Debug.Assert(!string.IsNullOrEmpty(_parent.Uri));
-            var rel = "/api/feed_entry/unread.json?uri=" + Uri.EscapeDataString(_parent.Uri);//WebUtility.UrlEncode(_parent.Uri);
+            var rel = "/api/feed_entry/unread.json?" + new { uri = _parent.Uri, count = 10, page = _page }.QueryString();
+            //var rel = "/api/feed_entry/unread.json?uri=" + Uri.EscapeDataString(_parent.Uri);
             var v = await HttpClientUtils.Get<FeedEntry[]>(ServiceLocator.BackendPath(rel));
             IsBusying = false;
             if (v.code != 0)

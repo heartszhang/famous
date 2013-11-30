@@ -1,4 +1,6 @@
-﻿using famousfront.messages;
+﻿using famousfront.datamodels;
+using famousfront.messages;
+using famousfront.utils;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
@@ -9,11 +11,12 @@ using System.Windows.Input;
 
 namespace famousfront.viewmodels
 {
-  class ContentViewModel : famousfront.core.ViewModelBase
+  class ContentViewModel : famousfront.core.TaskViewModel
   {
     FeedSourcesViewModel _sources = new FeedSourcesViewModel();
     FeedEntriesViewModel _entries = null;
     ImageTipViewModel _image_tip = new ImageTipViewModel();
+    readonly System.Windows.Threading.DispatcherTimer _update_worker = new System.Windows.Threading.DispatcherTimer();
     bool _show_sources = true;
     public bool ShowFeedSources
     {
@@ -29,6 +32,27 @@ namespace famousfront.viewmodels
 
       MessengerInstance.Register<FeedSourceViewModel>(this, OnSelectedFeedSourceChanged);
       MessengerInstance.Register<ToggleFeedSource>(this, OnToggleFeedSource);
+      _update_worker.Interval = TimeSpan.FromMinutes(ServiceLocator.Flags.FeedUpdateInterval);
+      _update_worker.Tick += do_updating;
+      _update_worker.Start();
+    }
+
+    async void do_updating(object sender, EventArgs e)
+    {
+      var rel = "/api/tick.json";
+      var v = await HttpClientUtils.Get<BackendTick>(ServiceLocator.BackendPath(rel));
+      if (v.code != 0)
+      {
+        MessengerInstance.Send(new famousfront.messages.BackendError() { code = v.code, reason = v.reason});
+        return;
+      }
+      var bt = v.data.feeds;
+      if (bt == null)
+        return;
+      foreach (var entity in bt)
+      {
+        MessengerInstance.Send(entity);
+      }
     }
     public ImageTipViewModel ImageTipViewModel
     {
@@ -58,6 +82,8 @@ namespace famousfront.viewmodels
     }
     public override void Cleanup()
     {
+      _update_worker.Stop();
+      _update_worker.Tick -= do_updating;
       _toggle_feedsources_view_command = null;
       _previous_source_command = null;
       _previous_entry_command = null;
@@ -65,9 +91,10 @@ namespace famousfront.viewmodels
       _next_entry_command = null;
       base.Cleanup();
     }
-    internal void ReloadFeedSources()
+    internal async void ReloadFeedSources()
     {
-      _sources.Reload();
+      await _sources.Reload();
+      LoadUpdates();
     }
 
     RelayCommand _previous_entry_command;
@@ -119,6 +146,25 @@ namespace famousfront.viewmodels
         return;
       }
       FeedEntriesViewModel = new FeedEntriesViewModel(cur);
+    }
+    async void LoadUpdates()
+    {
+      for (; ; )
+      {
+        IsBusying = true;
+        var rel = "/api/update/popup.json";
+        var v = await HttpClientUtils.Get<famousfront.datamodels.FeedEntity>(ServiceLocator.BackendPath(rel));
+        IsBusying = false;
+        if (v.code != 0)
+        {
+          MessengerInstance.Send(new famousfront.messages.BackendError() { code = v.code, reason = v.reason });
+          break;
+        }
+        var entity = v.data;
+        if (entity == null)
+          break;
+        MessengerInstance.Send(entity);
+      }
     }
   }
 }
