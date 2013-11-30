@@ -3,7 +3,7 @@ package pubsub
 import (
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/oauth2"
-	"time"
+	"github.com/heartszhang/unixtime"
 )
 
 type PubSubscriber interface {
@@ -102,46 +102,45 @@ func (this pubsuber) Retrieve(uri string, count int) (string, error) {
 	return curl.NewCurlerDetail("", this.proxy_policy, 0, nil).GetAsString(u)
 }
 
-type unixtime int64
-
-func (this unixtime) Time() time.Time {
-	return time.Unix(int64(this), 0)
-}
-
-type PubsubMessage struct {
+type PubsubMessage struct { // same as FeedSource
+	//	XMLName xml.Name `json:"-" xml:"feed"`
 	Status struct {
-		StatusCode        int      `json:"code"`
-		StatusReason      string   `json:"http,omitempty"`
-		Feed              string   `json:"feed"`
-		LastParse         unixtime `json:"lastParse"`
-		Period            unixtime `json:"period"`
-		LastMaintenanceAt unixtime `json:"lastMaintenanceAt"`
-		NextFetch         unixtime `json:"nextFetch"`
-		LastFetch         unixtime `json:"lastFetch"`
-	}
-	Title         string               `json:"title,omitempty"`
-	Subtitle      string               `json:"subtitle,omitempty"`
-	StandardLinks PubsubStandardLink   `json:"standardLinks,omitempty"`
-	Updated       unixtime             `json:"updated"`
-	Items         []PubsubMessageEntry `json:"items,omitempty"`
+		StatusCode        int               `json:"code" xml:"code,attr"`
+		StatusReason      string            `json:"http,omitempty" xml:"http,omitempty"`
+		Feed              string            `json:"feed" xml:"feed,attr,omitempty"`
+		LastParse         unixtime.UnixTime `json:"lastParse" xml:"last_parse"`
+		Period            int64             `json:"period" xml:"period"`
+		LastMaintenanceAt unixtime.UnixTime `json:"lastMaintenanceAt" xml:"last_maintenance_at"`
+		NextFetch         unixtime.UnixTime `json:"nextFetch" xml:"next_fetch"`
+		LastFetch         unixtime.UnixTime `json:"lastFetch" xml:"last_fetch"`
+		EntriesCount      int               `json:"-" xml:"entries_count_since_last_maintenance"`
+	} `json:"status" xml:"status"`
+	Title         string               `json:"title,omitempty" xml:"title"`
+	Subtitle      string               `json:"subtitle,omitempty" xml:"subtitle,omitempty"`
+	StandardLinks PubsubStandardLink   `json:"standardLinks,omitempty" xml:"-"`
+	Updated       unixtime.UnixTime    `json:"updated" xml:"updated"`
+	Items         []PubsubMessageEntry `json:"items,omitempty" xml:"entry,omitempty"`
+	Links         []PubsubLink         `json:"-" xml:"link,omitempty"`
 }
 type PubsubLink struct {
-	Mime  string `json:"type,omitempty"`
-	Href  string `json:"href,omitempty"`
-	Title string `json:"title,omitempty"`
+	Rel   string `json:"rel,omitempty" xml:"rel,omitempty"`
+	Mime  string `json:"type,omitempty" xml:"type,omitempty"`
+	Href  string `json:"href,omitempty" xml:"href,omitempty"`
+	Title string `json:"title,omitempty" xml:"title,omitempty"`
 }
 type PubsubStandardLink struct {
-	Self    []PubsubLink `json:"self,omitempty"`
-	Picture []PubsubLink `json:"picture,omitempty"`
+	Self    []PubsubLink `json:"self,omitempty" xml:"-"`
+	Picture []PubsubLink `json:"picture,omitempty" xml:"-"`
 }
 type PubsubMessageEntry struct {
-	StandardLinks *PubsubStandardLink `json:"standardLinks,omitempty"`
-	PermalinkUrl  string              `json:"permalinkUrl,omitempty"`
-	Verb          string              `json:"verb,omitempty"`
-	Content       string              `json:"content,omitempty"`
-	Summary       string              `json:"summary,omitempty"`
-	Published     unixtime            `json:"published"`
-	Updated       unixtime            `json:"updated"`
-	Title         string              `json:"title,omitempty"`
-	Categories    []string            `json:"categories,omitempty"`
+	StandardLinks *PubsubStandardLink `json:"standardLinks,omitempty" xml:"-"`
+	Uri           string              `json:"permalinkUrl,omitempty" xml:"id,omitempty"`
+	Verb          string              `json:"verb,omitempty" xml:"-"`
+	Content       string              `json:"content,omitempty" xml:"content"`
+	Summary       string              `json:"summary,omitempty" xml:"summary"`
+	Published     unixtime.UnixTime   `json:"published" xml:"published"`
+	Updated       unixtime.UnixTime   `json:"updated" xml:"updated"`
+	Title         string              `json:"title,omitempty" xml:"title"`
+	Links         []PubsubLink        `json:"-" xml:"link,omitempty"`
+	Categories    []string            `json:"categories,omitempty" xml:""`
 }
