@@ -158,7 +158,7 @@ func node_inner_text_length(n *html.Node) int {
 		return len(n.Data)
 	}
 	if node_is_object(n) {
-		w, h := media_get_dim(n)
+		w, h, _ := media_get_dim(n)
 		alt := node_get_attribute(n, "alt")
 		if alt != "" || w*h > 320*240 { // 图片设置了大小，或者alt，可以认为图片为正文内容
 			return 140
@@ -378,19 +378,19 @@ func node_update_attribute(n *html.Node, key string, val string) {
 	}
 }
 
-func media_get_dim(img *html.Node) (w, h int64) {
+func media_get_dim(img *html.Node) (w, h int64, ok bool) {
 	ws := node_get_attribute(img, "width")
 	ws = strings.TrimSuffix(ws, "px")
 	hs := node_get_attribute(img, "height")
 	hs = strings.TrimSuffix(hs, "px")
+	ok = true
 	var err error
 	if w, err = strconv.ParseInt(ws, 0, 0); err != nil {
-		w = -1
+		ok = false
 	}
 	if h, err = strconv.ParseInt(hs, 0, 0); err != nil {
-		h = -1
+		ok = false
 	}
-
 	return
 }
 
