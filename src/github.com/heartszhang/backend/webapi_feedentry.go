@@ -73,10 +73,14 @@ func webapi_feedentry_source_unread(w http.ResponseWriter, r *http.Request) {
 // uri: /api/feed_entry/unread.json?uri=&count=&page=
 func webapi_feedentry_unread(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Query().Get("uri")
-	log.Println("feedentry-unread", uri)
-	count, _ := strconv.ParseUint(r.URL.Query().Get("count"), 0, 0)
-	page, _ := strconv.ParseUint(r.URL.Query().Get("page"), 0, 0)
-	switch fe, err, sc := feedentry_unread(uri, uint(count), uint(page)); err {
+
+	count, _ := strconv.ParseInt(r.URL.Query().Get("count"), 0, 0)
+	page, _ := strconv.ParseInt(r.URL.Query().Get("page"), 0, 0)
+	if count == 0 {
+		count = backend_context.config.EntryDefaultPageCount
+	}
+	log.Println("feedentry-unread(uri, count, page)", uri, count, page)
+	switch fe, err, sc := feedentry_unread(uri, int(count), int(page)); err {
 	case nil:
 		webapi_write_as_json(w, fe)
 	default:
