@@ -19,7 +19,7 @@ func image_description(uri string) (feedfeed.FeedImage, error) {
 	if err == nil {
 		return v, nil
 	}
-	c := curl.NewCurl(config.ImageFolder)
+	c := curl.NewCurl(backend_context.config.ImageFolder)
 	cache, err := c.Get(uri)
 
 	v.Mime = cache.Mime
@@ -28,7 +28,7 @@ func image_description(uri string) (feedfeed.FeedImage, error) {
 	if err != nil {
 		return v, err
 	}
-	v.ThumbnailLocal, v.Mime, v.Width, v.Height, err = curl.NewThumbnail(cache.Local, config.ThumbnailFolder, config.ThumbnailWidth, 0)
+	v.ThumbnailLocal, v.Mime, v.Width, v.Height, err = curl.NewThumbnail(cache.Local, backend_context.config.ThumbnailFolder, backend_context.config.ThumbnailWidth, 0)
 	go imgo.save(uri, v)
 	return v, err
 }

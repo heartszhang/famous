@@ -12,24 +12,30 @@ import (
 // count: entries per page
 // page: page no, start at 0
 func feeds_entries_since(since_unixtime int64, category string, count uint, page uint) ([]feed.FeedEntry, error) {
-	return []feed.FeedEntry{}, nil
+	return []feed.FeedEntry{}, backend_error{"not impl", -1}
 }
 
-func feedentry_unread(source string, count uint, page uint) ([]feed.FeedEntry, error, int) {
-	c := curl.NewCurl(backend_config().FeedEntryFolder)
-	cache, err := c.GetUtf8(source)
+func feedentry_unread(source string, count int, page int) ([]feed.FeedEntry, error, int) {
+	var sc int
+	if page == 0 {
+		c := curl.NewCurl(backend_config().FeedEntryFolder)
+		cache, err := c.GetUtf8(source)
 
-	if err != nil || cache.LocalUtf8 == "" {
-		return nil, err, cache.StatusCode
+		if err != nil || cache.LocalUtf8 == "" {
+			return nil, err, cache.StatusCode
+		}
+		//atom+xml;xml;html
+		ext := curl.MimeToExt(cache.Mime)
+		if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
+			return nil, fmt.Errorf("unsupported mime: %v, %d", cache.Mime, cache.StatusCode), 0
+		}
+		v, err := feed.NewFeedMaker(cache.LocalUtf8, source).MakeFeedEntries()
+		v = feedentry_filter(v)
+		sc = cache.StatusCode
 	}
-	//atom+xml;xml;html
-	ext := curl.MimeToExt(cache.Mime)
-	if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
-		return nil, fmt.Errorf("unsupported mime: %v, %d", cache.Mime, cache.StatusCode), 0
-	}
-	v, err := feed.MakeFeedEntries(cache.LocalUtf8)
-	v = feedentry_filter(v)
-	return v, err, cache.StatusCode
+	v, err := new_feedentry_operator().topn_by_feedsource(count*page, count, source)
+	fmt.Println("unread-return(uri, page, count)", source, page, count, len(v), err)
+	return v, err, sc
 }
 
 func feedentry_mark(uri string, flags uint) (uint, error) {
@@ -63,7 +69,7 @@ func feedentry_category_umark(category string, flags uint) error {
 
 // /feed/entry/full_text.json/{url}/{entry_id}
 func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err error) {
-	c := curl.NewCurl(config.DocumentFolder)
+	c := curl.NewCurl(backend_context.config.DocumentFolder)
 	cache, err := c.GetUtf8(uri)
 	v.Uri = uri
 	v.Local = cache.LocalUtf8
@@ -78,7 +84,7 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err e
 	if err != nil {
 		return v, err
 	}
-	article, sum, err := cleaner.NewExtractor(config.CleanFolder).MakeHtmlReadable(doc, uri)
+	article, sum, err := cleaner.NewExtractor(backend_context.config.CleanFolder).MakeHtmlReadable(doc, uri)
 	v.Images = make([]feed.FeedMedia, len(sum.Images))
 	for idx, img := range sum.Images {
 		v.Images[idx].Uri = img.Uri
@@ -88,7 +94,7 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err e
 	}
 	v.Words = uint(sum.WordCount)
 	v.Links = uint(sum.LinkCount)
-	v.Local, err = html_write_file(article, config.DocumentFolder)
+	v.Local, err = html_write_file(article, backend_context.config.DocumentFolder)
 	return v, err
 }
 

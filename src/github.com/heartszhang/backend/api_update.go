@@ -5,7 +5,7 @@ import (
 	"github.com/heartszhang/baidu"
 	"github.com/heartszhang/feedfeed"
 	"github.com/heartszhang/pubsub"
-	"time"
+	"github.com/heartszhang/unixtime"
 )
 
 const (
@@ -19,47 +19,45 @@ func feedentries_updated() (*feedfeed.FeedSource, []feedfeed.FeedEntry, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	if v.Status.StatusCode != 200 {
+	if (v.Status.StatusCode != 200 && v.Status.StatusCode != 0) || v.Status.Feed == "" {
 		return nil, nil, fmt.Errorf("%d: %v", v.Status.StatusCode, v.Status.StatusReason)
 	}
 
 	fs := feedfeed.FeedSource{
 		Name:        v.Title,
 		Uri:         v.Status.Feed,
-		Update:      int64(v.Updated),
+		Update:      v.Updated,
 		Description: v.Subtitle,
-		LastTouch:   unix_current(),
-		NextTouch:   int64(v.Status.Period) + unix_current(),
-		LastUpdate:  unix_current(),
+		LastTouch:   unixtime.UnixTimeNow(),
+		NextTouch:   unixtime.UnixTime(v.Status.Period) + unixtime.UnixTimeNow(),
+		LastUpdate:  unixtime.UnixTimeNow(),
+		Period:      v.Status.Period / 60,
+	}
+	if fs.Period == 0 {
+		fs.Period = 120 // minutes
 	}
 	fes := make([]feedfeed.FeedEntry, len(v.Items))
 	for idx, i := range v.Items {
 		fes[idx] = feedfeed.FeedEntry{
-			Uri:     i.PermalinkUrl,
+			Uri:     i.Uri,
 			Title:   feedfeed.FeedTitle{Main: i.Title},
-			PubDate: int64(i.Published),
+			PubDate: i.Published,
 			Summary: i.Summary,
 			Content: i.Content,
 			Tags:    i.Categories,
 		}
 		feedentry_init_from_standardlinks(i.StandardLinks, fes[idx])
+		if fes[idx].Uri == "" {
+			feedentry_init_from_links(i.Links, fes[idx])
+		}
 	}
 	if err == nil {
 		fes = feedentry_filter(fes)
-		err = new_feedsource_operator().save_one(fs)
+		err = new_feedsource_operator().touch(fs.Uri, int64(fs.LastTouch), int64(fs.NextTouch), fs.Period)
 	}
 	return &fs, fes, err
 }
-func feedentry_filter(v []feedfeed.FeedEntry) []feedfeed.FeedEntry {
-	v = feed_entries_unreaded(v) // clean readed entries
-	v = feed_entries_clean(v)
-	v = feed_entries_clean_summary(v)
-	v = feed_entries_clean_fulltext(v)
-	v = feed_entries_autotag(v)
-	v = feed_entries_statis(v)
-	v = feed_entries_backup(v)
-	return v
-}
+
 func feedentry_init_from_standardlinks(links *pubsub.PubsubStandardLink, fe feedfeed.FeedEntry) {
 	if links == nil {
 		return
@@ -76,6 +74,14 @@ func feedentry_init_from_standardlinks(links *pubsub.PubsubStandardLink, fe feed
 	}
 }
 
-func unix_current() int64 {
-	return time.Now().Unix()
+func feedentry_init_from_links(links []pubsub.PubsubLink, fe feedfeed.FeedEntry) {
+	if len(links) == 0 {
+		return
+	}
+
+	for _, link := range links {
+		if link.Rel == "alternate" {
+			fe.Uri = link.Href
+		}
+	}
 }

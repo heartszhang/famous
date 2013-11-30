@@ -23,7 +23,7 @@ func feed_fetch(uri string) (v feed.FeedSource, fes []feed.FeedEntry, err error)
 	} else if cache.LocalUtf8 == "" {
 		return v, nil, fmt.Errorf("unrecognized encoding %v", cache.Local)
 	}
-	v, fes, err = feed.MakeFeed(cache.LocalUtf8)
+	v, fes, err = feed.NewFeedMaker(cache.LocalUtf8, uri).MakeFeed()
 	if v.Uri == "" {
 		v.Uri = uri
 	}
@@ -56,8 +56,12 @@ func feedsource_unsubscribe(url string) error {
 	return err
 }
 
+const (
+	refer = "http://iweizhi2.duapp.com"
+)
+
 func feedsource_show(uri string) ([]feed.FeedSourceFindEntry, error) {
-	fs, _, err := google.NewGoogleFeedApi(refer, config.FeedSourceFolder).Load(uri, config.Language, 4, false)
+	fs, _, err := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder).Load(uri, backend_context.config.Language, 4, false)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +74,8 @@ func feedsource_show(uri string) ([]feed.FeedSourceFindEntry, error) {
 }
 
 func feedsource_find(q string) ([]feed.FeedSourceFindEntry, error) {
-	svc := google.NewGoogleFeedApi(refer, config.FeedSourceFolder)
-	v, err := svc.Find(q, config.Language)
+	svc := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder)
+	v, err := svc.Find(q, backend_context.config.Language)
 	if err != nil {
 		return v, err
 	}

@@ -11,8 +11,6 @@ func feedcategory_create(name string) (string, error) {
 	return uid.(string), err
 }
 
-// id : isn't root or all, drop the category whoes name is name
-// id : other, drop categories
 // name : can be empty. if id is root or all, name cann't be empty
 func feedcategory_drop(name string) error {
 	return nil
