@@ -11,8 +11,8 @@ func init() {
 	http.HandleFunc("/api/feed_source/all.json", webapi_feedsource_all)
 	http.HandleFunc("/api/feed_source/subscribe.json", webapi_feedsource_subscribe)
 	http.HandleFunc("/api/feed_source/unsubscribe.json", webapi_feedsource_unsubscribe)
-	http.HandleFunc("/api/feed_source/find.json", webapi_feedsource_find)                              // ?q=
-	http.HandleFunc("/api/feed_source/show.json", webapi_feedsource_find)                              // ?q=
+	http.HandleFunc("/api/feed_source/find.json", webapi_feedsource_find) // ?q=
+	http.HandleFunc("/api/feed_source/show.json", webapi_feedsource_find) // ?q=
 }
 
 func webapi_feedsource_show(w http.ResponseWriter, r *http.Request) {
