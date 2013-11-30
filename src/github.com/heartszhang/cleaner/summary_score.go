@@ -27,7 +27,7 @@ func make_mediasummary(m *html.Node) MediaSummary {
 		Uri: node_get_attribute(m, "src"),
 		Alt: node_get_attribute(m, "alt"),
 	}
-	v.Width, v.Height = media_get_dim(m)
+	v.Width, v.Height, _ = media_get_dim(m)
 	return v
 }
 func new_docsummary_internal(n *html.Node, f hash.Hash64) *DocumentSummary {
