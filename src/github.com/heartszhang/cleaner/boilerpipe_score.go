@@ -45,8 +45,8 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 		})
 		p.anchors++
 	case n.Data == "img":
-		width, height := media_get_dim(n)
-		if width > 320 || height > 320 || (width < 0 && height < 0) {
+		width, height, ok := media_get_dim(n)
+		if width > 320 || height > 320 || !ok {
 			p.imgs++
 			//p.img_score = int_min(p.img_score+int((width/21)*(height/21)/15), 140)
 			p.words += int_min(int(width/21*height/26), 140)
@@ -58,7 +58,7 @@ func new_boilerpipe_score_omit_table(n *html.Node, omit bool, omit_form bool) bo
 			p.tagged_imgs = append(p.tagged_imgs, boiler_image{node_get_attribute(n, "src"), width, height, ""})
 		}
 	case node_is_media(n):
-		mw, wh := media_get_dim(n)
+		mw, wh, _ := media_get_dim(n)
 		if mw > 400 {
 			p.objects++
 			p.words += int_min(int(mw*wh/21/26), 140)

@@ -268,7 +268,7 @@ const (
 )
 
 func trim_small_image(img *html.Node) (drop bool) {
-	width, height := media_get_dim(img)
+	width, height, _ := media_get_dim(img)
 
 	if img.Parent == nil {
 		return

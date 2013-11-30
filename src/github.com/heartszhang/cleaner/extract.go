@@ -26,7 +26,7 @@ func (this html_extractor) MakeFragmentReadable(doc *html.Node) (*html.Node, *Do
 	//清理确定无疑的非正文内容
 	article := html_clean_fragment(doc)
 	of, err := write_file(doc, this.temp_dir)
-	log.Println("clean-fragment", of, err)
+	//	log.Println("clean-fragment", of, err)
 
 	//查找文档正文节点，并将其平面化
 	doc1, article := readabilitier_make_readable(article)

@@ -3,6 +3,7 @@ package baidu
 import (
 	"crypto/md5"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/oauth2"
@@ -94,6 +95,13 @@ type bcms_fetch struct {
 	msg_id    *uint `param:"msg_id"`
 	fetch_num *uint `param:"fetch_num"`
 }
+type BcmsResponse struct {
+	MessageNum int `json:"message_num"`
+	Messages   []struct {
+		MsgId   string `json:"msg_id"`
+		Message string `json:"message"`
+	} `json:"messages,omitempty"`
+}
 
 func (this bcms_queue) FetchAny(msgid, fetch_num *uint) ([]string, error) {
 	v := make([]string, 0)
@@ -110,14 +118,8 @@ func (this bcms_queue) FetchAny(msgid, fetch_num *uint) ([]string, error) {
 	}
 
 	var bcmsr struct {
-		RequestId int64 `json:"request_id"`
-		Response  struct {
-			MessageNum int `json:"message_num"`
-			Messages   []struct {
-				MsgId   string `json:"msg_id"`
-				Message string `json:"message"`
-			} `json:"messages,omitempty"`
-		} `json:"response_params"`
+		RequestId int64        `json:"request_id"`
+		Response  BcmsResponse `json:"response_params"`
 	}
 	uri := bcms_urlbase + this.queue_name
 	q.sign = bcms_sign("POST", uri, q, this.client_secret) // use client_secret to sign post-params
@@ -180,12 +182,40 @@ func (this bcms_queue) FetchOneAsJson(v interface{}) error {
 }
 
 func (this bcms_proxy) FetchOneAsJson(v interface{}) error {
+	var x BcmsResponse
 	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
-	return client.GetAsJson(this.uri, v)
+	err := client.GetAsJson(this.uri, &x)
+	if err != nil {
+		return err
+	}
+	if x.MessageNum != 1 {
+		return fmt.Errorf("bcms-message: %v unresolved message", x.MessageNum)
+	}
+	body := x.Messages[0].Message
+	switch body[0] {
+	case '{':
+		fallthrough
+	case '[':
+		err = json.Unmarshal([]byte(body), v)
+	case '<':
+		err = xml.Unmarshal([]byte(body), v)
+	default:
+		err = fmt.Errorf("bcms-decode informal format:", body)
+	}
+	return err
 }
 
 func (this bcms_proxy) FetchOne() (string, error) {
-	panic("not implemented yet")
+	var x BcmsResponse
+	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
+	err := client.GetAsJson(this.uri, &x)
+	if err != nil {
+		return "", err
+	}
+	if x.MessageNum != 1 {
+		return "", fmt.Errorf("bcmd-message invalid-msgnum: ", x.MessageNum)
+	}
+	return x.Messages[0].Message, nil
 }
 func (this bcms_proxy) FetchAnyAsJson(msgid, fetchnum *uint, v interface{}) error {
 	panic("not implemented yet")
