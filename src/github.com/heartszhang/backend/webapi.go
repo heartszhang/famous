@@ -12,7 +12,6 @@ import (
 
 func init() {
 	http.HandleFunc("/api/tick.json", webapi_tick)
-	http.HandleFunc("/api/update/popup.json", webapi_meta) // no param
 	http.HandleFunc("/api/meta.json", webapi_meta)
 	http.HandleFunc("/api/meta/cleanup.json", webapi_meta_cleanup)
 	http.HandleFunc("/api/update/popup.json", webapi_update_popup)
@@ -134,14 +133,14 @@ func webapi_write_error(w http.ResponseWriter, err error) {
 
 //http://address/api/image/thumbnail.json?uri=
 func redirect_thumbnail(uri string) string {
-	return fmt.Sprintf("http://%v/api/image/thumbnail.json?uri=%v", config.Address(), url.QueryEscape(uri))
+	return fmt.Sprintf("http://%v/api/image/thumbnail.json?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
 }
 
 func imageurl_from_video(uri string) string {
-	return fmt.Sprintf("http://%v/api/image/video.thumbnail?uri=%v", config.Address(), url.QueryEscape(uri))
+	return fmt.Sprintf("http://%v/api/image/video.thumbnail?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
 }
 
 //server/api/link/origin.json?uri=
 func redirect_link(uri string) string {
-	return fmt.Sprintf("http://%v/api/link/origin.json?uri=%v", config.Address(), url.QueryEscape(uri))
+	return fmt.Sprintf("http://%v/api/link/origin.json?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
 }
