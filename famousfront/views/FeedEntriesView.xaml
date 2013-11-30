@@ -69,6 +69,17 @@
           <ctrls:ListBoxScrollToTopBehavior />
           <ctrls:ListBoxPreventRequestBringIntoViewBehavior/>
         </i:Interaction.Behaviors>
+        <ListBox.GroupStyle>
+          <GroupStyle>
+            <GroupStyle.HeaderTemplate>
+              <DataTemplate DataType="{x:Type CollectionViewGroup}">
+                <TextBlock Text="{Binding Name}" TextElement.FontWeight="SemiBold"
+                           Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource Self}}"
+                           TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource Self}}"/>
+              </DataTemplate>
+            </GroupStyle.HeaderTemplate>
+          </GroupStyle>
+        </ListBox.GroupStyle>
       </ListBox>
       <Grid VerticalAlignment="Top" x:Name="_indicator"
                   Visibility="{Binding IsReady,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},ConverterParameter=true}">        

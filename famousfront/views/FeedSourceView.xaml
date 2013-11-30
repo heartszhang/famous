@@ -14,8 +14,8 @@
       <Grid x:Name="_label_wrap" Background="Transparent" metro:ApplicationBar.PreventsOpen="true">
         <DockPanel HorizontalAlignment="Right">
           <TextBlock x:Name="_label"
-                     Text="{Binding UnreadsCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
-                     Visibility="{Binding UnreadsCount, Converter={StaticResource IntToVisibilityConverter}, Mode=OneWay}"/>
+                     Text="{Binding UnreadCount, StringFormat=' (\{0\})'}" DockPanel.Dock="Right"
+                     Visibility="{Binding UnreadCount, Converter={StaticResource IntToVisibilityConverter}, Mode=OneWay}"/>
           <TextBlock DockPanel.Dock="Right" Text=""/>
           <TextBlock x:Name="_name" Text="{Binding Name}"
                      FontSize="{StaticResource LittleFourTextSize}"
@@ -26,13 +26,15 @@
             <MenuItem Header="Subscribe..."/>
             <MenuItem Header="Unsubscribe this" Command="{Binding DropSelfCommand}"/>
             <MenuItem Header="Open In Webbrowser" Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Uri,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
+            <MenuItem Header="{Binding Page,Mode=OneWay,StringFormat={}Next Page {0}+1}" Command="{Binding GotoPageCommand}" CommandParameter="1"/>
+            <MenuItem Header="{Binding Page, Mode=OneWay,StringFormat={}Previous Page {0}-1}" Command="{Binding GotoPageCommand}" CommandParameter="-1"/>
           </ContextMenu>
         </Grid.ContextMenu>
       </Grid>
 
     </StackPanel>
     <DataTemplate.Triggers>
-      <DataTrigger Binding="{Binding UnreadsCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
+      <DataTrigger Binding="{Binding UnreadCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
         <Setter TargetName="_label" Property="TextBlock.FontWeight" Value="Bold" />
 
       </DataTrigger>

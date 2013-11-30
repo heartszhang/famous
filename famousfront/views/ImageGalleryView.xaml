@@ -7,12 +7,12 @@
       <ItemsControl ItemsSource="{Binding Images}" >
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
-            <ctrl:GooglePlusPanel IsItemsHost="True"/>
+            <ctrl:GooglePlusPicturePanel IsItemsHost="True"/>
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemContainerStyle>
           <Style>
-            <Setter Property="ctrl:GooglePlusPanelProperties.Scale" Value="{Binding Scale,Mode=OneWay,FallbackValue=0.0}"/>
+            <Setter Property="ctrl:LayoutProperties.Scale" Value="{Binding Scale,Mode=OneWay,FallbackValue=0.0}"/>
           </Style>
         </ItemsControl.ItemContainerStyle>
       </ItemsControl>
