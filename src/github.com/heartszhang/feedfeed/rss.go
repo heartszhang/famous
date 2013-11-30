@@ -3,22 +3,23 @@ package feedfeed
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/heartszhang/unixtime"
 	"io"
 	"os"
 	"strings"
 )
 
 type rss_channel struct {
-	Title           string     `xml:"title,omityempty"` // required  unique?
-	Links           []rss_link `xml:"link,omitempty"`
-	Description     string     `xml:"description,omitempty"`
-	LastBuildDate   string     `xml:"lastBuildDate,omitemptty"`
-	UpdatePeriod    string     `xml:"http://purl.org/rss/1.0/modules/syndication/ updatePeriod,omityempty"`
-	UpdateFrequency uint       `xml:"http://purl.org/rss/1.0/modules/syndication/ updateFrequency,omityempty"`
-	TTL             uint       `xml:"ttl"` // minitues
-	Categories      []string   `xml:"category,omitempty"`
-	Image           *rss_image `xml:"image,omitempty"` // a img can be displayed
-	Items           []rss_item `xml:"item"`
+	Title           string            `xml:"title,omityempty"` // required  unique?
+	Links           []rss_link        `xml:"link,omitempty"`
+	Description     string            `xml:"description,omitempty"`
+	LastBuildDate   unixtime.UnixTime `xml:"lastBuildDate,omitemptty"`
+	UpdatePeriod    string            `xml:"http://purl.org/rss/1.0/modules/syndication/ updatePeriod,omityempty"`
+	UpdateFrequency int64             `xml:"http://purl.org/rss/1.0/modules/syndication/ updateFrequency,omityempty"`
+	TTL             int64             `xml:"ttl"` // minitues
+	Categories      []string          `xml:"category,omitempty"`
+	Image           *rss_image        `xml:"image,omitempty"` // a img can be displayed
+	Items           []rss_item        `xml:"item"`
 }
 type rss_enclosure struct {
 	Url    string `xml:"url,attr,omitempty"`
@@ -40,17 +41,17 @@ type media_content struct {
 }
 
 type rss_item struct {
-	Title       string          `xml:"title"`             // required
-	Link        string          `xml:"link"`              // required, http://nytimes.com/2004/12/07FEST.html
-	PubDate     string          `xml:"pubDate,omitempty"` // created or updated
-	Categories  []string        `xml:"category,omitempty"`
-	Author      string          `xml:"author,omitempty"`   // email address of the author
-	Description string          `xml:"description"`        // required
-	Guid        string          `xml:"guid,omitempty"`     // dont care
-	Comments    string          `xml:"comments,omitempty"` // comments url
-	FullText    string          `xml:"http://purl.org/rss/1.0/modules/content/ encoded,omitmepty"`
-	Enclosure   rss_enclosure   `xml:"enclosure,omitempty"` //attachment
-	Medias      []media_content `xml:"http://search.yahoo.com/mrss/ content,omitempty"`
+	Title       string            `xml:"title"`             // required
+	Link        string            `xml:"link"`              // required, http://nytimes.com/2004/12/07FEST.html
+	PubDate     unixtime.UnixTime `xml:"pubDate,omitempty"` // created or updated
+	Categories  []string          `xml:"category,omitempty"`
+	Author      string            `xml:"author,omitempty"`   // email address of the author
+	Description string            `xml:"description"`        // required
+	Guid        string            `xml:"guid,omitempty"`     // dont care
+	Comments    string            `xml:"comments,omitempty"` // comments url
+	FullText    string            `xml:"http://purl.org/rss/1.0/modules/content/ encoded,omitmepty"`
+	Enclosure   rss_enclosure     `xml:"enclosure,omitempty"` //attachment
+	Medias      []media_content   `xml:"http://search.yahoo.com/mrss/ content,omitempty"`
 }
 
 type rss_link struct {
@@ -147,7 +148,7 @@ func (this rss_channel) to_source() FeedSource {
 		Type:        Feed_type_rss,
 		Disabled:    false,
 		EnableProxy: false,
-		Update:      unixtime_nano_rfc822(this.LastBuildDate),
+		Update:      this.LastBuildDate,
 		Tags:        this.Categories,
 		Description: this.Description,
 		WebSite:     this.website(),
@@ -160,16 +161,16 @@ func (this rss_channel) to_source() FeedSource {
 }
 
 const (
-	minute  uint = 1
-	hourly       = 60 * minute
-	daily        = 24 * hourly
-	weekly       = 7 * daily
-	monthly      = 30 * daily
-	year         = 365 * daily
+	minute  int64 = 1
+	hourly        = 60 * minute
+	daily         = 24 * hourly
+	weekly        = 7 * daily
+	monthly       = 30 * daily
+	year          = 365 * daily
 )
 
 var (
-	sd_update_period = map[string]uint{
+	sd_update_period = map[string]int64{
 		"hourly":  hourly,
 		"daily":   daily,
 		"weekly":  weekly,
@@ -178,13 +179,13 @@ var (
 	}
 )
 
-func (this rss_channel) ttl() uint {
+func (this rss_channel) ttl() int64 {
 	v := this.TTL
 	if v == 0 {
 		v = sd_update_period[this.UpdatePeriod] * this.UpdateFrequency
 	}
 	if v == 0 {
-		v = 2 * hourly
+		v = _2hours
 	}
 	return v
 }
@@ -239,10 +240,10 @@ func mime_to_feedmediatype(mime string) uint {
 
 func (this rss_item) to_feed_entry(feed_url string) FeedEntry {
 	v := FeedEntry{
-		Source:  feed_url, // rss link
+		Parent:  feed_url, // rss link
 		Type:    Feed_type_rss,
 		Uri:     this.Link,
-		PubDate: unixtime_nano_rfc822(this.PubDate),
+		PubDate: this.PubDate,
 		Summary: this.Description,
 		Tags:    this.Categories,
 		Title:   FeedTitle{Main: this.Title},
