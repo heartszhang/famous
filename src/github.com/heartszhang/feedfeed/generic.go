@@ -2,9 +2,8 @@ package feedfeed
 
 import (
 	"encoding/xml"
-	//	"fmt"
+	"github.com/heartszhang/unixtime"
 	"os"
-	"time"
 )
 
 type feed_error string
@@ -13,32 +12,57 @@ func (this feed_error) Error() string {
 	return string(this)
 }
 
-func MakeFeed(filepath string) (FeedSource, []FeedEntry, error) {
+type FeedMaker interface {
+	MakeFeed() (FeedSource, []FeedEntry, error)
+	MakeFeedSource() (FeedSource, error)
+	MakeFeedEntries() ([]FeedEntry, error)
+}
+
+type feed_maker struct {
+	cache  string
+	source string
+}
+
+func NewFeedMaker(filepath, source string) FeedMaker {
+	return feed_maker{cache: filepath, source: source}
+}
+func (this feed_maker) MakeFeed() (FeedSource, []FeedEntry, error) {
 	var (
 		fs  FeedSource
 		fes []FeedEntry
 		err error
 	)
-	t := DetectFeedSourceType(filepath)
+	t := DetectFeedSourceType(this.cache)
 	switch t {
 	case Feed_type_atom:
-		fs, fes, err = feed_from_atom(filepath)
+		fs, fes, err = feed_from_atom(this.cache)
 	case Feed_type_rss:
-		fs, fes, err = feed_from_rss(filepath)
+		fs, fes, err = feed_from_rss(this.cache)
 	default:
-		fs, fes, err = FeedSource{}, nil, feed_error("invalid format")
+		fs, fes, err = FeedSource{Uri: this.source}, nil, feed_error("invalid format")
 	}
-	fs.LastTouch = time.Now().Unix()
+	if this.source == "" {
+		this.source = fs.Uri
+	}
+	fs.Uri = this.source
+
+	fs.LastTouch = unixtime.UnixTimeNow()
 	fs.LastUpdate = fs.Update
-	fs.NextTouch = int64(fs.Period)*60 + fs.LastTouch
+	fs.NextTouch = unixtime.UnixTime(int64(fs.Period)*60 + int64(fs.LastTouch))
+	count := len(fes)
+	for i := 0; i < count; i++ {
+		fes[i].Parent = this.source
+	}
 	return fs, fes, err
 }
-func MakeFeedSource(filepath string) (FeedSource, error) {
-	fs, _, err := MakeFeed(filepath)
+
+func (this feed_maker) MakeFeedSource() (FeedSource, error) {
+	fs, _, err := this.MakeFeed()
 	return fs, err
 }
-func MakeFeedEntries(filepath string) ([]FeedEntry, error) {
-	_, fes, err := MakeFeed(filepath)
+func (this feed_maker) MakeFeedEntries() ([]FeedEntry, error) {
+	_, fes, err := this.MakeFeed()
+
 	return fes, err
 }
 
