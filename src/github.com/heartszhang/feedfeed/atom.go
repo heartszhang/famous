@@ -2,8 +2,8 @@ package feedfeed
 
 import (
 	"encoding/xml"
+	"github.com/heartszhang/unixtime"
 	"os"
-	//	"time"
 )
 
 const (
@@ -40,38 +40,39 @@ type atom_category struct {
 }
 
 type atom_entry struct { // to feed_entry
-	Title      string          `xml:"title"`
-	Id         string          `xml:"id"`
-	Updated    string          `xml:"updated"`
-	Summary    atom_text       `xml:"summary,omitempty"`
-	Content    atom_text       `xml:"content,omitempty"`
-	Links      []atom_link     `xml:"link"`
-	Authors    []atom_person   `xml:"author,omitempty"`
-	Categories []atom_category `xml:"category,omitempty"`
+	Title      string            `xml:"title"`
+	Id         string            `xml:"id"`
+	Updated    unixtime.UnixTime `xml:"updated"`
+	Summary    atom_text         `xml:"summary,omitempty"`
+	Content    atom_text         `xml:"content,omitempty"`
+	Links      []atom_link       `xml:"link"`
+	Authors    []atom_person     `xml:"author,omitempty"`
+	Categories []atom_category   `xml:"category,omitempty"`
 }
 
 type atom_feed struct { // to feed_source
-	XMLName    xml.Name        `xml:"http://www.w3.org/2005/Atom feed"`
-	Title      string          `xml:"title"`
-	Subtitle   string          `xml:"subtitle"`
-	Id         string          `xml:"id"`
-	Updated    string          `xml:"updated"` // rfc-822
-	Logo       string          `xml:"logo,omitempty"`
-	Links      []atom_link     `xml:"link"`
-	Authors    []atom_person   `xml:"author"`
-	Entries    []atom_entry    `xml:"entry"`
-	Categories []atom_category `xml:"category"`
+	XMLName    xml.Name          `xml:"http://www.w3.org/2005/Atom feed"`
+	Title      string            `xml:"title"`
+	Subtitle   string            `xml:"subtitle"`
+	Id         string            `xml:"id"`
+	Updated    unixtime.UnixTime `xml:"updated"` // rfc-822
+	Logo       string            `xml:"logo,omitempty"`
+	Links      []atom_link       `xml:"link"`
+	Authors    []atom_person     `xml:"author"`
+	Entries    []atom_entry      `xml:"entry"`
+	Categories []atom_category   `xml:"category"`
 }
 
+/*
 func feedsource_from_atom(filepath string) (FeedSource, error) {
 	x, _, err := feed_from_atom(filepath)
 	return x, err
 }
-
+*/
 func feed_from_atom(filepath string) (FeedSource, []FeedEntry, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
-		return FeedSource{}, nil, err
+		return FeedSource{Local: filepath}, nil, err
 	}
 	defer f.Close()
 
@@ -80,7 +81,8 @@ func feed_from_atom(filepath string) (FeedSource, []FeedEntry, error) {
 	decoder.CharsetReader = charset_reader_passthrough
 
 	err = decoder.Decode(&v)
-	x := v.to_feed_soruce()
+	x := v.to_feed_source()
+	x.Local = filepath
 	fes := v.extract_entries()
 	return x, fes, err
 }
@@ -93,17 +95,21 @@ func (this atom_feed) link() string {
 	}
 	return ""
 }
-func (this atom_feed) to_feed_soruce() FeedSource {
+
+const (
+	_2hours = 2 * 60 // minutes
+)
+
+func (this atom_feed) to_feed_source() FeedSource {
 	f := FeedSource{
 		Name:        this.Title,
 		Uri:         this.docs(),
-		Local:       "",
 		Period:      _2hours,
 		Logo:        this.Logo,
 		Type:        Feed_type_atom,
 		Disabled:    false,
 		EnableProxy: false,
-		Update:      unixtime_nano_rfc822(this.Updated),
+		Update:      this.Updated,
 		WebSite:     this.link(),
 		Description: this.Subtitle,
 	}
@@ -114,27 +120,28 @@ func (this atom_feed) to_feed_soruce() FeedSource {
 	return f
 }
 
+/*
 func feedentries_from_atom(filepath string) ([]FeedEntry, error) {
 	_, fes, err := feed_from_atom(filepath)
 	return fes, err
 }
-
+*/
 func (this atom_feed) extract_entries() []FeedEntry {
 	v := make([]FeedEntry, len(this.Entries))
 	for idx, e := range this.Entries {
-		v[idx] = e.to_feed_entry()
+		v[idx] = e.to_feed_entry(this.docs())
 	}
 	return v
 }
 
-func (this atom_entry) to_feed_entry() FeedEntry {
+func (this atom_entry) to_feed_entry(source string) FeedEntry {
 	e := FeedEntry{
 		Flags:   0,
-		Source:  "",
+		Parent:  source,
 		Type:    Feed_type_atom,
 		Uri:     this.link(),
 		Title:   FeedTitle{Main: this.Title},
-		PubDate: unixtime_nano_rfc822(this.Updated),
+		PubDate: this.Updated,
 		Summary: this.Summary.Body,
 	}
 	if this.Content.Body != "" {
