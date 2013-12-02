@@ -51,6 +51,7 @@ namespace famousfront.core
         ImageTipMinHeight = 600d;
         ImageTipMinWidth = 500d;
         FeedUpdateInterval = 5.0;
+        ShowGalleryThreshold = 4;
       }
         [DataMember(Name="backend")]
         public string Backend
@@ -140,6 +141,8 @@ namespace famousfront.core
         public double ImageTipMinHeight{ get; set; }// milliseconds
         [DataMember(Name = "feedupdate_interval")]
         public double FeedUpdateInterval { get; set; }// minutes
+        [DataMember(Name = "showgallery_threshold")]
+        public int ShowGalleryThreshold { get; set; }// minutes
     }
 
 }

@@ -21,26 +21,29 @@ namespace famousfront.viewmodels
     internal FeedEntryViewModel(FeedEntry v)
     {
       _ = v;
+      var has_summary = (_.status & FeedStatuses.Feed_status_summary_empty) == 0;
       HasDocument = (_.status & FeedStatuses.Feed_status_text_empty) == 0;
-      var inline = _.status & FeedStatuses.Feed_status_media_inline;
+      var inline = _.status & (FeedStatuses.Feed_status_summary_mediainline | FeedStatuses.Feed_status_content_mediainline);
       var imgone = _.status & FeedStatuses.Feed_status_image_one;
       var imgmany = _.status & FeedStatuses.Feed_status_image_many;
-      var media = _.status & (FeedStatuses.Feed_status_media_one | FeedStatuses.Feed_status_media_many);
-      if (imgone != 0 && inline == 0 && media == 0)
+      var video = _.videos == null || _.videos.Length < 1;
+      var audio = _.audios == null || _.audios.Length < 1;
+      var media = video && audio;
+      if (_.images != null && _.images.Length == 1 &&_.images[0] != null && inline == 0 && media && has_summary)
       {
         Media = new ImageElementViewModel(_.images[0]);
       }
-      else if (imgmany != 0 && inline == 0 && media == 0)
+      else if (_.images != null&& _.images.Length > 1 && inline == 0 && media)
       {
         Media = new ImageGalleryViewModel(_.images);
       }
       if (_.videos != null)
       {
-        Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : null);
+        Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : new FeedMedia());
       }
       else if (_.audios != null)
       {
-        Media = new MediaElementViewModel(_.audios[0], (imgone | imgmany) != 0 ? _.images[0] : null);
+        Media = new MediaElementViewModel(_.audios[0], (imgone | imgmany) != 0 ? _.images[0] : new FeedMedia());
       }
 
     }
@@ -57,7 +60,7 @@ namespace famousfront.viewmodels
     }
     bool is_media_inline()
     {
-      var inline = _.status & FeedStatuses.Feed_status_media_inline;
+      var inline = _.status & (FeedStatuses.Feed_status_summary_mediainline | FeedStatuses.Feed_status_content_mediainline);
       return inline != 0;
     }
     public bool HasImageGallery

@@ -7,7 +7,12 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                     mc:Ignorable="d">
   <DataTemplate DataType="{x:Type vm:FeedSourceViewModel}" d:IsDesignTimeCreatable="false">
-    <StackPanel>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="50"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+    <StackPanel Grid.Column="1">
       <Grid x:Name="_content_wrap" TextElement.FontSize="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.ContentFontSize), Mode=OneWay}">
         <TextBlock x:Name="news" Text="{Binding Description}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
       </Grid>
@@ -33,6 +38,10 @@
       </Grid>
 
     </StackPanel>
+      <Grid Grid.Column="0">
+        <Image Source="{Binding Logo,Mode=OneWay,Converter={StaticResource NullImageConverter}}" Height="50"/>
+      </Grid>
+    </Grid>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding UnreadCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
         <Setter TargetName="_label" Property="TextBlock.FontWeight" Value="Bold" />

@@ -96,7 +96,10 @@ namespace famousfront.viewmodels
     internal ImageGalleryViewModel(FeedMedia[] imgs) 
     {
       _panel = new ImagePanelViewModel(imgs);
-      _first = new ImageElementViewModel(imgs[0]);
+      if (imgs[0] != null)
+        _first = new ImageElementViewModel(imgs[0]);
+      if (imgs.Length < ServiceLocator.Flags.ShowGalleryThreshold)
+        ExecuteToggleShowPanel();
     }
     ImagePanelViewModel _panel;
     public ImagePanelViewModel ImagePanelViewModel

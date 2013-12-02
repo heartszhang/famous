@@ -41,8 +41,7 @@ namespace famousfront.viewmodels
     {
       get { return _drop_self ?? (_drop_self = drop_self()); }
     }
-    string _logo = null;
-    public string Logo { get { return _logo; } private set { Set(ref _logo, value); } }
+    public string Logo { get { return _.logo; }  }
 
     string _news;
     public string News { get { return _news; } private set { Set(ref _news, value); } }
@@ -80,10 +79,7 @@ namespace famousfront.viewmodels
       _.categories = n.Concat(_.categories).ToArray();
       return true;
     }
-    private bool has_logo()
-    {
-      return false;
-    }
+
     ICommand drop_self()
     {
       return new RelayCommand(ExecuteDropSelf);

@@ -34,9 +34,17 @@
         <Style.Resources>
           <Style TargetType="{x:Type Image}">
             <Setter Property="MaxWidth" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="MaxHeight" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
+          </Style>
+          <Style TargetType="{x:Type Figure}">
+            <Setter Property="VerticalAnchor" Value="PageTop"/>
+            <Setter Property="HorizontalAnchor" Value="PageRight"/>
+            <Setter Property="Margin" Value="16,0,0,0"/>
+            <Setter Property="Padding" Value="0"/>
           </Style>
         </Style.Resources>
+        <Setter Property="IsOptimalParagraphEnabled" Value="True"/>
+        <Setter Property="IsHyphenationEnabled" Value="True"/>
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="Block.LineHeight" Value="{Binding Flags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
