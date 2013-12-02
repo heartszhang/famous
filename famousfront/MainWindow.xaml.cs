@@ -13,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+//using Elysium.Parameters;
 namespace famousfront
 {
     /// <summary>
@@ -26,6 +26,7 @@ namespace famousfront
         {          
             InitializeComponent();            
             SetIsMainWindow(this, true);
+            Elysium.Parameters.General.SetShadowBrush(this, Brushes.Black);
             // expression windowsinstance to window error if IsMainWindow setted in xaml
         }
         protected override void OnInitialized(EventArgs e)

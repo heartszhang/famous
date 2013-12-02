@@ -17,6 +17,7 @@
   FocusManager.FocusedElement="{Binding ElementName=_content}"
   Title="FamousFront" Height="960" Width="1400" x:Name="root">
   <Window.Resources>
+
   </Window.Resources>
   <metro:Window.TitleBar>
     <Grid>
@@ -52,7 +53,6 @@
   </metro:Window.ApplicationBar>
    -->
   <Grid
-  params:General.ShadowBrush="{StaticResource ForegroundBrush}"
   params:General.TextFontSize="{StaticResource LittleFiveTextSize}"
   params:General.ContentFontSize="{StaticResource FiveTextSize}"
   params:General.TitleFontSize="{StaticResource LittleThreeTextSize}"
