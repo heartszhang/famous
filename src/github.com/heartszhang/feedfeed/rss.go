@@ -82,7 +82,7 @@ func feed_from_rss(filepath string) (FeedSource, []FeedEntry, error) {
 		fes []FeedEntry
 	)
 	err = decoder.Decode(&v)
-	fs = v.Channel.to_source()
+	fs = v.Channel.to_source(filepath)
 	fes = v.Channel.to_entries()
 
 	return fs, fes, err
@@ -105,7 +105,7 @@ func feedsource_from_rss(filepath string) (FeedSource, error) {
 	)
 	err = decoder.Decode(&v)
 	if err == nil {
-		fs = v.Channel.to_source()
+		fs = v.Channel.to_source(filepath)
 	}
 	return fs, err
 }
@@ -139,11 +139,11 @@ func (this rss_channel) to_entries() []FeedEntry {
 	return v
 }
 
-func (this rss_channel) to_source() FeedSource {
+func (this rss_channel) to_source(local string) FeedSource {
 	v := FeedSource{
 		Name:        this.Title,
 		Uri:         this.self(),
-		Local:       "", // filled later
+		Local:       local, // filled later
 		Period:      this.ttl(),
 		Type:        Feed_type_rss,
 		Disabled:    false,
@@ -191,29 +191,37 @@ func (this rss_channel) ttl() int64 {
 }
 
 func (this rss_channel) self() string { // rel = self
-	for _, l := range this.Links {
-		if l.Rel == "self" {
-			return l.Href
+	l := query_selector(this.Links, "self")
+
+	return l.Href
+}
+func query_selector(links []rss_link, rel string) rss_link {
+	for _, l := range links {
+		if l.Rel == rel {
+			return l
 		}
 	}
-	return ""
+	return rss_link{}
 }
-
 func (this rss_channel) website() string { // rel = alternate
-	for _, l := range this.Links {
-		if l.Rel == "alternate" || l.Rel == "" {
-			return l.Href
-		}
+	l := query_selector(this.Links, "alternate")
+	if l.Href == "" {
+		l = query_selector(this.Links, "")
 	}
-	return ""
+	return l.Href
+}
+func (this rss_channel) hub() string {
+	return query_selector(this.Links, "hub").Href
 }
 
+/*
 func (this rss_item) save_content() *FeedContent {
 	if this.FullText == "" {
 		return nil
 	}
 	return &FeedContent{FullText: this.FullText}
 }
+*/
 
 func (this rss_enclosure) to_feed_media(mt uint) FeedMedia {
 	return FeedMedia{

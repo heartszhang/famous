@@ -16,7 +16,7 @@ type feedentry_operator interface {
 	mark_category(category string, newmark uint) error
 	umark_source(category string, markbit uint) error
 	mark_source(category string, newmark uint) error
-	setcontent(link string, filepath string, words int, imgs []feed.FeedMedia) error
+	//	setcontent(link string, filepath string, words int, imgs []feed.FeedMedia) error
 	unread_count(uri string) (int, error)
 	unread_count_sources() ([]feedentry_unreadcount, error)
 	unread_count_category(category string) (int, error)
@@ -48,6 +48,7 @@ type feedtag_operator feedcategory_operator
 type feedsource_operator interface {
 	save(feeds []feed.FeedSource) ([]feed.FeedSource, error)
 	upsert(f *feed.FeedSource) error
+	update(f feed.FeedSource) error
 	find(uri string) (*feed.FeedSource, error)
 	all() ([]feed.FeedSource, error)
 	touch(uri string, last, next, period int64) error

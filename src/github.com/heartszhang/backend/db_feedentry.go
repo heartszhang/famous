@@ -163,6 +163,7 @@ func insert_entry(coll *mgo.Collection, entry feed.FeedEntry) (interface{}, erro
 	return ci.UpsertedId, err
 }
 
+/*
 func (this feedentry_op) setcontent(uri, filepath string, words int, imgs []feed.FeedMedia) error {
 	status := feed.Feed_status_content_unresolved
 	imgc := len(imgs)
@@ -178,3 +179,4 @@ func (this feedentry_op) setcontent(uri, filepath string, words int, imgs []feed
 		}, "$push": bson.M{"images": bson.M{"$each": imgs}}})
 	})
 }
+*/

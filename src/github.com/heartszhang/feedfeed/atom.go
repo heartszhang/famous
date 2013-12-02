@@ -21,11 +21,17 @@ type atom_link struct {
 	Title  string `xml:"title,attr,omitempty"`
 	Length uint64 `xml:"length"`
 }
-
+type gd_image struct {
+	Width  int    `xml:"width"`
+	Height int    `xml:"height"`
+	Src    string `xml:"src,omitempty"`
+	Rel    string `xml:"rel,omitempty"`
+}
 type atom_person struct {
-	Name  string `xml:"name,omitempty"`
-	Uri   string `xml:"uri,omitempty"`
-	Email string `xml:"email,omitempty"`
+	Name   string    `xml:"name,omitempty"`
+	Uri    string    `xml:"uri,omitempty"`
+	Email  string    `xml:"email,omitempty"`
+	Avatar *gd_image `xml:"image,omitempty"`
 }
 
 type atom_text struct {
@@ -53,7 +59,7 @@ type atom_entry struct { // to feed_entry
 type atom_feed struct { // to feed_source
 	XMLName    xml.Name          `xml:"http://www.w3.org/2005/Atom feed"`
 	Title      string            `xml:"title"`
-	Subtitle   string            `xml:"subtitle"`
+	Subtitle   string            `xml:"subtitle,omitempty"`
 	Id         string            `xml:"id"`
 	Updated    unixtime.UnixTime `xml:"updated"` // rfc-822
 	Logo       string            `xml:"logo,omitempty"`
@@ -81,7 +87,7 @@ func feed_from_atom(filepath string) (FeedSource, []FeedEntry, error) {
 	decoder.CharsetReader = charset_reader_passthrough
 
 	err = decoder.Decode(&v)
-	x := v.to_feed_source()
+	x := v.to_feed_source(filepath)
 	x.Local = filepath
 	fes := v.extract_entries()
 	return x, fes, err
@@ -100,7 +106,7 @@ const (
 	_2hours = 2 * 60 // minutes
 )
 
-func (this atom_feed) to_feed_source() FeedSource {
+func (this atom_feed) to_feed_source(local string) FeedSource {
 	f := FeedSource{
 		Name:        this.Title,
 		Uri:         this.docs(),
@@ -112,10 +118,14 @@ func (this atom_feed) to_feed_source() FeedSource {
 		Update:      this.Updated,
 		WebSite:     this.link(),
 		Description: this.Subtitle,
+		Local:       local,
 	}
 	f.Tags = make([]string, len(this.Categories))
 	for i, c := range this.Categories {
 		f.Tags[i] = c.Term
+	}
+	if len(this.Authors) > 0 && this.Logo == "" && this.Authors[0].Avatar != nil {
+		f.Logo = this.Authors[0].Avatar.Src
 	}
 	return f
 }

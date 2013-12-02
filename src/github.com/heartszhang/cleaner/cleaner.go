@@ -239,7 +239,7 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 				cleaner.clean_unprintable_element(dropping, child)
 			}
 		} else if child.Type == html.TextNode {
-			child.Data = merge_tail_spaces(child.Data)
+			child.Data = strings.TrimSpace(merge_tail_spaces(child.Data))
 			l := new_boilerpipe_score(child).words
 			cleaner.text_words += l
 			if node_is_in_a(child) {

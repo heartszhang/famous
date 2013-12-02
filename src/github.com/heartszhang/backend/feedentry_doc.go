@@ -4,10 +4,124 @@ import (
 	"bytes"
 	"code.google.com/p/go.net/html"
 	"code.google.com/p/go.net/html/atom"
+	feed "github.com/heartszhang/feedfeed"
 	"io/ioutil"
 	"os"
 	"strings"
 )
+
+type flowdocument_maker struct {
+	first_paragraph *html.Node
+}
+
+func new_flowdoc_maker() *flowdocument_maker {
+	return &flowdocument_maker{}
+}
+
+func (this *flowdocument_maker) make(frag *html.Node, imgs []feed.FeedMedia) string {
+	if frag == nil || frag.Type != html.ElementNode {
+		return empty_flowdocument
+	}
+
+	this.convert_flowdocument(frag)
+	this.insert_images(imgs)
+	node_clean_empty(frag)
+	var buffer bytes.Buffer
+	html.Render(&buffer, frag) // ignore return error
+	body := buffer.String()
+
+	return body
+}
+
+func (this *flowdocument_maker) convert_flowdocument(frag *html.Node) {
+	if frag.Type == html.TextNode {
+		return
+	}
+	ignore_children := false
+	switch frag.Data {
+	case "img":
+		frag.Type = html.CommentNode
+		node_clear_children(frag)
+		frag.Attr = nil
+	case "a":
+		frag.Data = "Hyperlink"
+		frag.Attr = extract_ahref_attr(frag.Attr)
+	case "article":
+		frag.Data = "FlowDocument"
+		// set namespace dont work
+		frag.Attr = []html.Attribute{html.Attribute{Key: "xmlns", Val: fdocns}}
+	case "object", "video", "audio", "embed":
+		frag.Type = html.CommentNode
+		node_clear_children(frag)
+		frag.Attr = nil
+	case "p":
+		fallthrough
+	default:
+		frag.Data = "Paragraph"
+		frag.Attr = nil
+		if this.first_paragraph == nil {
+			this.first_paragraph = frag
+		}
+	}
+	for child := frag.FirstChild; ignore_children == false && child != nil; child = child.NextSibling {
+		this.convert_flowdocument(child)
+	}
+}
+func node_convert_attr(attrs []html.Attribute, origin, updated string, converter func(string) string) []html.Attribute {
+	for _, attr := range attrs {
+		if attr.Key == origin {
+			return []html.Attribute{html.Attribute{Key: updated, Val: converter(attr.Val)}}
+		}
+	}
+	return nil
+}
+
+func extract_imgsrc_attr(img feed.FeedMedia) []html.Attribute {
+	return []html.Attribute{html.Attribute{Key: "Source", Val: redirect_thumbnail(img.Uri)}}
+}
+
+func extract_ahref_attr(attrs []html.Attribute) []html.Attribute {
+	return node_convert_attr(attrs, "href", "NavigateUri", redirect_link)
+}
+
+const (
+	fdocns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+)
+
+func (this *flowdocument_maker) insert_images(imgs []feed.FeedMedia) {
+	if this.first_paragraph == nil || len(imgs) == 0 {
+		return
+	}
+	neib := this.first_paragraph.FirstChild
+
+	f := &html.Node{Type: html.ElementNode, Data: "Figure", DataAtom: atom.Div}
+	for _, img := range imgs {
+		c := &html.Node{Type: html.ElementNode, Data: "BlockUIContainer", DataAtom: atom.Div}
+		v := &html.Node{Type: html.ElementNode, Data: "Image", DataAtom: atom.Div}
+		v.Attr = []html.Attribute{html.Attribute{Key: "Source", Val: redirect_thumbnail(img.Uri)}}
+		// should add image-desc?
+		c.AppendChild(v)
+		f.AppendChild(c)
+	}
+	this.first_paragraph.InsertBefore(f, neib)
+}
+
+func node_clear_children(frag *html.Node) {
+	for child := frag.FirstChild; child != nil; {
+		next := child.NextSibling
+		frag.RemoveChild(child)
+		child = next
+	}
+}
+
+func node_is_hyperlink_decendant(frag *html.Node) bool {
+	for p := frag.Parent; p != nil; p = p.Parent {
+		if p.Type == html.ElementNode && (p.Data == "a" || p.Data == "Hyperlink") {
+			return true
+		}
+	}
+	return false
+}
 
 func html_create_fragment(fulltext string) (*html.Node, error) {
 	reader := strings.NewReader(fulltext)
@@ -60,115 +174,4 @@ func node_clean_empty(n *html.Node) {
 		parent := n.Parent
 		parent.RemoveChild(n)
 	}
-}
-
-//p, img, a, text
-func make_flowdocument(frag *html.Node, excludeimg bool) string {
-	if frag == nil || frag.Type != html.ElementNode {
-		return empty_flowdocument
-	}
-	node_convert_flowdocument(frag, excludeimg)
-	node_clean_empty(frag)
-	var buffer bytes.Buffer
-	html.Render(&buffer, frag) // ignore return error
-	body := buffer.String()
-
-	return body
-}
-
-func node_convert_flowdocument(frag *html.Node, excludeimg bool) {
-	if frag.Type == html.TextNode {
-		return
-	}
-	ignore_children := false
-	switch frag.Data {
-	case "img":
-		if excludeimg == true {
-			frag.Type = html.CommentNode
-			node_clear_children(frag)
-			frag.Attr = nil
-		} else if node_is_hyperlink_decendant(frag) == false {
-			frag.Data = "Figure"
-			node_clear_children(frag)
-			frag.AppendChild(make_image_node(frag))
-			frag.Attr = nil
-		} else {
-			frag.Data = "Image"
-			frag.Attr = extract_imgsrc_attr(frag.Attr)
-		}
-		ignore_children = true
-	case "a":
-		frag.Data = "Hyperlink"
-		frag.Attr = extract_ahref_attr(frag.Attr)
-	case "article":
-		frag.Data = "FlowDocument"
-		// set namespace dont work
-		frag.Attr = []html.Attribute{html.Attribute{Key: "xmlns", Val: fdocns}}
-	case "object":
-		fallthrough
-	case "video":
-		fallthrough
-	case "audio":
-		fallthrough
-	case "embed":
-		frag.Type = html.CommentNode
-		node_clear_children(frag)
-		frag.Attr = nil
-		ignore_children = true
-	case "p":
-		fallthrough
-	default:
-		frag.Data = "Paragraph"
-		frag.Attr = nil
-	}
-	for child := frag.FirstChild; ignore_children == false && child != nil; child = child.NextSibling {
-		node_convert_flowdocument(child, excludeimg)
-	}
-}
-func node_convert_attr(attrs []html.Attribute, origin, updated string, converter func(string) string) []html.Attribute {
-	for _, attr := range attrs {
-		if attr.Key == origin {
-			return []html.Attribute{html.Attribute{Key: updated, Val: converter(attr.Val)}}
-		}
-	}
-	return nil
-}
-func extract_imgsrc_attr(attrs []html.Attribute) []html.Attribute {
-	return node_convert_attr(attrs, "src", "Source", redirect_thumbnail)
-}
-
-func extract_ahref_attr(attrs []html.Attribute) []html.Attribute {
-	return node_convert_attr(attrs, "href", "NavigateUri", redirect_link)
-}
-
-const (
-	fdocns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-)
-
-func make_image_node(n *html.Node) *html.Node {
-	c := &html.Node{Type: html.ElementNode, Data: "BlockUIContainer", DataAtom: n.DataAtom}
-	v := &html.Node{Type: html.ElementNode, Data: "Image", DataAtom: n.DataAtom}
-	v.Attr = extract_imgsrc_attr(n.Attr)
-	c.AppendChild(v)
-	return c
-}
-func make_run_node(n *html.Node) *html.Node {
-	v := &html.Node{Type: html.TextNode, Data: "VIDEO", DataAtom: n.DataAtom}
-	return v
-}
-func node_clear_children(frag *html.Node) {
-	for child := frag.FirstChild; child != nil; {
-		next := child.NextSibling
-		frag.RemoveChild(child)
-		child = next
-	}
-}
-
-func node_is_hyperlink_decendant(frag *html.Node) bool {
-	for p := frag.Parent; p != nil; p = p.Parent {
-		if p.Type == html.ElementNode && (p.Data == "a" || p.Data == "Hyperlink") {
-			return true
-		}
-	}
-	return false
 }

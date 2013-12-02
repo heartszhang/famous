@@ -57,6 +57,21 @@ func (this feedsource_op) save_one(f feed.FeedSource) error {
 	})
 }
 
+func (this feedsource_op) update(f feed.FeedSource) error {
+	return do_in_session(this.coll, func(coll *mgo.Collection) error {
+		return coll.Update(bson.M{"uri": f.Uri}, bson.M{"$set": bson.M{
+			"name":    f.Name,
+			"local":   f.Local,
+			"period":  f.Period,
+			"type":    f.Type,
+			"update":  f.Update,
+			"website": f.WebSite,
+			"logo":    f.Logo,
+			"hub":     f.Hub,
+		}})
+	})
+}
+
 func (this feedsource_op) find(uri string) (*feed.FeedSource, error) {
 	rtn := new(feed.FeedSource)
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {

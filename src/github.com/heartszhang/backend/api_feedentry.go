@@ -2,7 +2,7 @@ package backend
 
 import (
 	"fmt"
-	"github.com/heartszhang/cleaner"
+	//	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	feed "github.com/heartszhang/feedfeed"
 )
@@ -67,7 +67,7 @@ func feedentry_category_umark(category string, flags uint) error {
 	return err
 }
 
-// /feed/entry/full_text.json/{url}/{entry_id}
+/*
 func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err error) {
 	c := curl.NewCurl(backend_context.config.DocumentFolder)
 	cache, err := c.GetUtf8(uri)
@@ -97,7 +97,7 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err e
 	v.Local, err = html_write_file(article, backend_context.config.DocumentFolder)
 	return v, err
 }
-
+*/
 // /feed/entry/media.json/{url}/{entry_id}/{media_type:[0-9]+}
 
 func feedentry_media(url string, entry_id string, media_type uint) (feed.FeedMedia, error) {
