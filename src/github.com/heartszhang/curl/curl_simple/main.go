@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	//	"fmt"
 	"github.com/heartszhang/curl"
 )
 
@@ -13,6 +13,5 @@ var (
 func main() {
 	flag.Parse()
 	curler := curl.NewCurl("")
-	v, err := curler.GetUtf8(*uri, 0)
-	fmt.Println(v, err)
+	curler.Get(*uri)
 }
