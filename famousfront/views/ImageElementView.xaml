@@ -9,7 +9,6 @@
     <Grid MaxHeight="{Binding Flags.ImageMaxHeight,Mode=OneWay,Source={StaticResource _locator}}"
           Background="{StaticResource SemiPaleBrush}">
       <Grid Width="{Binding Flags.ImageMaxWidth,Mode=OneWay,Source={StaticResource _locator}}"
-            Background="{StaticResource SemiPaleBrush}"
             Height="{Binding Scale,Mode=OneWay,Converter={StaticResource ScaleToHeightConverter}, ConverterParameter=400}"/>
       <Image Source="{Binding Url,Mode=OneWay, IsAsync=True, Converter={StaticResource NullImageConverter}}" 
              x:Name="_image"  Grid.Column="1"
