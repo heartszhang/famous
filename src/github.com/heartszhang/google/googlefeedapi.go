@@ -5,12 +5,24 @@ import (
 	"code.google.com/p/go.net/html/atom"
 	"fmt"
 	"github.com/heartszhang/curl"
-	"github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"github.com/heartszhang/oauth2"
 	"net/http"
 	"strings"
 )
 
+type GoogleFeedApiService interface {
+	Find(q, hl string) ([]FeedSourceFindEntry, error)
+	Load(uri, hl string, num int, scoring bool) (feed.FeedSource, []feed.FeedEntry, error)
+}
+
+type FeedSourceFindEntry struct {
+	Url        string `json:"url,omitempty`
+	Title      string `json:"title,omitempty`
+	Summary    string `json:"summary,omitempty`
+	Website    string `json:"website,omitempty"`
+	Subscribed bool   `json:"subscribed"`
+}
 type googlefeed_error struct {
 	code   int
 	reason string
@@ -23,7 +35,7 @@ func (this googlefeed_error) Error() string {
 type find_result struct {
 	ResponseDetails string `json:"responseDetails,omitempty"`
 	ResponseStatus  int    `json:"responseStatus"`
-	ResponseData *struct {
+	ResponseData    *struct {
 		Query   string `json:"query,omitempty"`
 		Entries []struct {
 			Url            string `json:"url,omitempty"`
@@ -34,16 +46,16 @@ type find_result struct {
 	} `json:"responseData,omitempty"`
 }
 
-func findresult_to_findentry(x find_result) ([]feedfeed.FeedSourceFindEntry, error) {
+func findresult_to_findentry(x find_result) ([]FeedSourceFindEntry, error) {
 	if x.ResponseStatus != 200 {
 		return nil, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
 	}
-	v := make([]feedfeed.FeedSourceFindEntry, 0)
+	v := make([]FeedSourceFindEntry, 0)
 	if x.ResponseData == nil {
 		return v, nil
 	}
 	for _, e := range x.ResponseData.Entries {
-		v = append(v, feedfeed.FeedSourceFindEntry{e.Url,
+		v = append(v, FeedSourceFindEntry{e.Url,
 			strip_html_tags(e.Title),
 			strip_html_tags(e.ContentSnippet),
 			e.Website, false})
@@ -64,26 +76,6 @@ type load_result struct {
 			Description string `json:"description,omitempty"`
 			Type        string `json:"type,omitempty"`
 			Entries     []struct {
-				MediaGroups []struct {
-					Contents []struct {
-						Url         string   `json:"url,omitempty"`
-						Type        string   `json:"type,omitempty"`
-						Medium      string   `json:"medium,omitempty"`
-						Height      int      `json:"height"`
-						Width       int      `json:"width"`
-						IsDefault   *bool    `json:"isDefault,omitempty"`
-						Title       string   `json:"title,omitempty"`
-						Description string   `json:"description,omitempty"`
-						Keywords    string   `json:"keywords,omitempty"`
-						Categories  []string `json:"category,omitempty"`
-						Thumbnails  []struct {
-							Url    string `json:"url,omitempty"`
-							Height int    `json:"height"`
-							Width  int    `json:"width"`
-							Time   string `json:"time,omitempty"`
-						} `json:"thumbnail,omitempty"`
-					} `json:"contents,omitempty"`
-				} `json:"mediaGroups,omitempty"`
 				Title          string   `json:"title,omitempty"`
 				Link           string   `json:"link,omitempty"`
 				Author         string   `json:"author,omitempty"`
@@ -100,59 +92,34 @@ func media_type(mime string) string {
 	s := strings.Split(mime, "/")
 	return s[0]
 }
-func loadresult_to_feedsource(x load_result) (*feedfeed.FeedSource, []feedfeed.FeedEntry, error) {
+func loadresult_to_feedsource(x load_result) (feed.FeedSource, []feed.FeedEntry, error) {
 	if x.ResponseStatus != 200 || x.ResponseData == nil || x.ResponseData.Feed == nil {
-		return nil, nil, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
+		return feed.FeedSource{}, nil, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
 	}
 
-	v := make([]feedfeed.FeedEntry, 0)
+	v := make([]feed.FeedEntry, 0)
 	f := x.ResponseData.Feed
-	s := feedfeed.FeedSource{
-		Name:        f.Title,
-		Uri:         f.FeedUrl,
-		WebSite:     f.Type + f.Website,
-		Description: f.Description,
+	s := feed.FeedSource{
+		FeedSourceMeta: feed.FeedSourceMeta{
+			Name:        f.Title,
+			Uri:         f.FeedUrl,
+			WebSite:     f.Type + f.Website,
+			Description: f.Description,
+		},
 	}
 	for _, e := range f.Entries {
-		ne := feedfeed.FeedEntry{
-			Title:   feedfeed.FeedTitle{Main: e.Title},
-			Uri:     e.Link,
-			Summary: e.ContentSnippet,
-			Content: e.Content,
-			Tags:    e.Categories,
-		}
-		for _, m := range e.MediaGroups {
-			for _, c := range m.Contents {
-				fm := feedfeed.FeedMedia{
-					Title:       c.Title,
-					Description: c.Description,
-					Width:       c.Width, Height: c.Height,
-					Mime: c.Type,
-					Uri:  c.Url,
-				}
-				switch media_type(c.Type) {
-				case "image":
-					ne.Images = append(ne.Images, fm)
-				case "vidoe":
-					ne.Videos = append(ne.Videos, fm)
-				case "audio":
-					ne.Audios = append(ne.Audios, fm)
-				}
-				for _, t := range c.Thumbnails {
-					fmt := feedfeed.FeedMedia{
-						Width: t.Width, Height: t.Height, Uri: t.Url,
-					}
-					ne.Images = append(ne.Images, fmt)
-				}
-			}
+		ne := feed.FeedEntry{
+			FeedEntryMeta: feed.FeedEntryMeta{
+				Title:   feed.FeedTitle{Main: e.Title},
+				Uri:     e.Link,
+				Summary: e.ContentSnippet,
+				Content: e.Content,
+				Tags:    e.Categories,
+			},
 		}
 		v = append(v, ne)
 	}
-	return &s, v, nil
-}
-type GoogleFeedApiService interface {
-	Find(q, hl string) ([]feedfeed.FeedSourceFindEntry, error)
-	Load(uri, hl string, num int, scoring bool) (*feedfeed.FeedSource, []feedfeed.FeedEntry, error)
+	return s, v, nil
 }
 
 type google_feedapi struct {
@@ -171,7 +138,7 @@ func (this google_feedapi) RoundTrip(r *http.Request) {
 	r.Header.Set("refer", this.refer)
 }
 
-func (this google_feedapi) Find(q, hl string) ([]feedfeed.FeedSourceFindEntry, error) {
+func (this google_feedapi) Find(q, hl string) ([]FeedSourceFindEntry, error) {
 	p := struct {
 		q  string `param:"q"`
 		hl string `param:"hl"` // default en, nil means en
@@ -199,7 +166,7 @@ func make_scoring(scoring bool) string {
 	}
 	return ""
 }
-func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (*feedfeed.FeedSource, []feedfeed.FeedEntry, error) {
+func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (feed.FeedSource, []feed.FeedEntry, error) {
 	p := struct {
 		q       string `param:"q"`
 		hl      string `param:"hl"`      // default en
@@ -213,16 +180,19 @@ func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (*feedfee
 	err := c.GetAsJson(url, &v)
 
 	if err != nil {
-		return nil, nil, err
+		return feed.FeedSource{}, nil, err
 	}
 	s, e, err := loadresult_to_feedsource(v)
 	return s, e, err
 }
 
+// http://www.google.com/uds/Gfeeds?context=0&num=20&hl=en&output=json&q=http%3A%2F%2Fpansci.tw%2Ffeed&v=1.0
+// http://www.google.com/uds/GfindFeeds?context=0&hl=en&q=%E6%9E%9C%E5%A3%B3%E7%BD%91&v=1.0
 const (
 	feed_service = `https://ajax.googleapis.com/ajax/services/feed/`
-	find_url     = feed_service + `find`
-	load_url     = feed_service + `load`
+
+	find_url = feed_service + `find`
+	load_url = feed_service + `load`
 )
 
 type googlefeedapi_find_param struct {
