@@ -25,9 +25,9 @@ namespace famousfront
         public MainWindow()
         {          
             InitializeComponent();            
+            // expression windowsinstance to window error if IsMainWindow setted in xaml
             SetIsMainWindow(this, true);
             Elysium.Parameters.General.SetShadowBrush(this, Brushes.Black);
-            // expression windowsinstance to window error if IsMainWindow setted in xaml
         }
         protected override void OnInitialized(EventArgs e)
         {

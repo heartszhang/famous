@@ -7,14 +7,15 @@
                     xmlns:views="clr-namespace:famousfront.views"
                     xmlns:cv="clr-namespace:famousfront.converters"
                     mc:Ignorable="d">
-    <ff:ServiceLocator x:Key="_locator" d:IsDataSource="True" />
-    <cv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-    <cv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+  <ff:ServiceLocator x:Key="_locator" d:IsDataSource="True" />
+  <cv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+  <cv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
   <cv:BoolToBusyIndicatorConverter x:Key="BoolToBusyIndicatorConverter"/>
   <cv:NullImageConverter x:Key="NullImageConverter"/>
   <cv:StringToUriConverter x:Key="StringToUriConverter"/>
   <cv:ScaleToHeightConverter x:Key="ScaleToHeightConverter"/>
+  <cv:BoolToMaxHeightConverter x:Key="BoolToMaxHeightConverter"/>
   <cv:StringIsNullOrEmptyToVisibilityConverter x:Key="StringIsNullOrEmptyToVisibilityConverter"/>
-    <metro:IsGreaterThanConverter x:Key="IsGreaterThanConverter"/>
+  <metro:IsGreaterThanConverter x:Key="IsGreaterThanConverter"/>
 
 </ResourceDictionary>
