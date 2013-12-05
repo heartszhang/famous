@@ -35,7 +35,7 @@ namespace famousfront.viewmodels
       }
       else if (_.images != null&& _.images.Length > 1 && inline == 0 && media)
       {
-        Media = new ImageGalleryViewModel(_.images);
+        Media = new ImagePanelViewModel(_.images);
       }
       if (_.videos != null)
       {
@@ -95,6 +95,12 @@ namespace famousfront.viewmodels
       get { return _media; }
       private set { Set(ref _media, value); }
     }
+    bool _is_document_expanded;
+    public bool IsDocumentExpanded
+    {
+      get { return _is_document_expanded; }
+      set { Set(ref _is_document_expanded, value); }
+    }
     bool _has_document = true;
     public bool HasDocument
     {
@@ -125,15 +131,7 @@ namespace famousfront.viewmodels
       Summary = _.content;
       IsExpanded = !IsExpanded;
     }
-    public bool CanExpand
-    {
-      get
-      {
-        //var flag = FeedStatuses.Feed_status_content_empty | FeedStatuses.Feed_status_summary_empty;
-        //return (_.status & flag) == 0ul;
-        return true;
-      }
-    }
+
   }
   internal class FriendlyDateTime 
   {
