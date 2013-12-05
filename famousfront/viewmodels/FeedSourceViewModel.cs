@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using famousfront.datamodels;
 using System.Windows.Input;
 using GalaSoft.MvvmLight.Command;
@@ -11,11 +8,11 @@ using famousfront.messages;
 using System.Diagnostics;
 namespace famousfront.viewmodels
 {
-  internal class FeedSourceViewModel : famousfront.core.TaskViewModel
+  internal class FeedSourceViewModel : core.TaskViewModel
   {
     int _page;
-    static readonly System.DateTime utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-    FeedSource _ = null;
+    static readonly DateTime Utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+    readonly FeedSource _ = null;
     internal FeedSourceViewModel(FeedSource val)
     {
       _ = val;
@@ -66,11 +63,11 @@ namespace famousfront.viewmodels
     {
       get
       {
-        return new FriendlyDateTime(utime.AddSeconds(_.update ));
+        return new FriendlyDateTime(Utime.AddSeconds(_.update ));
       }
     }
 
-    string _category = null;
+    readonly string _category = null;
     private string first_or_default_category()
     {
       return _.categories == null || _.categories.Length <= 0 ? "" : _.categories[0];

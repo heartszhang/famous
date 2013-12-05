@@ -1,11 +1,6 @@
 ﻿using famousfront.core;
 using famousfront.datamodels;
-using GalaSoft.MvvmLight.Threading;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace famousfront.viewmodels

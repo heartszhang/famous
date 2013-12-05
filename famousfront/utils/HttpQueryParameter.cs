@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace famousfront.utils
 {
@@ -114,17 +111,6 @@ namespace famousfront.utils
         pattern = pattern.Replace(s, v);
       }
       return pattern;
-    }
-  }
-  internal static class QueryStringEncoder
-  {
-    internal static string QueryString(this object request)
-    {
-      return HttpQueryParameter.EncodeFieldQueryString(request);
-    }
-    internal static string QueryPath(this object request, string pattren)
-    {
-      return HttpQueryParameter.EncodeRelativePath(request, pattren);
     }
   }
 }

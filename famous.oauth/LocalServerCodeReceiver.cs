@@ -1,12 +1,11 @@
-﻿using System.Collections.Specialized;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using famous.oauth.requests;
+using famous.oauth.core;
 using famous.oauth.responses;
 
 namespace famous.oauth

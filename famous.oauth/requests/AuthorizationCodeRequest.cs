@@ -1,5 +1,4 @@
 ﻿using System;
-using famous.oauth.core;
 using famous.oauth.core.request;
 using famous.oauth.utils;
 
@@ -58,7 +57,6 @@ namespace famous.oauth.requests
         public Uri Build(Uri serverurl)
         {
           var b = new RequestBuilder(this){ BaseUri = serverurl};
- //         b.AddParameter(HttpRequestParameter.ParamType.Query, "x_required_offers", "Bing/Search");
           return b.BuildUri();
         }
     }

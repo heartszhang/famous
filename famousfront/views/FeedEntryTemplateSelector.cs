@@ -1,12 +1,3 @@
-﻿using famousfront.viewmodels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-
-namespace famousfront.views
+﻿namespace famousfront.views
 {
 }

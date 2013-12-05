@@ -59,5 +59,14 @@ namespace famousfront.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only instance methods are supported..
+        /// </summary>
+        internal static string EventHandlerUtils_MakeWeak_Only_instance_methods_are_supported_ {
+            get {
+                return ResourceManager.GetString("EventHandlerUtils_MakeWeak_Only_instance_methods_are_supported_", resourceCulture);
+            }
+        }
     }
 }

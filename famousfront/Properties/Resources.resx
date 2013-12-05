@@ -117,4 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="EventHandlerUtils_MakeWeak_Only_instance_methods_are_supported_" xml:space="preserve">
+    <value>Only instance methods are supported.</value>
+  </data>
 </root>

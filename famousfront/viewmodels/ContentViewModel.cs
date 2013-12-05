@@ -3,19 +3,15 @@ using famousfront.messages;
 using famousfront.utils;
 using GalaSoft.MvvmLight.Command;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace famousfront.viewmodels
 {
-  class ContentViewModel : famousfront.core.TaskViewModel
+  class ContentViewModel : core.TaskViewModel
   {
-    FeedSourcesViewModel _sources = new FeedSourcesViewModel();
+    readonly FeedSourcesViewModel _sources = new FeedSourcesViewModel();
     FeedEntriesViewModel _entries = null;
-    ImageTipViewModel _image_tip = new ImageTipViewModel();
+    readonly ImageTipViewModel _image_tip = new ImageTipViewModel();
     readonly System.Windows.Threading.DispatcherTimer _update_worker = new System.Windows.Threading.DispatcherTimer();
     bool _show_sources = true;
     public bool ShowFeedSources
@@ -39,11 +35,11 @@ namespace famousfront.viewmodels
 
     async void do_updating(object sender, EventArgs e)
     {
-      var rel = "/api/tick.json";
+      const string rel = "/api/tick.json";
       var v = await HttpClientUtils.Get<BackendTick>(ServiceLocator.BackendPath(rel));
       if (v.code != 0)
       {
-        MessengerInstance.Send(new famousfront.messages.BackendError() { code = v.code, reason = v.reason});
+        MessengerInstance.Send(new famousfront.messages.BackendError() { code = v.code, reason = v.reason });
         return;
       }
       var bt = v.data.feeds;
@@ -152,7 +148,7 @@ namespace famousfront.viewmodels
       for (; ; )
       {
         IsBusying = true;
-        var rel = "/api/update/popup.json";
+        const string rel = "/api/update/popup.json";
         var v = await HttpClientUtils.Get<famousfront.datamodels.FeedEntity>(ServiceLocator.BackendPath(rel));
         IsBusying = false;
         if (v.code != 0)

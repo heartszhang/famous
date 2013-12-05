@@ -1,9 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using famous.oauth.requests;
 using famous.oauth.responses;
 
-namespace famous.oauth
+namespace famous.oauth.core
 {
   /// <summary>OAuth 2.0 verification code receiver.</summary>
   public interface ICodeReceiver

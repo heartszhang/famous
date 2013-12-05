@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using famous.oauth.core;
-using famous.oauth.requests;
 using famous.oauth.responses;
 
 namespace famous.oauth

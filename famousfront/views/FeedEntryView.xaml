@@ -1,13 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:famousfront.viewmodels" 
-                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:metro="http://schemas.codeplex.com/elysium"
-                    xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
-                    xmlns:views="clr-namespace:famousfront.views"
                     xmlns:ctrls="clr-namespace:famousfront.controls"
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntryViewModel}" d:IsDesignTimeCreatable="false">
@@ -59,13 +56,6 @@
       </Style>
     </DataTemplate.Resources>
     <StackPanel x:Name="_root" metro:ApplicationBar.PreventsOpen="true" Background="Transparent">
-      <!--
-      <i:Interaction.Triggers>
-        <i:EventTrigger EventName="MouseLeftButtonUp">
-          <mvvm:EventToCommand Command="{Binding ToggleExpandSummaryCommand,Mode=OneWay}" MustToggleIsEnabledValue="True" PassEventArgsToCommand="True"/>
-        </i:EventTrigger>
-      </i:Interaction.Triggers>
-      -->
       <StackPanel.ContextMenu>
         <ContextMenu x:Name="_menu">
           <MenuItem Header="Expand/Unexpand Body" 
@@ -86,8 +76,6 @@
         <Grid Grid.Column="1" params:General.ContentFontSize="{StaticResource FiveTextSize}"
               Visibility="{Binding IsMouseOver,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}, ElementName=_root,FallbackValue=Collapsed}" 
               TextElement.FontFamily="{StaticResource SymbolFont}">
- <!--         <TextBlock Background="Transparent" Text="&#xe015;" 
-                     HorizontalAlignment="Center" Padding="12,0" x:Name="_tools"/>-->
           <metro:DropDownCommandButton Content="&#xe015;" Padding="0" 
                                        Style="{DynamicResource DropDownCommandButtonSimpleStyle}">
             <metro:DropDownCommandButton.Submenu>
@@ -124,21 +112,21 @@
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid>
-        <ctrls:ExpandableStackPanel x:Name="_doc" ClipToBounds="True" IsExpanded="{Binding IsDocumentExpanded}">
-          <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
+          <ctrls:ExpandableStackPanel x:Name="_doc" ClipToBounds="True" IsExpanded="{Binding IsDocumentExpanded}">
+            <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
                           IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}"
                              Padding="0" ContextMenu="{x:Null}" VerticalScrollBarVisibility="Disabled"
                              HorizontalScrollBarVisibility="Disabled"
                           Background="Transparent" IsDocumentEnabled="True"
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
-        </ctrls:ExpandableStackPanel>
+          </ctrls:ExpandableStackPanel>
           <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" Fill="{StaticResource FadeOutBottomBrush}" VerticalAlignment="Bottom" 
                      Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"/>
         </Grid>
         <StackPanel Grid.Row="1" Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
-          <ToggleButton Content="&#x2026; &#x2026;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}"
+          <ToggleButton Content="&#x2026; &#x2026;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}" HorizontalAlignment="Center"
                         x:Name="_doc_btn" Style="{StaticResource LightToggleButtonStyle}"/>
-          
+
         </StackPanel>
       </Grid>
     </StackPanel>

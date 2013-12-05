@@ -3,10 +3,8 @@ using famousfront.datamodels;
 using famousfront.utils;
 using GalaSoft.MvvmLight.Threading;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
@@ -17,7 +15,7 @@ namespace famousfront.viewmodels
   using FeedImages = System.Collections.ObjectModel.ObservableCollection<ImageUnitViewModel>;
   class ImagePanelViewModel : TaskViewModel
   {
-    FeedMedia[] _;
+    readonly FeedMedia[] _;
 
     public ImagePanelViewModel(FeedMedia[] imgs)
     {
@@ -34,7 +32,7 @@ namespace famousfront.viewmodels
     async void DescribeImages()
     {
       IsBusying = true;
-      await Task.WhenAll(_.Select(m => DescribeImage(m))).ConfigureAwait(false);
+      await Task.WhenAll(_.Select(DescribeImage)).ConfigureAwait(false);
       await LoadImages();
       IsBusying = false;
     }
@@ -48,7 +46,7 @@ namespace famousfront.viewmodels
       _initialized = true;
       IsBusying = true;
 
-      await Task.WhenAll(_.Select(m => DescribeImage(m))).ConfigureAwait(false);
+      await Task.WhenAll(_.Select(DescribeImage)).ConfigureAwait(false);
       IsBusying = false;
 
       await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
@@ -60,10 +58,7 @@ namespace famousfront.viewmodels
         var c = i;
         if (c.duration != 0)
           continue;
-        await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
-        {
-          _coll_images.Add(new ImageUnitViewModel(c));
-        }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() => _coll_images.Add(new ImageUnitViewModel(c))), System.Windows.Threading.DispatcherPriority.ContextIdle);
       }
       await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
       {
@@ -111,52 +106,4 @@ namespace famousfront.viewmodels
       IsShowPanel = !IsShowPanel;
     }
   }
-  /*
-  class ImageGalleryViewModel : TaskViewModel
-  {
-    internal ImageGalleryViewModel(FeedMedia[] imgs) 
-    {
-      _panel = new ImagePanelViewModel(imgs);
-      if (imgs[0] != null)
-        _first = new ImageElementViewModel(imgs[0]);
-      if (imgs.Length < ServiceLocator.Flags.ShowGalleryThreshold)
-        ExecuteToggleShowPanel();
-    }
-    ImagePanelViewModel _panel;
-    public ImagePanelViewModel ImagePanelViewModel
-    {
-      get { return _panel; }
-    }
-    ImageElementViewModel _first;
-    public ImageElementViewModel ImageElementViewModel
-    {
-      get { return _first; }
-    }
-    bool _show_panel;
-    public bool IsShowPanel 
-    {
-      get { return _show_panel; }
-      protected set { Set(ref _show_panel, value); }
-    }
-    ICommand _toggle_show_panel;
-    public ICommand ToggleShowPanelCommand
-    {
-      get { return _toggle_show_panel ?? (_toggle_show_panel = toggle_show_panel());}
-    }
-    ICommand toggle_show_panel()
-    {
-      return new RelayCommand(ExecuteToggleShowPanel);
-    }
-    bool _panel_initialized;
-    void ExecuteToggleShowPanel()
-    {
-      IsShowPanel = !IsShowPanel;
-      if (!_panel_initialized)
-      {
-        _panel_initialized = true;
-        ImagePanelViewModel.LoadImages();
-      }
-    }
-  }
-   * */
 }

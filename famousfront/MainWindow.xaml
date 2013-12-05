@@ -3,10 +3,8 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:vm="clr-namespace:famousfront.viewmodels"
   xmlns:metro="http://schemas.codeplex.com/elysium"
   xmlns:params="http://schemas.codeplex.com/elysium/params"
-  xmlns:ctrl="clr-namespace:famousfront.controls"
   mc:Ignorable="d" x:Class="famousfront.MainWindow"
   Background="{DynamicResource BackgroundBrush}"
   Icon="title-32.png"
@@ -26,11 +24,11 @@
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
       <StackPanel Grid.Column="1" Orientation="Horizontal">
-        <Button Grid.Column="1" Command="{Binding FindFeedSourceCommand}"
+        <Button Command="{Binding FindFeedSourceCommand}"
                     Style="{DynamicResource {x:Static metro:Window.MainWindowCaptionButtonStyleKey}}">
           <Path Width="10" Height="10" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathDataSearch}"/>
         </Button>
-        <Button Grid.Column="1" Command="{Binding ToggleFeedSourcesViewCommand}"
+        <Button Command="{Binding ToggleFeedSourcesViewCommand}"
                     Style="{DynamicResource {x:Static metro:Window.MainWindowCaptionButtonStyleKey}}">
           <Path Width="10" Height="10" Stretch="Uniform" Fill="{Binding Foreground,RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Data="{StaticResource PathDataLeftBullet}"/>
         </Button>

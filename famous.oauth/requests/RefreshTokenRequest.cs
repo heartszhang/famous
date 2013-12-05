@@ -1,4 +1,3 @@
-using famous.oauth.core;
 using famous.oauth.core.request;
 
 namespace famous.oauth.requests

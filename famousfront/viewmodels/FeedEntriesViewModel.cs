@@ -1,23 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using famousfront.datamodels;
 using famousfront.utils;
 using GalaSoft.MvvmLight.Threading;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Net;
 using System.Windows.Data;
 namespace famousfront.viewmodels
 {
 using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntryViewModel>;
-  class FeedEntriesViewModel : famousfront.core.TaskViewModel
+  class FeedEntriesViewModel : core.TaskViewModel
   {
-    int _page;
-    FeedSourceViewModel _parent;
-    FeedEntries _entries = new FeedEntries();
+    readonly int _page;
+    readonly FeedSourceViewModel _parent;
+    readonly FeedEntries _entries = new FeedEntries();
     internal FeedEntriesViewModel(FeedSourceViewModel p)
     {
       _page = p.Page;
@@ -27,8 +22,8 @@ using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntr
     ICollectionView _grouped_entries = null;
     public ICollectionView Entries { get { return _grouped_entries ?? (_grouped_entries = grouped_entries()); } }
 
-    VideoElementViewModel _video_service = new VideoElementViewModel();
-    public famousfront.core.TaskViewModel VideoService
+    readonly VideoElementViewModel _video_service = new VideoElementViewModel();
+    public core.TaskViewModel VideoService
     {
       get { return _video_service; }
     }
@@ -53,19 +48,13 @@ using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntr
         return;
       }
       IsReady = true;
-      await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
-      {
-        _entries.Clear();
-      }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+      await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() => _entries.Clear()), System.Windows.Threading.DispatcherPriority.ContextIdle);
       if (v.data == null)
         return;
       foreach (var fe in v.data)
       {
         var c = fe;
-        await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
-        {
-          _entries.Add(new FeedEntryViewModel(c));
-        }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() => _entries.Add(new FeedEntryViewModel(c))), System.Windows.Threading.DispatcherPriority.ContextIdle);
       }
     }
   }

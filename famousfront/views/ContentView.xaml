@@ -1,21 +1,12 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:metro="http://schemas.codeplex.com/elysium"
                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-                    xmlns:cmd="http://www.galasoft.ch/mvvmlight"
                     xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:ctrls="clr-namespace:famousfront.controls"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
   <DataTemplate DataType="{x:Type vm:ContentViewModel}" d:IsDesignTimeCreatable="false">
     <Grid d:DesignWidth="500" d:DesignHeight="300">
-<!--    
-      <i:Interaction.Triggers>
-        <i:EventTrigger EventName="MouseRightButtonUp">
-          <cmd:EventToCommand Command="{Binding ToggleFeedSourcesViewCommand,Mode=OneWay}" MustToggleIsEnabledValue="True" PassEventArgsToCommand="True"/>
-        </i:EventTrigger>
-      </i:Interaction.Triggers>
--->
       <Grid.InputBindings>
         <KeyBinding Key="N" Command="{Binding NextEntryCommand}" />
         <KeyBinding Key="P" Command="{Binding PreviousEntryCommand}"/>
@@ -39,7 +30,7 @@
         <ContentPresenter Content="{Binding FeedEntriesViewModel}"/>
       </Grid>
       <Grid Width="{Binding Flags.FeedSourceWidth, Source={StaticResource _locator}}" 
-            HorizontalAlignment="Left" Grid.ColumnSpan="3" 
+            HorizontalAlignment="Left" Grid.ColumnSpan="3" Grid.Column="0"
             Visibility="{Binding ShowFeedSources, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
@@ -50,7 +41,8 @@
           <ctrls:ImageTipServiceHostBehavior/>
         </i:Interaction.Behaviors>
       </ContentPresenter>
-      <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Fill="{StaticResource FadeOutBottomBrush}"/>
+      <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" VerticalAlignment="Bottom" Grid.ColumnSpan="3"
+                 Grid.Column="0" Fill="{StaticResource FadeOutBottomBrush}"/>
     </Grid>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding ShowFeedSources}" Value="True">

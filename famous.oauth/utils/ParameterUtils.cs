@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
-using famous.oauth.core;
 using famous.oauth.core.request;
 
 namespace famous.oauth.utils

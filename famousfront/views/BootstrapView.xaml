@@ -4,7 +4,6 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:metro="http://schemas.codeplex.com/elysium"
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
-                    xmlns:ff="clr-namespace:famousfront"
                     xmlns:vm="clr-namespace:famousfront.viewmodels"
                     mc:Ignorable="d">
   <DataTemplate DataType="{x:Type vm:BootstrapViewModel}" d:IsDesignTimeCreatable="false">

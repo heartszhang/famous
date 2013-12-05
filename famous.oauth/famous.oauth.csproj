@@ -68,8 +68,6 @@
     <Compile Include="requests\AuthorizationCodeRequest.cs" />
     <Compile Include="requests\AuthorizationCodeTokenRequest.cs" />
     <Compile Include="core\IDataStorage.cs" />
-    <Compile Include="core\request\HttpMethods.cs" />
-    <Compile Include="requests\AuthorizeImplicitRequestUrl.cs" />
     <Compile Include="requests\RefreshTokenRequest.cs" />
     <Compile Include="requests\TokenRequestBase.cs" />
     <Compile Include="responses\AuthorizationCodeResponse.cs" />

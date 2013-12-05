@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 
 namespace famousfront.utils
@@ -27,12 +22,12 @@ namespace famousfront.utils
 
       T foundChild = null;
 
-      int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
-      for (int i = 0; i < childrenCount; i++)
+      var childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+      for (var i = 0; i < childrenCount; i++)
       {
         var child = VisualTreeHelper.GetChild(parent, i);
         // If the child is not of the request child type child
-        T childType = child as T;
+        var childType = child as T;
         if (childType == null)
         {
           // recursively drill down the tree
@@ -45,12 +40,10 @@ namespace famousfront.utils
         {
           var frameworkElement = child as FrameworkElement;
           // If the child's name is set for search
-          if (frameworkElement != null && frameworkElement.Name == childName)
-          {
-            // if the child's name is of the request name
-            foundChild = (T)child;
-            break;
-          }
+          if (frameworkElement == null || frameworkElement.Name != childName) continue;
+          // if the child's name is of the request name
+          foundChild = (T)child;
+          break;
         }
         else
         {
@@ -64,16 +57,12 @@ namespace famousfront.utils
     }
     static internal T FindVisualChild<T>(DependencyObject parent) where T : Visual
     {
-      T child = default(T);
-      int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
-      for (int i = 0; i < numVisuals; i++)
+      var child = default(T);
+      var numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+      for (var i = 0; i < numVisuals; i++)
       {
-        Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
-        child = v as T;
-        if (child == null)
-        {
-          child = FindVisualChild<T>(v);
-        }
+        var v = (Visual)VisualTreeHelper.GetChild(parent, i);
+        child = v as T ?? FindVisualChild<T>(v);
         if (child != null)
         {
           break;

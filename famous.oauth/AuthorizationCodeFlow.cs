@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using famous.oauth.core;
 using famous.oauth.requests;
 using famous.oauth.responses;
 using famous.oauth.utils;
-using Newtonsoft.Json;
+
 namespace famous.oauth
 {
   /// <summary>

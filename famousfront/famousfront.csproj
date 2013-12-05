@@ -98,15 +98,63 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="controls\ExpandableStackPanel.cs" />
     <Compile Include="controls\GooglePlusPanel.cs" />
     <Compile Include="controls\ImageTipProviderBehaviorcs.cs" />
+    <Compile Include="controls\ImageTipServiceHostBehavior.cs" />
+    <Compile Include="controls\LayoutProperties.cs" />
+    <Compile Include="controls\ListBoxPreventRequestBringIntoViewBehavior.cs" />
     <Compile Include="controls\ListBoxScrollToTopBehavior.cs" />
+    <Compile Include="converters\BoolToBusyIndicatorConverter.cs" />
+    <Compile Include="converters\BoolToMaxHeightConverter.cs" />
+    <Compile Include="converters\IntToVisibilityConverter.cs" />
+    <Compile Include="converters\InverseBooleanConverter.cs" />
+    <Compile Include="converters\NotNullToVisibilityConverter.cs" />
+    <Compile Include="converters\NullImageConverter.cs" />
+    <Compile Include="converters\ScaleToHeightConverter.cs" />
+    <Compile Include="converters\StringIsNullOrEmptyToBooleanConverter.cs" />
+    <Compile Include="converters\StringIsNullOrEmptyToVisibilityConverter.cs" />
+    <Compile Include="converters\StringToUriConverter.cs" />
+    <Compile Include="datamodels\BackendConstans.cs" />
+    <Compile Include="datamodels\BackendError.cs" />
+    <Compile Include="datamodels\BackendTick.cs" />
+    <Compile Include="datamodels\FeedAuthor.cs" />
+    <Compile Include="datamodels\FeedContent.cs" />
+    <Compile Include="datamodels\FeedEntity.cs" />
+    <Compile Include="datamodels\FeedEntry.cs" />
+    <Compile Include="datamodels\FeedFlags.cs" />
+    <Compile Include="datamodels\FeedImage.cs" />
+    <Compile Include="datamodels\FeedLink.cs" />
+    <Compile Include="datamodels\FeedMedia.cs" />
+    <Compile Include="datamodels\FeedMediaTypes.cs" />
+    <Compile Include="datamodels\FeedsBackendConfig.cs" />
+    <Compile Include="datamodels\FeedSource.cs" />
+    <Compile Include="datamodels\FeedSourceTypes.cs" />
+    <Compile Include="datamodels\FeedStatuses.cs" />
+    <Compile Include="datamodels\FeedTag.cs" />
+    <Compile Include="datamodels\FeedTitle.cs" />
+    <Compile Include="datamodels\FeedTypes.cs" />
+    <Compile Include="messages\BackendError.cs" />
+    <Compile Include="messages\BackendInitialized.cs" />
+    <Compile Include="messages\BackendInitializing.cs" />
+    <Compile Include="messages\BackendShutdown.cs" />
+    <Compile Include="messages\DropFeedSource.cs" />
+    <Compile Include="messages\GenericMessage.cs" />
+    <Compile Include="messages\ShowFindFeedSourceView.cs" />
+    <Compile Include="messages\SubscribeFeedSource.cs" />
+    <Compile Include="messages\ToggleFeedSource.cs" />
+    <Compile Include="messages\UnsubscribeFeedSource.cs" />
+    <Compile Include="messages\VideoPlayRequest.cs" />
+    <Compile Include="utils\EventHandlerUtils.cs" />
     <Compile Include="utils\HttpQueryParameter.cs" />
     <Compile Include="utils\HyperlinkOptions.cs" />
-    <Compile Include="utils\ElementOptions.cs" />
+    <Compile Include="utils\QueryStringEncoder.cs" />
+    <Compile Include="utils\ThicknessUtil.cs" />
     <Compile Include="utils\VisualTreeExtensions.cs" />
+    <Compile Include="utils\WeakEventHandlerSpecial.cs" />
     <Compile Include="viewmodels\FeedSourceFindEntryViewModel.cs" />
     <Compile Include="viewmodels\FeedSourceFindViewModel.cs" />
+    <Compile Include="utils\FriendlyDateTime.cs" />
     <Compile Include="viewmodels\ImageBaseViewModel.cs" />
     <Compile Include="viewmodels\ImageTipViewModel.cs" />
     <Compile Include="views\FeedEntryTemplateSelector.cs" />
@@ -119,18 +167,17 @@
     <Compile Include="utils\HttpClientUtils.cs" />
     <Compile Include="core\TaskViewModel.cs" />
     <Compile Include="core\ViewModelBase.cs" />
-    <Compile Include="datamodels\datamodels.cs" />
+    <Compile Include="datamodels\FeedSourceFindEntry.cs" />
     <Compile Include="designtime\Prototype.xaml.cs">
       <DependentUpon>Prototype.xaml</DependentUpon>
     </Compile>
-    <Compile Include="messages\messages.cs" />
+    <Compile Include="messages\ImageTipRequest.cs" />
     <Compile Include="Strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="utils\WeakEventHandler.cs" />
-    <Compile Include="utils\ColorExtensions.cs" />
     <Compile Include="utils\UrlLauncher.cs" />
     <Compile Include="ServiceLocator.cs" />
     <Compile Include="utils\WebBrowserExtensions.cs" />
