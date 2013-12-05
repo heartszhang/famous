@@ -15,6 +15,16 @@ namespace famousfront.controls
       WidthThreshold = 320;
       HeightThreshold = 240;
     }
+    public static readonly DependencyProperty IsExpandedProperty = DependencyProperty.Register(
+      "IsExpanded",      typeof(bool),      typeof(GooglePlusPicturePanel),
+      new FrameworkPropertyMetadata(false,
+          FrameworkPropertyMetadataOptions.AffectsRender | 
+          FrameworkPropertyMetadataOptions.AffectsMeasure )    );
+    public bool IsExpanded
+    {
+      get { return (bool)GetValue(IsExpandedProperty); }
+      set { SetValue(IsExpandedProperty, value); }
+    }
     public double WidthThreshold { get; set; }
     public double HeightThreshold { get; set; }
     protected override Size MeasureOverride(Size avail)
@@ -22,6 +32,7 @@ namespace famousfront.controls
       var mheight = 0.0;
       var unit_width = 0.0;
       var row = new List<UIElement>();
+      var first_line = 0d;
       foreach (UIElement child in InternalChildren)
       {
         row.Add(child);
@@ -40,12 +51,22 @@ namespace famousfront.controls
           mheight += cheight;
           unit_width = 0.0;
           row.Clear();
+          if (first_line.zero())
+          {
+            first_line = cheight;
+          }
         }
       }
       if (row.Count > 0)
       {
         do_row_measure(0, mheight, HeightThreshold, row);
         mheight += HeightThreshold;
+      }
+      if (first_line.zero())
+        first_line = HeightThreshold;
+      if (!IsExpanded)
+      {
+        mheight = first_line;
       }
       return new Size(avail.Width, mheight);
     }
