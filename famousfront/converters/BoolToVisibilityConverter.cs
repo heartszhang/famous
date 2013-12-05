@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using famousfront.utils;
-
+using Elysium;
 namespace famousfront.converters
 {
     [ValueConversion(typeof(bool), typeof(Visibility))]
@@ -193,5 +193,23 @@ namespace famousfront.converters
         {
             throw new NotImplementedException();
         }
+    }
+    public class BoolToMaxHeightConverter : IValueConverter
+    {
+      public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+      {
+        if (value == null)
+          return parameter;
+
+        var boolean = (bool)value;
+        if (boolean)
+          return DependencyProperty.UnsetValue;
+        return parameter;
+      }
+
+      public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+      {
+        throw new NotImplementedException();
+      }
     }
 }
