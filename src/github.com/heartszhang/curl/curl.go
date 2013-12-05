@@ -19,16 +19,17 @@ import (
 )
 
 type Cache struct {
-	Length       int64
-	Mime         string
-	Charset      string
-	Local        string
-	Disposition  string
-	LocalUtf8    string
-	LastModified string
-	ETag         string
-	LengthUtf8   int64
-	StatusCode   int
+	Uri          string `json:"uri" bson:"uri"`
+	Mime         string `json:"mime,omitempty" bson:"mime,omitempty"`
+	Charset      string `json:"charset,omitempty" bson:"charset,omitempty"`
+	Local        string `json:"local,omitempty" bson:"local,omitempty"`
+	Disposition  string `json:"disposition,omitempty" bson:"disposition,omitempty"`
+	LocalUtf8    string `json:"local_utf8,omitempty" bson:"local_utf8,omitempty"`
+	LastModified string `json:"last_modified,omitempty" bson:"last_modified,omitempty"`
+	ETag         string `json:"etag,omitempty" bson:"etag,omitempty"`
+	Length       int64  `json:"length" bson:"length"`
+	LengthUtf8   int64  `json:"length_utf8" bson:"length_utf8"`
+	StatusCode   int    `json:"status_code" bson:"status_code"`
 }
 
 const (
@@ -91,7 +92,9 @@ func client_do_get(client *http.Client, uri string, interceptor CurlerRoundTrip)
 		if interceptor != nil {
 			interceptor.RoundTrip(req)
 		}
+		log.Println("begin-curl", uri)
 		resp, err = client.Do(req)
+		log.Println("end-curl", uri)
 	}
 	return
 }
@@ -275,22 +278,6 @@ func file_detect_content_type(local, mime string) string {
 	return ct
 }
 
-/*
-func (this *curler) GetLocalAsJson(uri string, v interface{}) (Cache, error) {
-	c, err := this.GetUtf8(uri)
-	if err != nil {
-		return c, err
-	}
-	file, err := os.Open(c.LocalUtf8)
-	if err != nil {
-		return c, err
-	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(v)
-	return c, err
-}
-*/
 // detect content-type via http://mimesniff.spec.whatwg.org/ if charset isn't declared
 // treat gb2312 as gbk
 // convert text/* and application/*+xml to utf-8
@@ -441,7 +428,7 @@ func (this *curler) GetAsJson(uri string, val interface{}) error {
 // detect charset by mimetype
 // use server-site filename as name-prefix
 func (this *curler) Get(uri string) (Cache, error) {
-	v := Cache{}
+	v := Cache{Uri: uri}
 	resp, err := do_get(uri, this.proxy_policy, this.interceptor)
 	if err != nil {
 		return v, err
@@ -554,19 +541,3 @@ type roundtrip_wrapper func(*http.Request)
 func (this roundtrip_wrapper) RoundTrip(r *http.Request) {
 	this(r)
 }
-
-// process gzip/deflatej
-/*
-func uncompress(resp *http.Response) (v io.ReadCloser, err error) {
-	encoding := resp.Header.Get("content-encoding")
-	switch encoding {
-	default:
-		v = resp.Body
-	case "gzip":
-		v, err = gzip.NewReader(resp.Body)
-	case "deflate":
-		v = flate.NewReader(resp.Body)
-	}
-	return
-}
-*/
