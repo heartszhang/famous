@@ -122,5 +122,9 @@ namespace famousfront.utils
     {
       return HttpQueryParameter.EncodeFieldQueryString(request);
     }
+    internal static string QueryPath(this object request, string pattren)
+    {
+      return HttpQueryParameter.EncodeRelativePath(request, pattren);
+    }
   }
 }
