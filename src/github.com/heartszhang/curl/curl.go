@@ -3,6 +3,7 @@ package curl
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/heartszhang/gfwlist"
 	"io"
 	"io/ioutil"
 	"log"
@@ -18,12 +19,16 @@ const (
 	CurlProxyPolicyNoProxy
 	CurlProxyPolicyAlwayseProxy
 )
+const (
+	gfw_url = `http://autoproxy-gfwlist.googlecode.com/svn/trunk/gfwlist.txt`
+)
 
 type curler struct {
 	data_dir     string
 	proxy_policy int
 	dial_timeo   int
 	interceptor  CurlerRoundTrip
+	ruler        gfwlist.GfwRuler
 }
 
 func NewCurl(datadir string) Curler {
@@ -36,7 +41,8 @@ func NewInterceptCurler(datadir string, intercepter func(*http.Request)) Curler 
 		dial_timeo:  connection_timeout}
 }
 
-func NewCurlerDetail(datadir string, proxypolicy, dialtimeo int, intercepter CurlerRoundTrip) Curler {
+func NewCurlerDetail(datadir string, proxypolicy,
+	dialtimeo int, intercepter CurlerRoundTrip, ruler gfwlist.GfwRuler) Curler {
 	if dialtimeo == 0 {
 		dialtimeo = connection_timeout
 	}
@@ -44,6 +50,7 @@ func NewCurlerDetail(datadir string, proxypolicy, dialtimeo int, intercepter Cur
 		proxy_policy: proxypolicy,
 		interceptor:  intercepter,
 		dial_timeo:   dialtimeo,
+		ruler:        ruler,
 	}
 }
 
@@ -53,9 +60,31 @@ const (
 	response_timeout           = 20 // seconds
 )
 
+func (this *curler) new_proxy() proxy_func {
+	if this.proxy_policy == CurlProxyPolicyAlwayseProxy {
+		return http.ProxyFromEnvironment
+	}
+	if this.proxy_policy == CurlProxyPolicyNoProxy {
+		return nil
+	}
+	if this.ruler != nil {
+		return func(req *http.Request) (*url.URL, error) {
+			uri := req.URL.String()
+			blocked := this.ruler.IsBlocked(uri)
+			log.Println("gfwlist-check", uri, blocked)
+			if blocked {
+				return http.ProxyFromEnvironment(req)
+			}
+			return nil, nil
+		}
+	}
+	return nil
+}
+
+// ProxyFromEnvironment(req *Request) (*url.URL, error)
 func (this *curler) do_post(uri string, form url.Values) (*http.Response, error) {
-	retry := this.proxy_policy == CurlProxyPolicyUseProxy
-	var proxy proxy_func
+	retry := this.proxy_policy == CurlProxyPolicyUseProxy && this.ruler == nil
+	proxy := this.new_proxy()
 	if this.proxy_policy == CurlProxyPolicyAlwayseProxy {
 		proxy = http.ProxyFromEnvironment
 	}
@@ -114,10 +143,7 @@ func (this *curler) new_client(proxy proxy_func, cache *Cache) *http.Client {
 
 func (this *curler) do_get(uri string, cache *Cache) (*http.Response, error) {
 	retry := this.proxy_policy == CurlProxyPolicyUseProxy
-	var proxy proxy_func
-	if this.proxy_policy == CurlProxyPolicyAlwayseProxy {
-		proxy = http.ProxyFromEnvironment
-	}
+	var proxy = this.new_proxy()
 	resp, err := this.new_client(proxy, cache).Get(uri)
 	if err != nil && retry {
 		fmt.Println("try again with proxy", uri, err)
@@ -273,7 +299,7 @@ func (this *curler) get(uri string, savecache bool) (Cache, error) {
 	v, _ := cacher.load_index(uri)
 	resp, err := this.do_get(uri, v)
 	if err != nil {
-		return *v, err
+		return Cache{Uri: uri, StatusCode: -1}, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotModified {
@@ -288,6 +314,7 @@ func (this *curler) get(uri string, savecache bool) (Cache, error) {
 	}
 	v.ETag = resp.Header.Get("etag")
 	v.LastModified = resp.Header.Get("last-modified")
+	v.Expires = resp.Header.Get("expires")
 	mime, cs, err := extract_charset(resp.Header.Get("content-type"))
 	if err == nil {
 		v.Mime = strings.ToLower(mime)

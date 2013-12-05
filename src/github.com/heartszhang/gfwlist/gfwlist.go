@@ -299,7 +299,7 @@ func (this *gfw_ruler) IsBlocked(uri string) bool {
 }
 
 const prime_rk = 16777619
-const min_pattern_len = 5 // 前两个字符中存在通配符的时候，结果就会出现错误
+
 //rabin-k hash algorithm
 func make_key(sep string) uint32 {
 	l := len(sep)

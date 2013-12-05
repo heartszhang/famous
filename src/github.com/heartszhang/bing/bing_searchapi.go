@@ -32,25 +32,25 @@ func NewBingSearchService(temp, acckey string) BingSearchService {
 
 func (this bing_search) Web(params BingSearchWebParameters) (curl.Cache, error) {
 	q := oauth2.HttpQueryEncode(params)
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	return c.Get(BingSearchServiceRoot + ServiceOperationWeb + "?" + q)
 }
 
 func (this bing_search) News(params BingSearchNewsParameters) (curl.Cache, error) {
 	q := oauth2.HttpQueryEncode(params)
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	return c.Get(BingSearchServiceRoot + ServiceOperationNews + "?" + q)
 }
 
 func (this bing_search) Image(params BingSearchImageParameters) (curl.Cache, error) {
 	q := oauth2.HttpQueryEncode(params)
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	return c.Get(BingSearchServiceRoot + ServiceOperationImage + "?" + q)
 }
 
 func (this bing_search) Video(params BingSearchVideoParameters) (curl.Cache, error) {
 	q := oauth2.HttpQueryEncode(params)
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	return c.Get(BingSearchServiceRoot + ServiceOperationVideo + "?" + q)
 }
 func new_string(v string) *string {
@@ -59,7 +59,7 @@ func new_string(v string) *string {
 func (this bing_search) SpellingSuggestion(params BingSearchParameters) (curl.Cache, error) {
 	params.Format = new_string(SearchResultFormatJson)
 	q := oauth2.HttpQueryEncode(params)
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	x := BingSearchServiceRoot + ServiceOperationSpellingSuggestion + "?" + q
 	log.Println(x)
 	return c.Get(x)
@@ -68,13 +68,13 @@ func (this bing_search) SpellingSuggestion(params BingSearchParameters) (curl.Ca
 func (this bing_search) RelatedSearch(params BingSearchParameters) (curl.Cache, error) {
 	params.Format = new_string(SearchResultFormatJson)
 	q := oauth2.HttpQueryEncode(params)
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	return c.Get(BingSearchServiceRoot + ServiceOperationRelatedSearch + "?" + q)
 }
 
 func (this bing_search) Composite(params BingSearchCompositeParameters) (curl.Cache, error) {
 	q := oauth2.HttpQueryEncode(params)
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	return c.Get(BingSearchServiceRoot + ServiceOperationComposite + "?" + q)
 }
 

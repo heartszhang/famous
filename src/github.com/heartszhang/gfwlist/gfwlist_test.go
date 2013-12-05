@@ -17,7 +17,7 @@ func TestWhiteList(t *testing.T) {
 	defer f.Close()
 	ruler, _ := NewGfwRuler(f)
 	//	sites := []string{"http://www.sina.com.cn", "http://www.cafepress.com", "http://www.hulu.com", "https://youtube.com", "http://twitter.com"}
-	sites := []string{"http://yahoo.can?www.cafepress.com"}
+	sites := []string{"http://chinadigitaltimes.net/chinese"}
 	for _, site := range sites {
 		v := ruler.IsBlocked(site)
 		t.Log(site, v)

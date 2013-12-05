@@ -25,7 +25,7 @@ func feedentry_unread(source string, count int, page int) ([]feed.FeedEntry, err
 	var sc int
 	if page == 0 {
 		log.Println("curl-get...")
-		c := curl.NewCurl(backend_config().FeedEntryFolder)
+		c := curl.NewCurlerDetail(backend_config().FeedEntryFolder, 0, 0, nil, backend_context.ruler)
 		cache, err := c.GetUtf8(source)
 		log.Println("curl-get", cache.LocalUtf8)
 		if err != nil || cache.LocalUtf8 == "" {

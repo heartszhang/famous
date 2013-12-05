@@ -61,7 +61,7 @@ func (this pubsuber) Subscribe(uri string) (int, error) {
 		format:   strptr("json"),
 		verify:   &this.verify,
 	}
-	resp, err := curl.NewCurlerDetail("", this.proxy_policy, 0, nil).PostForm(this.service_provider, oauth2.HttpQueryValues(p))
+	resp, err := curl.NewCurlerDetail("", this.proxy_policy, 0, nil, nil).PostForm(this.service_provider, oauth2.HttpQueryValues(p))
 	return resp, err
 }
 
@@ -79,7 +79,7 @@ func (this pubsuber) Unsubscribe(uri string) (int, error) {
 		callback: hub_callback,
 		verify:   &this.verify,
 	}
-	resp, err := curl.NewCurlerDetail("", this.proxy_policy, 0, nil).PostForm(this.service_provider, oauth2.HttpQueryValues(p))
+	resp, err := curl.NewCurlerDetail("", this.proxy_policy, 0, nil, nil).PostForm(this.service_provider, oauth2.HttpQueryValues(p))
 	return resp, err
 }
 
@@ -99,7 +99,7 @@ func (this pubsuber) Retrieve(uri string, count int) (string, error) {
 		format string `param:"format"`
 	}{"retrieve", uri, count, "json"}
 	u := this.service_provider + "?" + oauth2.HttpQueryEncode(p)
-	return curl.NewCurlerDetail("", this.proxy_policy, 0, nil).GetAsString(u)
+	return curl.NewCurlerDetail("", this.proxy_policy, 0, nil, nil).GetAsString(u)
 }
 
 type PubsubMessage struct { // same as FeedSource

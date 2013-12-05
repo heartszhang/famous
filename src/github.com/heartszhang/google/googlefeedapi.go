@@ -144,7 +144,7 @@ func (this google_feedapi) Find(q, hl string) ([]FeedSourceFindEntry, error) {
 		hl string `param:"hl"` // default en, nil means en
 		v  string `param:"v"`
 	}{q: q, hl: hl, v: "1.0"}
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this, nil)
 	v := find_result{}
 	uri := find_url + "?" + oauth2.HttpQueryEncode(p)
 	err := c.GetAsJson(uri, &v)
@@ -174,7 +174,7 @@ func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (feed.Fee
 		scoring string `param:"scoring"` // nil or h
 		v       string `param:"v"`
 	}{q: uri, hl: hl, num: make_num(num), scoring: make_scoring(scoring), v: "1.0"}
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this, nil)
 	v := load_result{}
 	url := load_url + "?" + oauth2.HttpQueryEncode(p)
 	err := c.GetAsJson(url, &v)

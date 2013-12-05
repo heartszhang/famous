@@ -2,6 +2,7 @@ package backend
 
 import (
 	"fmt"
+	"github.com/heartszhang/gfwlist"
 	"os"
 	"path/filepath"
 	"sync"
@@ -74,8 +75,18 @@ func init() {
 	config.Language = "zh-CN"
 	config.EntryDefaultPageCount = 10
 	backend_context.startup = time.Now()
-}
 
+	load_gfwrules()
+}
+func load_gfwrules() {
+	fp := filepath.Join(backend_config().DataFolder, "gfwlist.txt")
+	reader, err := os.Open(fp)
+	if err == nil {
+		defer reader.Close()
+		backend_context.ruler, err = gfwlist.NewGfwRuler(reader)
+	}
+	fmt.Println("gfwlist-load", err, fp)
+}
 func (this FeedsBackendConfig) Address() string {
 	return fmt.Sprintf("%v:%d", this.BackendIp, this.BackendPort)
 }
@@ -86,6 +97,7 @@ var backend_context struct {
 	startup      time.Time
 	working      int64
 	feed_updates []FeedEntity
+	ruler        gfwlist.GfwRuler
 }
 
 func BackendConfig() FeedsBackendConfig {

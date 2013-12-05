@@ -124,7 +124,7 @@ func (this bcms_queue) FetchAny(msgid, fetch_num *uint) ([]string, error) {
 	uri := bcms_urlbase + this.queue_name
 	q.sign = bcms_sign("POST", uri, q, this.client_secret) // use client_secret to sign post-params
 	vals := oauth2.HttpQueryValues(q)
-	c := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
+	c := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil, nil)
 	err = c.PostFormAsJson(uri, vals, &bcmsr)
 
 	if err == nil {
@@ -183,7 +183,7 @@ func (this bcms_queue) FetchOneAsJson(v interface{}) error {
 
 func (this bcms_proxy) FetchOneAsJson(v interface{}) error {
 	var x BcmsResponse
-	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
+	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil, nil)
 	err := client.GetAsJson(this.uri, &x)
 	if err != nil {
 		return err
@@ -207,7 +207,7 @@ func (this bcms_proxy) FetchOneAsJson(v interface{}) error {
 
 func (this bcms_proxy) FetchOne() (string, error) {
 	var x BcmsResponse
-	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil)
+	client := curl.NewCurlerDetail("", curl.CurlProxyPolicyNoProxy, 0, nil, nil)
 	err := client.GetAsJson(this.uri, &x)
 	if err != nil {
 		return "", err
