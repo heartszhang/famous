@@ -3,22 +3,6 @@
                     xmlns:ctrl="clr-namespace:famousfront.controls"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
   <DataTemplate DataType="{x:Type vm:ImagePanelViewModel}">
-    <Grid>
-      <ItemsControl ItemsSource="{Binding Images}" >
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <ctrl:GooglePlusPicturePanel IsItemsHost="True"/>
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemContainerStyle>
-          <Style>
-            <Setter Property="ctrl:LayoutProperties.Scale" Value="{Binding Scale,Mode=OneWay,FallbackValue=0.0}"/>
-          </Style>
-        </ItemsControl.ItemContainerStyle>
-      </ItemsControl>
-    </Grid>    
-  </DataTemplate>
-  <DataTemplate DataType="{x:Type vm:ImageGalleryViewModel}">
     <Grid Background="Transparent">
       <Grid.ContextMenu>
         <ContextMenu>
@@ -28,12 +12,19 @@
                     IsChecked="{Binding IsShowPanel,Mode=OneWay}"/>
         </ContextMenu>
       </Grid.ContextMenu>
-      <ContentPresenter Content="{Binding ImageElementViewModel}" x:Name="_content"/>
-    </Grid>
-    <DataTemplate.Triggers>
-      <DataTrigger Binding="{Binding IsShowPanel}" Value="True">
-        <Setter Property="Content" Value="{Binding ImagePanelViewModel}" TargetName="_content"/>
-      </DataTrigger>
-    </DataTemplate.Triggers>
+
+      <ItemsControl ItemsSource="{Binding Images}" >
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <ctrl:GooglePlusPicturePanel IsItemsHost="True" IsExpanded="{Binding IsShowPanel,Mode=OneWay}" ClipToBounds="True"/>
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemContainerStyle>
+          <Style>
+            <Setter Property="ctrl:LayoutProperties.Scale" Value="{Binding Scale,Mode=OneWay,FallbackValue=0.0}"/>
+          </Style>
+        </ItemsControl.ItemContainerStyle>
+      </ItemsControl>
+    </Grid>    
   </DataTemplate>
 </ResourceDictionary>
