@@ -1,7 +1,7 @@
 package backend
 
 import (
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"log"
 	"net/http"
 	"strconv"

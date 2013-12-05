@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"code.google.com/p/go.net/html"
 	"code.google.com/p/go.net/html/atom"
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"io/ioutil"
 	"os"
 	"strings"

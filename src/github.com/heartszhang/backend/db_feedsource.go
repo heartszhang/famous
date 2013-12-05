@@ -1,7 +1,7 @@
 package backend
 
 import (
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	//	"time"
@@ -32,9 +32,9 @@ func (this feedsource_op) save(feeds []feed.FeedSource) (inserted []feed.FeedSou
 	})
 	return
 }
-func (this feedsource_op) upsert(f *feed.FeedSource) error {
+func (this feedsource_op) upsert(f feed.FeedSource) error {
 	return do_in_session(this.coll, func(coll *mgo.Collection) error {
-		_, err := coll.Upsert(bson.M{"uri": f.Uri}, bson.M{"$setOnInsert": f})
+		_, err := coll.Upsert(bson.M{"uri": f.Uri}, bson.M{"$setOnInsert": &f})
 		return err
 	})
 }
@@ -58,17 +58,28 @@ func (this feedsource_op) save_one(f feed.FeedSource) error {
 }
 
 func (this feedsource_op) update(f feed.FeedSource) error {
+	val := bson.M{
+		"name":        f.Name,
+		"period":      f.Period,
+		"update":      f.Update,
+		"last_touch":  f.LastTouch,
+		"last_update": f.LastUpdate,
+		"next_touch":  f.NextTouch,
+	}
+	if f.Local != "" {
+		val["local"] = f.Local
+	}
+	if f.WebSite != "" {
+		val["website"] = f.WebSite
+	}
+	if f.Hub != "" {
+		val["hub"] = f.Hub
+	}
+	if f.Logo != "" {
+		val["logo"] = f.Logo
+	}
 	return do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Update(bson.M{"uri": f.Uri}, bson.M{"$set": bson.M{
-			"name":    f.Name,
-			"local":   f.Local,
-			"period":  f.Period,
-			"type":    f.Type,
-			"update":  f.Update,
-			"website": f.WebSite,
-			"logo":    f.Logo,
-			"hub":     f.Hub,
-		}})
+		return coll.Update(bson.M{"uri": f.Uri}, bson.M{"$set": val})
 	})
 }
 

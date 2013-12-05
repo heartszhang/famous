@@ -93,8 +93,8 @@ func BackendConfig() FeedsBackendConfig {
 }
 
 func backend_config() FeedsBackendConfig {
-	backend_context.Lock()
-	defer backend_context.Unlock()
+	//	backend_context.Lock()
+	//	defer backend_context.Unlock()
 	return backend_context.config
 }
 

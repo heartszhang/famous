@@ -2,7 +2,7 @@ package backend
 
 import (
 	"github.com/heartszhang/curl"
-	"github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	vt "github.com/heartszhang/videothumbnail"
 )
 
@@ -12,7 +12,7 @@ func image_videothumbnail(uri string) (vt.VideoDescription, error) {
 }
 
 // /feed/entry/image.json/{url}/{entry_id}
-func image_description(uri string) (feedfeed.FeedImage, error) {
+func image_description(uri string) (feed.FeedImage, error) {
 	imgo := new_imagecache_operator()
 	v, err := imgo.find(uri)
 
@@ -33,13 +33,13 @@ func image_description(uri string) (feedfeed.FeedImage, error) {
 	return v, err
 }
 
-func image_description_cached(uri string) (feedfeed.FeedImage, error) {
+func image_description_cached(uri string) (feed.FeedImage, error) {
 	imgo := new_imagecache_operator()
 	v, err := imgo.find(uri)
 	return v, err
 }
 
-func image_dimension(uri string) (feedfeed.FeedImage, error) {
+func image_dimension(uri string) (feed.FeedImage, error) {
 	imgo := new_imagecache_operator()
 	v, err := imgo.find(uri)
 	if err == nil {

@@ -1,7 +1,7 @@
 package backend
 
 import (
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )

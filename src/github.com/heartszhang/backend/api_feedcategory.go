@@ -1,18 +1,16 @@
 package backend
 
-// select a idle category_id, assigned to category
-func feedcategory_create(name string) (string, error) {
+// create a category
+// if category has existed, nothing will be done
+func feedcategory_create(name string) error {
 	fco := new_feedcategory_operator()
-	uid, err := fco.save(name)
-
-	if uid == nil {
-		return "", err
-	}
-	return uid.(string), err
+	_, err := fco.save(name)
+	return err
 }
 
-// name : can be empty. if id is root or all, name cann't be empty
+// TODO: to be implemented
 func feedcategory_drop(name string) error {
+	panic("not implemented")
 	return nil
 }
 

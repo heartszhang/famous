@@ -17,7 +17,7 @@ func clone_session() (*mgo.Session, error) {
 			session = s
 		}
 	}
-	return session.Clone(), nil
+	return session.Copy(), nil
 }
 
 func close_session() {

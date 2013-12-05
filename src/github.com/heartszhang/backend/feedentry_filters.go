@@ -4,7 +4,7 @@ import (
 	//	"code.google.com/p/go.net/html"
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"github.com/heartszhang/markhtml"
 	"io/ioutil"
 	"log"
@@ -57,8 +57,18 @@ func feed_entries_clean_text(entries []feed.FeedEntry) []feed.FeedEntry {
 
 func feedentry_clean_text(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
-	entry.Content, entry.ContentStatus = make_text_readable(entry, entry.Content, false, false)
-	entry.Summary, entry.SummaryStatus = make_text_readable(entry, entry.Summary, true, true)
+	entry.Content, entry.ContentStatus = make_text_readable(entry, entry.Content, false, true)
+	entry.Summary, entry.SummaryStatus = make_text_readable(entry, entry.Summary, true, false)
+	// sum_empty := entry.SummaryStatus.Status&feed.Feed_status_content_empty != 0
+	con_empty := entry.ContentStatus.Status&feed.Feed_status_content_empty != 0
+	if !con_empty {
+		backup := entry.Summary
+		bs := entry.SummaryStatus
+		entry.Summary = entry.Content
+		entry.SummaryStatus = entry.ContentStatus
+		entry.ContentStatus = bs
+		entry.Content = backup
+	}
 	diff := feed.Feed_status_summary_empty / feed.Feed_status_content_empty
 	entry.Status |= entry.SummaryStatus.Status * diff
 }
@@ -75,8 +85,10 @@ func make_text_readable(entry *feed.FeedEntry, txt string, trans, insimg bool) (
 
 	frag, _ := html_create_fragment(txt)
 	frag, score, _ := cleaner.NewExtractor(backend_context.config.CleanFolder).MakeFragmentReadable(frag)
-	entry.Images = append_unique(entry.Images, feedmedias_from_docsummary(score.Images)...)
-	entry.Videos = append_unique(entry.Videos, feedmedias_from_docsummary(score.Medias)...)
+	entry.Images = append_unique(entry.Images, feedmedias_from_docsummary(score.Images, redirect_thumbnail)...)
+	entry.Images = append_unique(entry.Images, feedmedias_from_docsummary(score.Medias, imageurl_from_video)...)
+
+	entry.Videos = append_unique(entry.Videos, feedmedias_from_docsummary(score.Medias, func(o string) string { return o })...)
 	status.WordCount = score.WordCount
 	status.LinkCount = score.LinkCount
 	status.LinkWordCount = score.LinkWordCount
@@ -213,11 +225,11 @@ func describe_image(img_url_chan <-chan string, img_chan chan<- feed.FeedMedia) 
 	}
 }
 
-func feedmedias_from_docsummary(medias []cleaner.MediaSummary) []feed.FeedMedia {
+func feedmedias_from_docsummary(medias []cleaner.MediaSummary, redirector func(string) string) []feed.FeedMedia {
 	count := len(medias)
 	v := make([]feed.FeedMedia, count)
 	for idx, ms := range medias {
-		v[idx].Uri = ms.Uri
+		v[idx].Uri = redirector(ms.Uri)
 		v[idx].Width = int(ms.Width)
 		v[idx].Height = int(ms.Height)
 		v[idx].Description = ms.Alt

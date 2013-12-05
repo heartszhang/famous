@@ -1,7 +1,7 @@
 package backend
 
 import (
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 )
 
 type feedentry_operator interface {
@@ -47,7 +47,7 @@ type feedtag_operator feedcategory_operator
 
 type feedsource_operator interface {
 	save(feeds []feed.FeedSource) ([]feed.FeedSource, error)
-	upsert(f *feed.FeedSource) error
+	upsert(f feed.FeedSource) error
 	update(f feed.FeedSource) error
 	find(uri string) (*feed.FeedSource, error)
 	all() ([]feed.FeedSource, error)

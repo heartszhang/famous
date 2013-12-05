@@ -26,7 +26,7 @@ func webapi_feedsource_show(w http.ResponseWriter, r *http.Request) {
 }
 func webapi_feedsource_find(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
-	if _, err := url.Parse(q); err == nil {
+	if u, err := url.Parse(q); u.IsAbs() && err == nil {
 		webapi_feedsource_show(w, r)
 		return
 	}
@@ -54,8 +54,7 @@ func webapi_feedsource_subscribe(w http.ResponseWriter, r *http.Request) {
 }
 
 func webapi_feedsource_all(w http.ResponseWriter, r *http.Request) {
-	fso := new_feedsource_operator()
-	switch fs, err := fso.all(); err {
+	switch fs, err := feedsource_all(); err {
 	case nil:
 		webapi_write_as_json(w, fs)
 	default:

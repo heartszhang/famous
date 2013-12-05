@@ -3,13 +3,19 @@ package backend
 import (
 	"fmt"
 	"github.com/heartszhang/curl"
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"github.com/heartszhang/google"
+	"log"
+	"net/url"
 )
 
 func feedsource_all() ([]feed.FeedSource, error) {
 	dbo := new_feedsource_operator()
 	fs, err := dbo.all()
+	for i := 0; i < len(fs); i++ {
+		f := &fs[i]
+		f.Logo = resolve_logo(*f)
+	}
 	return fs, err
 }
 func feed_fetch(uri string) (v feed.FeedSource, fes []feed.FeedEntry, err error) {
@@ -18,7 +24,7 @@ func feed_fetch(uri string) (v feed.FeedSource, fes []feed.FeedEntry, err error)
 		return
 	}
 	ext := curl.MimeToExt(cache.Mime)
-	if ext != "xml" && ext != "atom+xml" && ext != "rss+atom" {
+	if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
 		return v, nil, fmt.Errorf("unsupported mime: %v", cache.Mime)
 	} else if cache.LocalUtf8 == "" {
 		return v, nil, fmt.Errorf("unrecognized encoding %v", cache.Local)
@@ -45,7 +51,7 @@ func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err 
 	v.Type = source_type
 
 	if err == nil && v.Uri != "" {
-		err = fso.upsert(&v)
+		err = fso.upsert(v)
 	}
 	return v, err
 }
@@ -60,20 +66,15 @@ const (
 	refer = "http://iweizhi2.duapp.com"
 )
 
-func feedsource_show(uri string) ([]feed.FeedSourceFindEntry, error) {
-	fs, _, err := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder).Load(uri, backend_context.config.Language, 4, false)
+func feedsource_show(uri string) (FeedEntity, error) {
+	fs, entries, err := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder).Load(uri, backend_context.config.Language, 4, false)
 	if err != nil {
-		return nil, err
+		return FeedEntity{}, err
 	}
-	v := make([]feed.FeedSourceFindEntry, 1)
-	v[0].Summary = fs.Description
-	v[0].Title = fs.Name
-	v[0].Url = fs.Uri
-	v[0].Website = fs.WebSite
-	return v, err
+	return FeedEntity{fs, entries}, err
 }
 
-func feedsource_find(q string) ([]feed.FeedSourceFindEntry, error) {
+func feedsource_find(q string) ([]google.FeedSourceFindEntry, error) {
 	svc := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder)
 	v, err := svc.Find(q, backend_context.config.Language)
 	if err != nil {
@@ -96,4 +97,18 @@ func feedsource_find(q string) ([]feed.FeedSourceFindEntry, error) {
 		}
 	}
 	return v, err
+}
+
+func resolve_logo(f feed.FeedSource) string {
+	baseu, _ := url.Parse(f.WebSite)
+	u, err := url.Parse(f.Logo)
+	if err != nil {
+		u, err = baseu.Parse("/favicon.ico")
+	}
+	if !u.IsAbs() {
+		u, _ = baseu.Parse(f.Logo)
+	}
+	v := u.String()
+	log.Println("web-site:", u.String())
+	return v
 }

@@ -2,13 +2,13 @@ package backend
 
 import (
 	"fmt"
-	"github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"testing"
 )
 
 func TestFeedSoruceImport(t *testing.T) {
 	t.Skip()
-	fs, err := feedfeed.CreateFeedsCategoryOpml("feedly.opml")
+	fs, err := feed.CreateFeedsCategoryOpml("feedly.opml")
 	if err != nil {
 		t.Error(err)
 		return

@@ -1,8 +1,8 @@
 package backend
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 )
 
 func init() {
@@ -11,6 +11,7 @@ func init() {
 	http.HandleFunc("/api/feed_category/create.json", webapi_feedcategory_create)
 	http.HandleFunc("/api/feed_category/drop.json", webapi_feedcategory_drop)
 }
+
 // uri : /api/feed_category/all.json
 func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {
 	switch fc, err := feedcategory_all(); err {
@@ -26,11 +27,11 @@ func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {
 func webapi_feedcategory_create(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 	log.Println("feed-cat", name)
-	v, err := feedcategory_create(name)
+	err := feedcategory_create(name)
 	if err != nil {
 		webapi_write_error(w, err)
 	} else {
-		webapi_write_as_json(w, v)
+		webapi_write_as_json(w, name)
 	}
 }
 

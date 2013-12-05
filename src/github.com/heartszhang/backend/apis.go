@@ -1,7 +1,7 @@
 package backend
 
 import (
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
 	"github.com/heartszhang/pubsub"
 	"github.com/heartszhang/unixtime"
 	"log"
@@ -95,4 +95,5 @@ func update_work() {
 	if err != nil {
 		log.Println("pubsub-superfeedr", sc, err)
 	}
+	log.Println("update-tick", fs.Name, err)
 }

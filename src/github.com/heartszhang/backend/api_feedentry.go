@@ -2,39 +2,51 @@ package backend
 
 import (
 	"fmt"
-	//	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
-	feed "github.com/heartszhang/feedfeed"
+	"github.com/heartszhang/feed"
+	"log"
 )
 
-// since_unixtime , 0: from now
-// categories, categories mask, every bit represent a category
-// count: entries per page
+// category
+// count: entries per page, must large than 0
 // page: page no, start at 0
-func feeds_entries_since(since_unixtime int64, category string, count uint, page uint) ([]feed.FeedEntry, error) {
+func feeds_entries_since(category string, count uint, page uint) ([]feed.FeedEntry, error) {
 	return []feed.FeedEntry{}, backend_error{"not impl", -1}
 }
 
+// source : feed(atom/rss) url
+// count: must large than 0
+// page: 0 based page index
+// if page is 0, entries may be fetched online
 func feedentry_unread(source string, count int, page int) ([]feed.FeedEntry, error, int) {
+	if count <= 0 {
+		panic("invalid arg count")
+	}
 	var sc int
 	if page == 0 {
+		log.Println("curl-get...")
 		c := curl.NewCurl(backend_config().FeedEntryFolder)
 		cache, err := c.GetUtf8(source)
-
+		log.Println("curl-get", cache.LocalUtf8)
 		if err != nil || cache.LocalUtf8 == "" {
 			return nil, err, cache.StatusCode
 		}
-		//atom+xml;xml;html
+
 		ext := curl.MimeToExt(cache.Mime)
 		if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
 			return nil, fmt.Errorf("unsupported mime: %v, %d", cache.Mime, cache.StatusCode), 0
 		}
-		v, err := feed.NewFeedMaker(cache.LocalUtf8, source).MakeFeedEntries()
+		fs, v, err := feed.NewFeedMaker(cache.LocalUtf8, source).MakeFeed()
+		if err == nil {
+			new_feedsource_operator().update(fs)
+			log.Println("feed-update", fs.Name)
+		}
 		v = feedentry_filter(v)
+		log.Println("feedentries-filter", len(v))
 		sc = cache.StatusCode
 	}
 	v, err := new_feedentry_operator().topn_by_feedsource(count*page, count, source)
-	fmt.Println("unread-return(uri, page, count)", source, page, count, len(v), err)
+	log.Println("unread-return(uri, page, count)", source, page, count, len(v), err)
 	return v, err, sc
 }
 
