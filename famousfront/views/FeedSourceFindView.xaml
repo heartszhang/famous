@@ -53,7 +53,7 @@
               <ColumnDefinition/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="1" x:Name="_box"/>
+            <TextBox Grid.Column="1" x:Name="_box" TextElement.FontSize="{StaticResource LittleFourTextSize}"/>
             <Grid  HorizontalAlignment="Right" Grid.Column="1" 
                   Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
                  Width="{Binding ActualHeight,RelativeSource={RelativeSource Self}}">
