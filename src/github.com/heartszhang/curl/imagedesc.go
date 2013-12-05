@@ -8,10 +8,14 @@ import (
 	_ "image/png"
 	"mime"
 	"net/http"
+	"strings"
 )
 
 func DescribeImage(uri string) (mediatype string, width, height int, filelength int64, err error) {
-	resp, err := do_get_timeo(uri, 0, connection_speedup_timeout, nil)
+	c := curler{
+		dial_timeo: connection_speedup_timeout,
+	}
+	resp, err := c.do_get(uri, nil)
 	if err != nil {
 		return
 	}
@@ -28,7 +32,11 @@ func DescribeImage(uri string) (mediatype string, width, height int, filelength 
 	}
 	ct := resp.Header.Get("Content-Type")
 	mediatype, _, _ = mime.ParseMediaType(ct)
-
+	types := strings.Split(mediatype, "/")
+	if types[0] != "image" {
+		err = fmt.Errorf("%v: unknown mime %v", uri, mediatype)
+		return
+	}
 	ic, mediatype, err := image.DecodeConfig(resp.Body)
 	width = ic.Width
 	height = ic.Height
