@@ -35,10 +35,11 @@ namespace famousfront.viewmodels
     {
       IsBusying = true;
       await Task.WhenAll(_.Select(m => DescribeImage(m))).ConfigureAwait(false);
+      await LoadImages();
       IsBusying = false;
     }
     bool _initialized;
-    internal async void LoadImages()
+    internal async Task LoadImages()
     {
       if (_ == null || _.Length == 0)
         return;
@@ -90,7 +91,27 @@ namespace famousfront.viewmodels
       img.local = v.data.origin;
       img.thumbanil = v.data.thumbnail;
     }
+    bool _show_panel;
+    public bool IsShowPanel
+    {
+      get { return _show_panel; }
+      protected set { Set(ref _show_panel, value); }
+    }
+    ICommand _toggle_show_panel;
+    public ICommand ToggleShowPanelCommand
+    {
+      get { return _toggle_show_panel ?? (_toggle_show_panel = toggle_show_panel()); }
+    }
+    ICommand toggle_show_panel()
+    {
+      return new RelayCommand(ExecuteToggleShowPanel);
+    }
+    void ExecuteToggleShowPanel()
+    {
+      IsShowPanel = !IsShowPanel;
+    }
   }
+  /*
   class ImageGalleryViewModel : TaskViewModel
   {
     internal ImageGalleryViewModel(FeedMedia[] imgs) 
@@ -137,4 +158,5 @@ namespace famousfront.viewmodels
       }
     }
   }
+   * */
 }

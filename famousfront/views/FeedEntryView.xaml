@@ -33,14 +33,14 @@
       <Style TargetType="{x:Type FlowDocument}" x:Key="FeedEntryFlowDocumentStyle">
         <Style.Resources>
           <Style TargetType="{x:Type Image}">
-            <Setter Property="MaxWidth" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
-            <Setter Property="MaxHeight" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
+            <Setter Property="Stretch" Value="UniformToFill"/>
           </Style>
           <Style TargetType="{x:Type Figure}">
             <Setter Property="VerticalAnchor" Value="PageTop"/>
             <Setter Property="HorizontalAnchor" Value="PageRight"/>
             <Setter Property="Margin" Value="16,0,0,0"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
           </Style>
         </Style.Resources>
         <Setter Property="IsOptimalParagraphEnabled" Value="True"/>
@@ -48,6 +48,14 @@
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="Block.LineHeight" Value="{Binding Flags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
+      </Style>
+      
+      <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}" x:Key="LightToggleButtonStyle">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="{Binding Path=(params:General.DefaultPadding), RelativeSource={RelativeSource Self}}"/>
       </Style>
     </DataTemplate.Resources>
     <StackPanel x:Name="_root" metro:ApplicationBar.PreventsOpen="true" Background="Transparent">
@@ -62,8 +70,6 @@
         <ContextMenu x:Name="_menu">
           <MenuItem Header="Expand/Unexpand Body" 
                     Command="{Binding ToggleExpandSummaryCommand}" 
-                    IsEnabled="{Binding CanExpand,Mode=OneWay}" 
-                    IsCheckable="{Binding CanExpand,Mode=OneWay}" 
                     IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
           <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
           <MenuItem Header="Unsubscribe this" />
@@ -87,9 +93,6 @@
             <metro:DropDownCommandButton.Submenu>
               <metro:Submenu>
                 <MenuItem Header="Expand/Unexpand Body" 
-                    Command="{Binding ToggleExpandSummaryCommand}" 
-                    IsEnabled="{Binding CanExpand,Mode=OneWay}" 
-                    IsCheckable="{Binding CanExpand,Mode=OneWay}" 
                     IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
                 <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
                 <MenuItem Header="Unsubscribe this" />
@@ -116,11 +119,27 @@
       </Grid>
       <Grid x:Name="_document_room" Margin="0,8"
             Visibility="{Binding HasDocument,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
-        <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
+        <Grid.RowDefinitions>
+          <RowDefinition/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+        <ctrls:ExpandableStackPanel x:Name="_doc" ClipToBounds="True" IsExpanded="{Binding IsDocumentExpanded}">
+          <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
                           IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}"
-                             Padding="0" ContextMenu="{x:Null}"
-                          Background="Transparent" IsDocumentEnabled="True" Focusable="False"
+                             Padding="0" ContextMenu="{x:Null}" VerticalScrollBarVisibility="Disabled"
+                             HorizontalScrollBarVisibility="Disabled"
+                          Background="Transparent" IsDocumentEnabled="True"
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
+        </ctrls:ExpandableStackPanel>
+          <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" Fill="{StaticResource FadeOutBottomBrush}" VerticalAlignment="Bottom" 
+                     Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"/>
+        </Grid>
+        <StackPanel Grid.Row="1" Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
+          <ToggleButton Content="&#x2026; &#x2026;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}"
+                        x:Name="_doc_btn" Style="{StaticResource LightToggleButtonStyle}"/>
+          
+        </StackPanel>
       </Grid>
     </StackPanel>
   </DataTemplate>
