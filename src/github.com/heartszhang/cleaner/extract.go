@@ -55,9 +55,12 @@ func (this html_extractor) CleanFragment(doc *html.Node) (*html.Node, *DocumentS
 // return filepath, *SummaryScore, error
 func (this html_extractor) MakeHtmlReadable(doc *html.Node, url string) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_root(doc, url)
+	of, err := write_file(article, this.temp_dir)
+	log.Println("clean-fragment", of, err)
 
-	//	s2, _ := WriteHtmlFile2(doc)
 	doc1, article := readabilitier_make_readable(article)
+	of, err = write_file(doc1, this.temp_dir)
+	log.Println("make-readable", of, err)
 
 	//	s2, _ = WriteHtmlFile2(doc1)
 	article, images := boiler_clean_by_link_density(article)

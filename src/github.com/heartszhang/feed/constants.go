@@ -113,18 +113,22 @@ type FeedTitle struct {
 	Others []string `json:"second,omitempty" bson:"second,omitempty"` // secondary or alternative titles, not including main
 }
 
+type FeedContent struct {
+	Uri     string      `json:"uri" bson:"uri"`
+	FlowDoc string      `json:"doc,omitempty" bson:"doc,omitempty"`
+	Local   string      `json:"local,omitempty" bson:"local,omitempty"`
+	Words   uint        `json:"words" bson:"words"`
+	Density uint        `json:"density" bson:"density"`
+	Links   uint        `json:"links" bson:"links"`
+	Status  uint64      `json:"status" bson:"status"`
+	Images  []FeedMedia `json:"images" bson:"images"`
+	Medias  []FeedMedia `json:"media" bson:"media"`
+}
 type FeedCache struct {
 	Uri          string `json:"uri" bson:"uri"`
 	Local        string `json:"local" bson:"local"`
 	LastModified string `json:"last_modified,omitempty" bson:"last_modified,omitempty"`
 	ETag         string `json:"etag,omitempty" bson:"etag,omitempty"`
-	//	FullText string      `json:"-" bson:"-"`
-	//	Words   uint   `json:"words" bson:"words"`
-	//	Density uint   `json:"density" bson:"density"`
-	//	Links   uint   `json:"links" bson:"links"`
-	//	Status  uint64 `json:"status" bson:"status"`
-	//	Images   []FeedMedia `json:"images" bson:"images"`
-	//	Medias   []FeedMedia `json:"media" bson:"media"`
 }
 
 type FeedTextStatus struct {

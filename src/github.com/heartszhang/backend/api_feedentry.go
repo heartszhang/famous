@@ -2,9 +2,11 @@ package backend
 
 import (
 	"fmt"
+	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
 	"log"
+	"net/url"
 )
 
 // category
@@ -79,16 +81,14 @@ func feedentry_category_umark(category string, flags uint) error {
 	return err
 }
 
-/*
-func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err error) {
-	c := curl.NewCurl(backend_context.config.DocumentFolder)
+func feedentry_fulldoc(uri string) (v feed.FeedContent, err error) {
+	c := curl.NewCurlerDetail(backend_context.config.DocumentFolder, 0, 0, nil, backend_context.ruler)
 	cache, err := c.GetUtf8(uri)
-	v.Uri = uri
-	v.Local = cache.LocalUtf8
-	//	v.Length = cache.LengthUtf8
 	if err != nil {
 		return v, err
 	}
+	v.Uri = uri
+	v.Local = cache.LocalUtf8
 	if curl.MimeToExt(cache.Mime) != "html" {
 		return v, fmt.Errorf("unsupported mime %v", cache.Mime)
 	}
@@ -97,19 +97,26 @@ func feedentry_fulltext(uri string, entry_uri string) (v feed.FeedContent, err e
 		return v, err
 	}
 	article, sum, err := cleaner.NewExtractor(backend_context.config.CleanFolder).MakeHtmlReadable(doc, uri)
-	v.Images = make([]feed.FeedMedia, len(sum.Images))
-	for idx, img := range sum.Images {
-		v.Images[idx].Uri = img.Uri
-		v.Images[idx].Width = int(img.Width)
-		v.Images[idx].Height = int(img.Height)
-		v.Images[idx].Description = img.Alt
+	if err != nil {
+		return v, err
 	}
+	for _, img := range sum.Images {
+		x := feed.FeedMedia{
+			Uri:         url_resolve(uri, img.Uri),
+			Width:       int(img.Width),
+			Height:      int(img.Height),
+			Description: img.Alt,
+		}
+		v.Images = append(v.Images, x)
+	}
+
 	v.Words = uint(sum.WordCount)
 	v.Links = uint(sum.LinkCount)
 	v.Local, err = html_write_file(article, backend_context.config.DocumentFolder)
+	v.FlowDoc = new_flowdoc_maker().make(article, v.Images)
 	return v, err
 }
-*/
+
 // /feed/entry/media.json/{url}/{entry_id}/{media_type:[0-9]+}
 
 func feedentry_media(url string, entry_id string, media_type uint) (feed.FeedMedia, error) {
@@ -121,4 +128,13 @@ func feedentry_media(url string, entry_id string, media_type uint) (feed.FeedMed
 // id is mongo's _id
 func feedentry_drop(id string) error {
 	return nil
+}
+
+func url_resolve(root, ref string) string {
+	u, e := url.ParseRequestURI(root)
+	u, e = u.Parse(ref)
+	if e == nil {
+		return u.String()
+	}
+	return ref
 }

@@ -57,8 +57,8 @@ func feed_entries_clean_text(entries []feed.FeedEntry) []feed.FeedEntry {
 
 func feedentry_clean_text(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
-	entry.Content, entry.ContentStatus = make_text_readable(entry, entry.Content, false, true)
 	entry.Summary, entry.SummaryStatus = make_text_readable(entry, entry.Summary, true, false)
+	entry.Content, entry.ContentStatus = make_text_readable(entry, entry.Content, false, true)
 	// sum_empty := entry.SummaryStatus.Status&feed.Feed_status_content_empty != 0
 	con_empty := entry.ContentStatus.Status&feed.Feed_status_content_empty != 0
 	if !con_empty {
@@ -82,11 +82,17 @@ func make_text_readable(entry *feed.FeedEntry, txt string, trans, insimg bool) (
 	if trans {
 		txt = markhtml.TransferText(txt)
 	}
-
+	redirector := func(uri string) string {
+		return redirect_thumbnail(url_resolve(entry.Uri, uri))
+	}
+	imgurl_maker := func(uri string) string {
+		u := url_resolve(entry.Uri, uri)
+		return imageurl_from_video(u)
+	}
 	frag, _ := html_create_fragment(txt)
 	frag, score, _ := cleaner.NewExtractor(backend_context.config.CleanFolder).MakeFragmentReadable(frag)
-	entry.Images = append_unique(entry.Images, feedmedias_from_docsummary(score.Images, redirect_thumbnail)...)
-	entry.Images = append_unique(entry.Images, feedmedias_from_docsummary(score.Medias, imageurl_from_video)...)
+	entry.Images = append_unique(entry.Images, feedmedias_from_docsummary(score.Images, redirector)...)
+	entry.Images = append_unique(entry.Images, feedmedias_from_docsummary(score.Medias, imgurl_maker)...)
 
 	entry.Videos = append_unique(entry.Videos, feedmedias_from_docsummary(score.Medias, func(o string) string { return o })...)
 	status.WordCount = score.WordCount

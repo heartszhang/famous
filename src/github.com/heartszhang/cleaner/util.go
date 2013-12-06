@@ -138,6 +138,12 @@ func node_has_children(this *html.Node) bool {
 	return this.FirstChild != nil
 }
 
+func node_set_attribute(n *html.Node, name, val string) {
+	v := node_get_attribute(n, name)
+	if v == "" {
+		n.Attr = append(n.Attr, html.Attribute{Key: name, Val: val})
+	}
+}
 func node_get_attribute(n *html.Node, name string) string {
 	for _, a := range n.Attr {
 		if a.Key == name {
@@ -403,13 +409,22 @@ func node_is_in_a(n *html.Node) bool {
 	return false
 }
 
-/*
-func node_clear_children(a *html.Node) {
-	for a.FirstChild != nil {
-		a.RemoveChild(a.FirstChild)
+var (
+	width_exp  = regexp.MustCompile(`width:\s*(\d+)`) // px, %, pt will be ignored
+	height_exp = regexp.MustCompile(`height:\s*(\d+)`)
+)
+
+func img_extract_dim_from_style(img *html.Node) {
+	st := node_get_attribute(img, "style")
+	x := width_exp.FindStringSubmatch(st)
+	if len(x) == 2 {
+		node_set_attribute(img, "width", x[1])
+	}
+	x = height_exp.FindStringSubmatch(st)
+	if len(x) == 2 {
+		node_set_attribute(img, "height", x[1])
 	}
 }
-*/
 func trim_display_none(n *html.Node) {
 	st := node_get_attribute(n, "style")
 	if strings.Contains(st, "display") && (strings.Contains(st, "none")) {

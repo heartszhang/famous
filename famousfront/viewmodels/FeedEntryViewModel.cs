@@ -6,7 +6,7 @@ using famousfront.utils;
 using GalaSoft.MvvmLight.Command;
 namespace famousfront.viewmodels
 {
-  class FeedEntryViewModel : ViewModelBase
+  class FeedEntryViewModel : TaskViewModel
   {
     static readonly DateTime Utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
     readonly FeedEntry _ = new FeedEntry();
@@ -119,11 +119,35 @@ namespace famousfront.viewmodels
       get { return _expanded; }
       protected set { Set(ref _expanded, value); }
     }
+    int _external_doc_status;
     private void ExecuteToggleExpandSummary()
     {
+      if (_external_doc_status == 0)
+      {
+        _external_doc_status = 0;
+        LoadExternalDoc();
+        return;
+      }
       Summary = _.content;
       IsExpanded = !IsExpanded;
     }
-
+    async void LoadExternalDoc()
+    {
+      IsBusying = true;
+      var rel = "/api/feed_entry/fulldoc.json?uri=" + Uri.EscapeDataString(_.uri);
+      var v = await HttpClientUtils.Get<FeedContent>(ServiceLocator.BackendPath(rel));
+      IsBusying = false;
+      if (v.code != 0)
+      {
+        Reason = v.reason;
+        MessengerInstance.Send(new BackendError() { code = v.code, reason = v.reason });
+        _external_doc_status = 0;
+        return;
+      }
+      _external_doc_status = 2;
+      _.content = v.data.doc;
+      Summary = v.data.doc;
+      IsExpanded = !IsExpanded;
+    }
   }
 }

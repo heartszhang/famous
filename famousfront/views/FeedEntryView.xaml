@@ -122,6 +122,11 @@
           </ctrls:ExpandableStackPanel>
           <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" Fill="{StaticResource FadeOutBottomBrush}" VerticalAlignment="Bottom" 
                      Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"/>
+          <Grid Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
+                VerticalAlignment="Bottom">
+            <metro:ProgressBar Value="100"
+            State="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToBusyIndicatorConverter}}"/>
+          </Grid>
         </Grid>
         <StackPanel Grid.Row="1" Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
           <ToggleButton Content="&#x2026; &#x2026;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}" HorizontalAlignment="Center"

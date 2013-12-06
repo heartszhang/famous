@@ -11,7 +11,7 @@ func init() {
 	http.HandleFunc("/api/feed_entry/unread.json", webapi_feedentry_unread)
 	http.HandleFunc("/api/feed_entry/mark.json", webapi_feedentry_mark)
 	http.HandleFunc("/api/feed_entry/umark.json", webapi_feedentry_umark)
-	//	http.HandleFunc("/api/feed_entry/full_text.json", webapi_feedentry_fulltext)
+	http.HandleFunc("/api/feed_entry/fulldoc.json", webapi_feedentry_fulldoc)
 	http.HandleFunc("/api/feed_entry/media.json", webapi_feedentry_media)
 	http.HandleFunc("/api/feed_entry/drop.json", webapi_feedentry_drop)
 	// same as feed_entry/unread
@@ -146,20 +146,18 @@ func webapi_feedentry_umark(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
 // uri: /feed_entry/full_text.json/{entry_uri}
-func webapi_feedentry_fulltext(w http.ResponseWriter, r *http.Request) {
-	uri := r.URL.Query().Get("uri")
-	entry_uri := r.URL.Query().Get("entry_uri")
-	log.Println("feed-entry-fullt", entry_uri)
-	ff, err := feedentry_fulltext(uri, entry_uri)
+func webapi_feedentry_fulldoc(w http.ResponseWriter, r *http.Request) {
+	uri := r.URL.Query().Get("uri") // web-url
+	log.Println("feed-entry-fulldocument", uri)
+	ff, err := feedentry_fulldoc(uri)
 	if err != nil {
 		webapi_write_error(w, err)
 	} else {
 		webapi_write_as_json(w, ff)
 	}
 }
-*/
+
 // uri: /feed_entry/media.json/{entry_id}/{url}/{media_type:[0-9]+}
 func webapi_feedentry_media(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Query().Get("uri")

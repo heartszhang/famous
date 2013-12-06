@@ -99,20 +99,32 @@ func html_clean_root(root *html.Node, uribase string) *html.Node {
 	if cleaner.head != nil {
 		cleaner.head.Parent.RemoveChild(cleaner.head)
 	}
-
+	var (
+		h1l = len(cleaner.header1s)
+		h2l = len(cleaner.header2s)
+		h3l = len(cleaner.header3s)
+		h4l = len(cleaner.header4s)
+	)
+	alter := false
 	//文档中如果只有一个h1,通常这个h1所在的div就是文档内容
-	if len(cleaner.header1s) == 1 { // only one h1
+	if h1l == 1 { // only one h1
 		ab := find_article_via_header_i(cleaner.header1s[0])
-		cleaner.try_update_article(ab)
+		alter = cleaner.try_update_article(ab)
 	}
 	//如果文档中只有一个h2，这时又没有h1，h2就是其中的标题，所在的div就是文档内容
-	if len(cleaner.header1s) == 0 && len(cleaner.header2s) == 1 {
+	if h1l == 0 && h2l == 1 {
 		ab := find_article_via_header_i(cleaner.header2s[0])
-		cleaner.try_update_article(ab)
+		alter = alter || cleaner.try_update_article(ab)
 	}
-
+	if alter == false && h3l == 1 {
+		ab := find_article_via_header_i(cleaner.header3s[0])
+		alter = alter || cleaner.try_update_article(ab)
+	}
+	if alter == false && h4l == 1 {
+		ab := find_article_via_header_i(cleaner.header4s[0])
+		alter = alter || cleaner.try_update_article(ab)
+	}
 	if cleaner.article == nil {
-
 		cleaner.article = &html.Node{Type: html.ElementNode,
 			DataAtom: atom.Body,
 			Data:     "body"}
@@ -211,6 +223,7 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 				case "option":
 					child.Data = "a"
 				case "img":
+					img_extract_dim_from_style(child)
 					drop = trim_small_image(child)
 					if !drop {
 						drop = trim_invisible_image(child)
@@ -251,16 +264,17 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 	return
 }
 
-func (this *html_cleaner) try_update_article(candi *html.Node) {
+func (this *html_cleaner) try_update_article(candi *html.Node) bool {
 	if candi == nil {
-		return
+		return false
 	}
 	sc := new_boilerpipe_score(candi)
 	per := sc.words * 100 / (this.text_words + 1)
 	if sc.words < wordwrap || per < w_current_line_l {
-		return
+		return false
 	}
 	this.article = candi
+	return true
 }
 
 const (
