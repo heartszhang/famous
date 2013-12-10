@@ -6,7 +6,7 @@
   xmlns:metro="http://schemas.codeplex.com/elysium"
   xmlns:params="http://schemas.codeplex.com/elysium/params"
   mc:Ignorable="d" x:Class="famousfront.MainWindow"
-  Background="{DynamicResource BackgroundBrush}"
+  Background="{StaticResource BackgroundBrush}"
   Icon="title-32.png"
   WindowStartupLocation="CenterScreen"
   DataContext="{StaticResource _locator}"
@@ -51,10 +51,10 @@
   </metro:Window.ApplicationBar>
    -->
   <Grid
-  params:General.TextFontSize="{StaticResource LittleFiveTextSize}"
-  params:General.ContentFontSize="{StaticResource FiveTextSize}"
-  params:General.TitleFontSize="{StaticResource LittleThreeTextSize}"
-  params:General.HeaderFontSize="{StaticResource ThreeTextSize}"    >
+  params:General.TextFontSize="{StaticResource FiveTextSize}"
+  params:General.ContentFontSize="{StaticResource LittleFourTextSize}"
+  params:General.TitleFontSize="{StaticResource ThreeTextSize}"
+  params:General.HeaderFontSize="{StaticResource LittleTwoTextSize}"    >
     <ContentPresenter x:Name="_content"/>
     <!-- a event stack should be here-->
   </Grid>

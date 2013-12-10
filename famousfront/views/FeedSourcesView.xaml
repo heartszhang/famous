@@ -20,8 +20,7 @@
 		<Grid >
       <ListBox x:Name="_sources" ItemsSource="{Binding Sources}"
                SelectedItem="{Binding Selected,Mode=TwoWay}"
-               Style="{StaticResource FeedSourcesListStyle}"
-               ItemContainerStyle="{StaticResource FeedSourceItemStyle}"/>
+               Style="{StaticResource FeedSourcesListStyle}"/>
 		</Grid>
 	</DataTemplate>
 </ResourceDictionary>

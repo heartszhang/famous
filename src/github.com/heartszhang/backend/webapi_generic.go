@@ -1,9 +1,9 @@
 package backend
 
 import (
+	"log"
 	"net/http"
 	"os"
-	"log"
 )
 
 func init() {
@@ -11,9 +11,9 @@ func init() {
 	http.HandleFunc("/", webapi_home)
 }
 
-
 // uri: /exit.json
 func webapi_exit(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
 	webapi_write_as_json(w, r.URL)
 
 	f, canflush := w.(http.Flusher)

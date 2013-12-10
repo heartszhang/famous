@@ -31,19 +31,19 @@
         <Style.Resources>
           <Style TargetType="{x:Type Image}">
             <Setter Property="Stretch" Value="UniformToFill"/>
+            <Setter Property="StretchDirection" Value="DownOnly"/>
           </Style>
           <Style TargetType="{x:Type Figure}">
             <Setter Property="VerticalAnchor" Value="PageTop"/>
-            <Setter Property="HorizontalAnchor" Value="PageRight"/>
-            <Setter Property="Margin" Value="16,0,0,0"/>
+            <Setter Property="HorizontalAnchor" Value="PageLeft"/>
+            <Setter Property="Margin" Value="0,0,16,0"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Width" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
           </Style>
         </Style.Resources>
+        <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
         <Setter Property="IsOptimalParagraphEnabled" Value="True"/>
         <Setter Property="IsHyphenationEnabled" Value="True"/>
-        <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="Block.LineHeight" Value="{Binding Flags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
       </Style>
       
@@ -95,7 +95,7 @@
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid TextElement.Foreground="{StaticResource PaleBrush}">
-          <TextBlock VerticalAlignment="Center" Text="{Binding PubDate,Mode=OneWay}" />
+          <TextBlock VerticalAlignment="Center" Text="{Binding PubDate,Mode=OneWay, StringFormat=D, ConverterCulture=zh-CN}" />
         </Grid>
         <StackPanel Grid.Column="1"
           Orientation="Horizontal" params:General.ContentFontSize="{StaticResource LittleFiveTextSize}">
@@ -116,12 +116,14 @@
             <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
                           IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}"
                              Padding="0" ContextMenu="{x:Null}" VerticalScrollBarVisibility="Disabled"
-                             HorizontalScrollBarVisibility="Disabled"
+                             HorizontalScrollBarVisibility="Disabled" FontFamily="{StaticResource LightFont}"
                           Background="Transparent" IsDocumentEnabled="True"
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
           </ctrls:ExpandableStackPanel>
-          <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" Fill="{StaticResource FadeOutBottomBrush}" VerticalAlignment="Bottom" 
+          <Grid VerticalAlignment="Bottom" Focusable="False" Visibility="{Binding IsDocumentExpanded,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=false}">
+          <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}"  Fill="{StaticResource FadeOutBottomBrush}" 
                      Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"/>
+          </Grid>
           <Grid Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
                 VerticalAlignment="Bottom">
             <metro:ProgressBar Value="100"
@@ -129,7 +131,7 @@
           </Grid>
         </Grid>
         <StackPanel Grid.Row="1" Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
-          <ToggleButton Content="&#x2026; &#x2026;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}" HorizontalAlignment="Center"
+          <ToggleButton Content="&#x00B7;&#x00B7;&#x00B7; &#x00B7;&#x00B7;&#x00B7;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}" HorizontalAlignment="Center"
                         x:Name="_doc_btn" Style="{StaticResource LightToggleButtonStyle}"/>
 
         </StackPanel>

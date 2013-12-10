@@ -22,7 +22,12 @@ func NewThumbnail(localfile, tmp string, width, height uint) (filepath, mediatyp
 	}
 	w = img.Bounds().Max.X
 	h = img.Bounds().Max.Y
-
+	if width > 0 && uint(w) < width {
+		width = uint(w)
+	}
+	if height > 0 && uint(h) < height {
+		height = uint(h)
+	}
 	imgnew := resize.Resize(width, height, img, resize.MitchellNetravali)
 	mediatype = "image/jpeg"
 	of, err := ioutil.TempFile(tmp, "jpeg.")

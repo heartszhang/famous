@@ -13,11 +13,12 @@ namespace famousfront.utils
     {
       return t._;
     }
+
     public override string ToString()
     {
       var p = _;
       var now = DateTime.Now;
-      var v = p.ToString("D");
+      var v = p.ToString("D", new System.Globalization.CultureInfo("zh-cn"));
       if (p.Year != now.Year)
         return v;
       var diff = (now - p).Days;

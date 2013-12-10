@@ -10,102 +10,30 @@
   params:Design.Theme="Light"      
   mc:Ignorable="d" d:DesignHeight="300" Background="white">
   <UserControl.Resources>
-    <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
-      <Style.BasedOn>
-        <Style TargetType="{x:Type ButtonBase}">
-          <Setter Property="Background" Value="#FF017BCD"/>
-          <Setter Property="BorderBrush" Value="#FF017BCD"/>
-          <Setter Property="BorderThickness" Value="{Binding (params:General.DefaultThickness), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-          <Setter Property="Foreground" Value="White"/>
-          <Setter Property="FontSize" Value="{Binding (params:General.ContentFontSize), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-          <Setter Property="FontStretch" Value="Normal"/>
-          <Setter Property="FontStyle" Value="Normal"/>
-          <Setter Property="FontWeight" Value="SemiBold"/>
-          <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
-          <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
-          <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled"/>
-          <Setter Property="Focusable" Value="True"/>
-          <Setter Property="FocusVisualStyle">
-            <Setter.Value>
-              <Style>
-                <Setter Property="Control.Template">
-                  <Setter.Value>
-                    <ControlTemplate>
-                      <Rectangle RenderOptions.EdgeMode="Aliased" Margin="{TemplateBinding params:General.DefaultPadding}" Stroke="Black" StrokeThickness="{TemplateBinding params:General.DefaultThicknessValue}" StrokeDashArray="2 1"/>
-                    </ControlTemplate>
-                  </Setter.Value>
-                </Setter>
-              </Style>
-            </Setter.Value>
-          </Setter>
-          <Setter Property="HorizontalContentAlignment" Value="Center"/>
-          <Setter Property="VerticalContentAlignment" Value="Center"/>
-          <Setter Property="Padding" Value="{Binding (params:General.BoldPadding), Mode=OneWay, RelativeSource={RelativeSource Self}}"/>
-          <Setter Property="MinWidth" Value="70"/>
-          <Setter Property="SnapsToDevicePixels" Value="True"/>
-          <Setter Property="Template">
-            <Setter.Value>
-              <ControlTemplate TargetType="{x:Type ButtonBase}">
-                <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" RenderOptions.ClearTypeHint="{TemplateBinding RenderOptions.ClearTypeHint}" TextElement.Foreground="{TemplateBinding Foreground}" TextElement.FontWeight="{TemplateBinding FontWeight}" TextElement.FontStyle="{TemplateBinding FontStyle}" TextElement.FontStretch="{TemplateBinding FontStretch}" TextElement.FontSize="{TemplateBinding FontSize}" TextElement.FontFamily="{TemplateBinding FontFamily}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" TextOptions.TextRenderingMode="{TemplateBinding TextOptions.TextRenderingMode}" TextOptions.TextFormattingMode="{TemplateBinding TextOptions.TextFormattingMode}">
-                  <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                </Border>
-              </ControlTemplate>
-            </Setter.Value>
-          </Setter>
-          <Style.Triggers>
-            <DataTrigger>
-              <DataTrigger.Binding>
-                <Binding ConverterParameter="18" Mode="OneWay" Path="FontSize" RelativeSource="{RelativeSource Self}">
-                  <Binding.Converter>
-                    <metro:IsGreaterThanConverter/>
-                  </Binding.Converter>
-                </Binding>
-              </DataTrigger.Binding>
-              <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
-            </DataTrigger>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter Property="Background" Value="Black"/>
-              <Setter Property="BorderBrush" Value="Black"/>
-              <Setter Property="Foreground" Value="White"/>
-            </Trigger>
-            <Trigger Property="IsPressed" Value="True">
-              <Setter Property="Background" Value="#FF4D4D4D"/>
-              <Setter Property="BorderBrush" Value="#FF4D4D4D"/>
-              <Setter Property="Foreground" Value="White"/>
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="False">
-              <Setter Property="Background" Value="#FFB8B5B2"/>
-              <Setter Property="BorderBrush" Value="#FFB8B5B2"/>
-              <Setter Property="Foreground" Value="White"/>
-            </Trigger>
-          </Style.Triggers>
-        </Style>
-      </Style.BasedOn>
-      <Style.Triggers>
-        <Trigger Property="IsChecked" Value="True">
-          <Setter Property="Background" Value="#FF4D4D4D"/>
-          <Setter Property="BorderBrush" Value="#FF4D4D4D"/>
-          <Setter Property="Foreground" Value="White"/>
-        </Trigger>
-      </Style.Triggers>
+    <Style x:Key="GroupItemStyle1" TargetType="{x:Type GroupItem}">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="{x:Type GroupItem}">
+            <StackPanel>
+              <ContentPresenter x:Name="PART_Header"/>
+              <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0"/>
+            </StackPanel>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
     </Style>
   </UserControl.Resources>
   <Grid x:Name="LayoutRoot">
-    <StackPanel>
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="*"/>
-          <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <TextBlock Text="asdfasdfasdfsadfasfsadfsadfasdfsadfsadfsafs高低，都是人民的勤务员，我们所做的一切，都是为人民服务高低，都是人民的勤务员，我们所做的一切，都是为人民服务高低，都是人民的勤务员，我们所做的一切，都是为人民服务高低，都是人民的勤务员，我们所做的一切，都是为人民服务高低，都是人民的勤务员，我们所做的一切，都是为人民服务" TextWrapping="Wrap"/>
-        <StackPanel Grid.Row="0">
-          <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" Fill="{StaticResource FadeOutBottomBrush}"/>
-          <ToggleButton Content="&#xE015;&#xE014;" TextElement.FontFamily="Segoe UI Symbol" Background="White"
-                      Foreground="#FF017BCD" BorderBrush="White" BorderThickness="0" Style="{StaticResource ToggleButtonStyle1}"/>
-
-        </StackPanel>
-        <TextBlock Text="&#xE015;&#xE014;" Grid.Row="1" FontSize="12pt" TextAlignment="Center" FontFamily="Segoe UI Symbol"/>
+    <StackPanel TextElement.FontFamily="{StaticResource LightFont}">
+      <Grid x:Name="_source">
+        <TextBlock x:Name="_name" Text="News Of Google"/>
       </Grid>
+      <Grid x:Name="_entries">
+        <ItemsControl/>
+      </Grid>
+      <GroupItem Style="{DynamicResource GroupItemStyle1}">
+        <TextBlock Text="新华网曼谷12月9日电 （记者常天童张春晓）泰国总理英拉9日上午发表电视讲话，宣布解散国会下议院，并将迅速确定重新大选的日期。 英拉在讲话中表示，解散国会是为了在危机时刻将权利还给人民。英拉希望所有党派都能 ..." TextWrapping="Wrap" FontSize="{StaticResource FourTextSize}"/>
+      </GroupItem>
     </StackPanel>
   </Grid>
 </UserControl>

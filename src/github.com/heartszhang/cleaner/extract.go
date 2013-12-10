@@ -25,12 +25,12 @@ func NewExtractor(tmpdir string) Extractor {
 func (this html_extractor) MakeFragmentReadable(doc *html.Node) (*html.Node, *DocumentSummary, error) {
 	//清理确定无疑的非正文内容
 	article := html_clean_fragment(doc)
-	of, err := write_file(doc, this.temp_dir)
-	//	log.Println("clean-fragment", of, err)
-
+	return this.make_article_readable(article)
+}
+func (this html_extractor) make_article_readable(article *html.Node) (*html.Node, *DocumentSummary, error) {
 	//查找文档正文节点，并将其平面化
 	doc1, article := readabilitier_make_readable(article)
-	of, err = write_file(doc1, this.temp_dir)
+	of, err := write_file(doc1, this.temp_dir)
 	log.Println("make-readable", of, err)
 
 	// 去除正文中的广告群
@@ -43,8 +43,8 @@ func (this html_extractor) MakeFragmentReadable(doc *html.Node) (*html.Node, *Do
 	//	of, err = write_file(doc1, this.temp_dir)
 	//	log.Println("clean-form", of, err)
 	return article, new_docsummary(doc1, images), nil
-}
 
+}
 func (this html_extractor) CleanFragment(doc *html.Node) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_fragment(doc)
 	doc1, article := readabilitier_make_readable(article)
@@ -55,20 +55,9 @@ func (this html_extractor) CleanFragment(doc *html.Node) (*html.Node, *DocumentS
 // return filepath, *SummaryScore, error
 func (this html_extractor) MakeHtmlReadable(doc *html.Node, url string) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_root(doc, url)
-	of, err := write_file(article, this.temp_dir)
-	log.Println("clean-fragment", of, err)
-
-	doc1, article := readabilitier_make_readable(article)
-	of, err = write_file(doc1, this.temp_dir)
-	log.Println("make-readable", of, err)
-
-	//	s2, _ = WriteHtmlFile2(doc1)
-	article, images := boiler_clean_by_link_density(article)
-
-	//	h4ml, _ := WriteHtmlFile2(doc1)
-	article = boiler_clean_form_prefix(article)
-	//	h5ml, err := WriteHtmlFile2(doc1)
-	return article, new_docsummary(doc1, images), nil
+	n, _ := write_file(article, "")
+	log.Println("1-step", n)
+	return this.make_article_readable(article)
 }
 
 func write_file(doc *html.Node, temp string) (string, error) {

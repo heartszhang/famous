@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <LinearGradientBrush x:Key="FadeOutBottomBrush" EndPoint="0,1" StartPoint="0,0" >
     <GradientStop Color="Transparent"/>
-    <GradientStop Color="#7FFFFFFF" Offset="1"/>
+    <GradientStop Color="#FFFFFFFF" Offset="1"/>
   </LinearGradientBrush>
   <Geometry x:Key="PathDataExpand">F1 M 62.0945,90.0937L 32.7611,119.427L 46.6667,133.333L 6.10352e-005,133.333L 6.10352e-005,86.6666L 13.9057,100.573L 43.239,71.2396L 62.0945,90.0937 Z M 43.2389,62.0944L 13.9056,32.7612L 0,46.6668L 0,0.000106812L 46.6667,0.000106812L 32.7611,13.9057L 62.0944,43.239L 43.2389,62.0944 Z M 90.0938,71.2396L 119.427,100.573L 133.333,86.6667L 133.333,133.333L 86.6667,133.333L 100.573,119.427L 71.2396,90.0938L 90.0938,71.2396 Z M 86.6667,1.52588e-005L 133.333,1.52588e-005L 133.333,46.6667L 119.427,32.7611L 90.0938,62.0944L 71.2396,43.239L 100.573,13.9056L 86.6667,1.52588e-005 Z</Geometry>
   <Geometry x:Key="PathDataLeftArrow">F1 M 328.101,80.0001L 80,328.101L 328.101,576.203</Geometry>
@@ -13,10 +13,13 @@
 
   <Geometry x:Key="PathSettings">F1 M 0,16.4775L 0,1.10252C 0,0.712509 0.180008,0.375015 0.539993,0.0900116C 0.930008,-0.124985 1.3125,-0.154984 1.6875,1.52588e-005L 10.8,3.65251L 19.9575,1.52588e-005C 20.3475,-0.154984 20.74,-0.124985 21.135,0.0900116C 21.445,0.340012 21.6,0.677505 21.6,1.10252L 21.6,16.4775C 21.6,16.9925 21.3575,17.36 20.8725,17.58L 11.295,21.42C 11.17,21.45 11.0825,21.4825 11.0325,21.5175L 10.8,21.5175L 10.6125,21.5175L 10.38,21.42L 0.772507,17.58C 0.257507,17.36 0,16.9925 0,16.4775 Z M 1.92,15.9825L 9.60002,19.05L 9.60002,5.62502L 1.92,2.55003L 1.92,15.9825 Z M 3.375,13.1475L 3.375,11.5275L 8.22002,13.455L 8.22002,15.0675L 3.375,13.1475 Z M 3.375,8.15251L 3.375,6.54002L 8.22002,8.46001L 8.22002,10.08L 3.375,8.15251 Z M 12,19.05L 19.68,15.9825L 19.68,2.55003L 12,5.62502L 12,19.05 Z M 13.455,15.0675L 13.455,13.455L 18.3,11.5275L 18.3,13.1475L 13.455,15.0675 Z M 13.455,10.08L 13.455,8.46001L 18.3,6.54002L 18.3,8.15251L 13.455,10.08 Z</Geometry>
 
-  <Style TargetType="{x:Type ListBox}" x:Key="ListBasicStyle" BasedOn="{StaticResource {x:Type ListBox}}" >
+  <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource {x:Type ListBox}}" >
     <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
     <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
     <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+    <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
+    <Setter Property="Background" Value="Transparent"/>
   </Style>
 </ResourceDictionary>

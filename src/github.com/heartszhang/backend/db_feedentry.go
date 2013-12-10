@@ -124,7 +124,7 @@ func (this feedentry_op) unread_count_categories() (v []feedentry_unreadcount, e
 func (this feedentry_op) topn(skip, limit int) ([]feed.FeedEntry, error) {
 	rtn := make([]feed.FeedEntry, 0)
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"readed": false}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
+		return coll.Find(bson.M{"readed": false}).Sort("-pubdate").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
@@ -133,7 +133,7 @@ func (this feedentry_op) topn_by_feedsource(skip, limit int, source string) ([]f
 	log.Println("topn-source", source, skip, limit)
 	var rtn []feed.FeedEntry
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"readed": false, "src": source}).Sort("-created").Skip(skip).Limit(limit).All(&rtn)
+		return coll.Find(bson.M{"readed": false, "src": source}).Sort("-pubdate").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
@@ -142,7 +142,7 @@ func (this feedentry_op) topn_by_category(skip, limit int, tag string) ([]feed.F
 	rtn := make([]feed.FeedEntry, 0)
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false, "tags": tag}).
-			Sort("-created").
+			Sort("-pubdate").
 			Skip(skip).
 			Limit(limit).
 			All(rtn)

@@ -43,16 +43,17 @@ func unixtime_unmarshal(data []byte, format_quoted bool) (int64, error) {
 		return v, nil
 	}
 	formats := []string{
-		time.RFC822Z,
-		time.ANSIC,
-		time.RFC850,
-		time.UnixDate,
-		time.RFC3339,
-		time.RFC3339Nano,
-		time.RFC822,
-		time.RFC1123,
-		time.RFC1123Z,
-		time.RubyDate,
+		time.RFC822Z,                      // 02 Jan 06 15:04 -0700
+		time.ANSIC,                        // Mon Jan _2 15:04:05 2006
+		time.RFC850,                       // Monday, 02-Jan-06 15:04:05 MST
+		time.UnixDate,                     // Mon Jan _2 15:04:05 MST 2006
+		time.RFC3339,                      // 2006-01-02T15:04:05Z07:00
+		time.RFC3339Nano,                  // 2006-01-02T15:04:05Z07:00
+		time.RFC822,                       // 02 Jan 06 15:04 MST
+		time.RFC1123,                      // Mon, 02 Jan 2006 15:04:05 MST
+		time.RFC1123Z,                     // Mon, 02 Jan 2006 15:04:05 -0700
+		time.RubyDate,                     // Mon Jan 02 15:04:05 -0700 2006
+		`Mon, _2 Jan 2006 15:04:05 -0700`, // like rfc1123z
 	}
 	for _, format := range formats {
 		if format_quoted {
@@ -63,5 +64,5 @@ func unixtime_unmarshal(data []byte, format_quoted bool) (int64, error) {
 			return t.Unix(), nil
 		}
 	}
-	return v, fmt.Errorf("unrecognized timeformat")
+	return v, fmt.Errorf(str + ": unrecognized timeformat")
 }

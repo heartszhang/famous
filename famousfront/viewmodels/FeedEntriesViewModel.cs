@@ -12,13 +12,13 @@ using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntr
   {
     readonly int _page;
     readonly FeedSourceViewModel _parent;
-    readonly FeedEntries _entries = new FeedEntries();
     internal FeedEntriesViewModel(FeedSourceViewModel p)
     {
       _page = p.Page;
       _parent = p;
       Reload();
     }
+    readonly FeedEntries _entries = new FeedEntries();
     ICollectionView _grouped_entries = null;
     public ICollectionView Entries { get { return _grouped_entries ?? (_grouped_entries = grouped_entries()); } }
 

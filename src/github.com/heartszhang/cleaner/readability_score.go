@@ -30,17 +30,34 @@ func new_readability_score(n *html.Node) *readability_score {
 }
 
 var (
-	negative *regexp.Regexp = regexp.MustCompile(`article|body|content|entry|hentry|main|page|pagination|post|text|blog|story`)
+	positive *regexp.Regexp = regexp.MustCompile(`article|body|content|entry|hentry|main|page|pagination|post|text|blog|story`)
 
-	positive *regexp.Regexp = regexp.MustCompile(`(?i)combx|comment|com-|contact|foot|footer|footnote|masthead|media|meta|outbrain|promo|related|scroll|shoutbox|sidebar|sponsor|shopping|tags|tool|widget`)
+	negative *regexp.Regexp = regexp.MustCompile(`(?i)combx|comment|com-|contact|foot|footer|footnote|masthead|media|meta|outbrain|promo|related|scroll|shoutbox|sidebar|sponsor|shopping|tags|tool|widget`)
 
 	extraneous *regexp.Regexp = regexp.MustCompile(`(?i)  print|archive|comment|discuss|e[\-]?mail|share|reply|all|login|sign|single`)
 )
 
+func get_class_weight(n *html.Node, attname string) int {
+	c := node_get_attribute(n, attname)
+
+	weight := 0
+	if negative.MatchString(c) {
+		weight -= 25
+	}
+	if positive.MatchString(c) {
+		weight += 25
+	}
+	return weight
+}
 func (score *readability_score) String() string {
-	return fmt.Sprintf("%v, score: %v, linkd: %v, words: %v, lines: %v, commas: %v, imgs: %v, a: %v, aimg: %v",
+	txt := score.inner_text
+	if len(txt) > 30 {
+		txt = txt[:30]
+	}
+
+	return fmt.Sprintf("%v, score: %v, linkd: %v, words: %v, lines: %v, commas: %v, imgs: %v, a: %v, aimg: %v, txt:%v",
 		score.element.Data, score.content_score,
 		score.link_density(),
 		score.words, score.lines(), score.commas,
-		score.imgs, score.anchors, score.anchor_imgs)
+		score.imgs, score.anchors, score.anchor_imgs, txt)
 }

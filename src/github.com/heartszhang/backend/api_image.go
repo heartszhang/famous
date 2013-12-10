@@ -19,7 +19,7 @@ func image_description(uri string) (feed.FeedImage, error) {
 	if err == nil {
 		return v, nil
 	}
-	c := curl.NewCurl(backend_context.config.ImageFolder)
+	c := curl.NewCurlerDetail(backend_context.config.ImageFolder, 0, 0, nil, backend_context.ruler)
 	cache, err := c.Get(uri)
 
 	v.Mime = cache.Mime

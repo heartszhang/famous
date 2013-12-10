@@ -185,9 +185,8 @@ func foreach_child(n *html.Node, dof func(*html.Node)) {
 }
 
 func string_count_words(txt string) (tokens int, words int, commas int) {
-
 	for _, c := range txt {
-		if unicode.IsPunct(c) {
+		if unicode.IsPunct(c) || strings.ContainsRune(zh_stop_chars, c) {
 			commas++
 		}
 	}

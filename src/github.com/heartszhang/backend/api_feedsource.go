@@ -45,7 +45,7 @@ func feedsource_subscribe(uri string, source_type uint) (v feed.FeedSource, err 
 	fso := new_feedsource_operator()
 	fs, err := fso.find(uri)
 	if err == nil {
-		return *fs, nil
+		return fs, nil
 	}
 	v, _, err = feed_fetch(uri)
 	v.Type = source_type
@@ -71,6 +71,7 @@ func feedsource_show(uri string) (FeedEntity, error) {
 	if err != nil {
 		return FeedEntity{}, err
 	}
+	entries = feedentry_filter(entries)
 	return FeedEntity{fs, entries}, err
 }
 

@@ -10,6 +10,7 @@
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntriesViewModel}" d:IsDesignTimeCreatable="false">
     <DataTemplate.Resources>
+      <!--
       <Style TargetType="{x:Type ListBox}" x:Key="FeedEntriesListStyle" BasedOn="{StaticResource {x:Type ListBox}}" >
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -19,9 +20,11 @@
         <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
         <Setter Property="Background" Value="Transparent"/>
       </Style>
+      -->
       <Style x:Key="FeedEntryItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">       
-        <Setter Property="Margin" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
+<!--        <Setter Property="Margin" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
         <Setter Property="Padding" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
+        -->
         <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
         <Setter Property="Template">
           <Setter.Value>
@@ -59,10 +62,8 @@
         </Style.Triggers>
       </Style>
     </DataTemplate.Resources>
-    <Grid ><!-- Background="{StaticResource SemiPaleBrush}">-->
-      <ListBox ItemsSource="{Binding Entries}" 
-                     ItemContainerStyle="{StaticResource FeedEntryItemStyle}"
-                     Style="{StaticResource FeedEntriesListStyle}">
+    <Grid><!-- Background="{StaticResource SemiPaleBrush}">-->
+      <ListBox ItemsSource="{Binding Entries}" >
         <i:Interaction.Behaviors>
           <ctrls:ListBoxScrollToTopBehavior />
           <ctrls:ListBoxPreventRequestBringIntoViewBehavior/>
@@ -76,6 +77,22 @@
                            TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource Self}}"/>
               </DataTemplate>
             </GroupStyle.HeaderTemplate>
+            <GroupStyle.ContainerStyle>
+              <Style TargetType="{x:Type GroupItem}">
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                      <StackPanel Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource Self}}">
+                        <ContentPresenter x:Name="PART_Header"/>
+                        <Rectangle StrokeThickness="1" Stroke="{StaticResource SemiPaleBrush}"/>
+                        <ItemsPresenter x:Name="ItemsPresenter" Margin="0"/>
+                      </StackPanel>
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </Style>
+
+            </GroupStyle.ContainerStyle>
           </GroupStyle>
         </ListBox.GroupStyle>
       </ListBox>

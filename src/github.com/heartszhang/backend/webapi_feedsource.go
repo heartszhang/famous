@@ -16,6 +16,7 @@ func init() {
 }
 
 func webapi_feedsource_show(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
 	q := r.URL.Query().Get("q")
 	switch fs, err := feedsource_show(q); err {
 	case nil:
@@ -25,8 +26,9 @@ func webapi_feedsource_show(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func webapi_feedsource_find(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
 	q := r.URL.Query().Get("q")
-	if u, err := url.Parse(q); u.IsAbs() && err == nil {
+	if _, err := url.ParseRequestURI(q); err == nil {
 		webapi_feedsource_show(w, r)
 		return
 	}
@@ -40,8 +42,8 @@ func webapi_feedsource_find(w http.ResponseWriter, r *http.Request) {
 
 // uri: /feed_source/subscribe.json?uri=
 func webapi_feedsource_subscribe(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
-	log.Println("feedsource-sub", uri)
 	source_type := source_type_map(r.URL.Query().Get("source_type"))
 	switch fs, err := feedsource_subscribe(uri, source_type); err {
 	case nil:
@@ -54,6 +56,7 @@ func webapi_feedsource_subscribe(w http.ResponseWriter, r *http.Request) {
 }
 
 func webapi_feedsource_all(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
 	switch fs, err := feedsource_all(); err {
 	case nil:
 		webapi_write_as_json(w, fs)
@@ -65,8 +68,8 @@ func webapi_feedsource_all(w http.ResponseWriter, r *http.Request) {
 
 // uri: /feed_source/unsubscribe.json/{uri}
 func webapi_feedsource_unsubscribe(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
-	log.Println("feed-unsub", uri)
 	err := feedsource_unsubscribe(uri)
 	webapi_write_error(w, err)
 }

@@ -174,19 +174,6 @@ func flatten_block_node(b *html.Node, article *html.Node, flatt bool, class stri
 	}
 }
 
-func get_class_weight(n *html.Node, attname string) int {
-	c := node_get_attribute(n, attname)
-
-	weight := 0
-	if negative.MatchString(c) {
-		weight -= 25
-	}
-	if positive.MatchString(c) {
-		weight += 25
-	}
-	return weight
-}
-
 func (this *readabilitier) String() string {
 	return fmt.Sprint("readerabilitier content:", len(this.content), ", candidates:", len(this.candidates))
 }

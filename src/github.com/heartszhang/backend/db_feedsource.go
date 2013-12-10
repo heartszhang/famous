@@ -83,10 +83,10 @@ func (this feedsource_op) update(f feed.FeedSource) error {
 	})
 }
 
-func (this feedsource_op) find(uri string) (*feed.FeedSource, error) {
-	rtn := new(feed.FeedSource)
+func (this feedsource_op) find(uri string) (feed.FeedSource, error) {
+	rtn := feed.FeedSource{}
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
-		err := coll.Find(bson.M{"uri": uri}).One(rtn)
+		err := coll.Find(bson.M{"uri": uri}).One(&rtn)
 		return err
 	})
 	return rtn, err

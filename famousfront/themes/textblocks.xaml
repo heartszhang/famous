@@ -27,8 +27,7 @@
 
   <Style x:Key="TextBlockHeaderStyle" TargetType="{x:Type TextBlock}">
     <Setter Property="FontSize" Value="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource Self},Mode=OneWay}"/>
-    <Setter Property="FontFamily" Value="{StaticResource BoldFont}"/>
-    <Setter Property="FontWeight" Value="Bold"/>
+    <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
   </Style>
 
   <Style x:Key="TextBlockContentStyle" TargetType="{x:Type TextBlock}">

@@ -130,14 +130,11 @@ func html_clean_root(root *html.Node, uribase string) *html.Node {
 			Data:     "body"}
 		root.AppendChild(cleaner.article)
 	}
+	cleaner.fix_forms() // may alter form to div, so do this before try_catch_phpwind
 	cleaner.try_catch_phpwnd()
-	cleaner.fix_forms()
-
 	cleaner.clean_body()
-
 	cleaner.clean_empty_nodes(cleaner.article)
 	cleaner.clean_attributes(cleaner.article)
-
 	return cleaner.article
 }
 
@@ -213,9 +210,7 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 				case "table":
 					cleaner.tables = append(cleaner.tables, child)
 				case "td":
-					ts := new_boilerpipe_score_omit_table(child, true, true)
-					cleaner.tds = append(cleaner.tds, ts)
-					cleaner.table_words += ts.words
+					fallthrough
 				case "th":
 					ts := new_boilerpipe_score_omit_table(child, true, true)
 					cleaner.tds = append(cleaner.tds, ts)
@@ -515,6 +510,10 @@ func (this *html_cleaner) fix_forms() {
 		pcnt := score.words * 100 / (1 + this.text_words)
 		if pcnt > 33 {
 			form.Data = "div"
+			this.text_words += score.words
+			this.imgs += score.imgs
+			this.anchor_words += score.anchor_words
+			this.links += score.anchors
 		}
 	}
 }

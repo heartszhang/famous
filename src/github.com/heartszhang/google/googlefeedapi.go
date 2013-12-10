@@ -7,6 +7,7 @@ import (
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/oauth2"
+	"github.com/heartszhang/unixtime"
 	"net/http"
 	"strings"
 )
@@ -76,13 +77,13 @@ type load_result struct {
 			Description string `json:"description,omitempty"`
 			Type        string `json:"type,omitempty"`
 			Entries     []struct {
-				Title          string   `json:"title,omitempty"`
-				Link           string   `json:"link,omitempty"`
-				Author         string   `json:"author,omitempty"`
-				PublishedDate  string   `json:"publishedDate"`
-				ContentSnippet string   `json:"contentSnippet,omitempty"`
-				Content        string   `json:"content,omitempty"`
-				Categories     []string `json:"categories,omitempty"`
+				Title          string            `json:"title,omitempty"`
+				Link           string            `json:"link,omitempty"`
+				Author         string            `json:"author,omitempty"`
+				PublishedDate  unixtime.UnixTime `json:"publishedDate"`
+				ContentSnippet string            `json:"contentSnippet,omitempty"`
+				Content        string            `json:"content,omitempty"`
+				Categories     []string          `json:"categories,omitempty"`
 			} `json:"entries,omitempty"`
 		} `json:"feed,omitempty"`
 	} `json:"responseData,omitempty"`
@@ -103,10 +104,13 @@ func loadresult_to_feedsource(x load_result) (feed.FeedSource, []feed.FeedEntry,
 		FeedSourceMeta: feed.FeedSourceMeta{
 			Name:        f.Title,
 			Uri:         f.FeedUrl,
-			WebSite:     f.Type + f.Website,
+			WebSite:     f.Website,
 			Description: f.Description,
+			Type:        feed.FeedSourceTypes[f.Type],
+			Period:      120, // minutes
 		},
 	}
+
 	for _, e := range f.Entries {
 		ne := feed.FeedEntry{
 			FeedEntryMeta: feed.FeedEntryMeta{
@@ -115,6 +119,7 @@ func loadresult_to_feedsource(x load_result) (feed.FeedSource, []feed.FeedEntry,
 				Summary: e.ContentSnippet,
 				Content: e.Content,
 				Tags:    e.Categories,
+				PubDate: e.PublishedDate,
 			},
 		}
 		v = append(v, ne)

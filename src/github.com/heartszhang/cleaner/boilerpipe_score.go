@@ -95,6 +95,7 @@ func (this *boilerpipe_score) add(rhs boilerpipe_score) {
 	this.anchor_imgs += rhs.anchor_imgs
 	this.imgs += rhs.imgs
 	this.objects += rhs.objects
+	this.commas += rhs.commas
 	this.tagged_imgs = append(this.tagged_imgs, rhs.tagged_imgs...)
 	//  this.forms += rhs.forms
 }
@@ -127,7 +128,11 @@ func (this boilerpipe_score) table_score() int {
 }
 
 func (this boilerpipe_score) String() string {
+	txt := this.inner_text
+	if len(txt) > 30 {
+		txt = txt[:30]
+	}
 	return fmt.Sprint("boilerpipe-score node-tag:", this.element.Data,
 		", words:", this.words, ", anchor_words:", this.anchor_words,
-		", imgs:", this.imgs, ", aimgs", this.anchor_imgs)
+		", imgs:", this.imgs, ", aimgs", this.anchor_imgs, txt)
 }

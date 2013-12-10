@@ -156,6 +156,7 @@ var (
 	FeedSourceTypes = map[string]uint{
 		"":         Feed_type_unknown,
 		"rss":      Feed_type_rss,
+		"rss20":    Feed_type_rss,
 		"atom":     Feed_type_atom,
 		"atom10":   Feed_type_atom,
 		"rss+xml":  Feed_type_rss,

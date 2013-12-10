@@ -11,8 +11,8 @@ type Time_s struct {
 }
 
 func TestUnixTimeMarshal(t *testing.T) {
-	xd := `<time_s><time>Thu, 28 Nov 2013 20:06:22 -0500</time></time_s>`
-	jd := `{"time":"Thu, 28 Nov 2013 20:06:22 -0500"}`
+	xd := `<time_s><time>Tue, 25 Nov 2008 10:47:32 +0800</time></time_s>`
+	jd := `{"time":"Mon, 6 May 2013 15:23:32 +0800"}`
 	var xv, jv Time_s
 	err := xml.Unmarshal([]byte(xd), &xv)
 	t.Log(xv, err)
