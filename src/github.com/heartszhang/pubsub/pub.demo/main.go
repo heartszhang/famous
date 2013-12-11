@@ -9,7 +9,7 @@ import (
 var (
 	//	uri  = "http://feeds.feedburner.com/ftchina"
 	//	uri2 = "http://www.bbc.co.uk/zhongwen/trad/index.xml"
-	uri         = flag.String("uri", "http://feeds.feedburner.com/ftchina", "feed rss url")
+	uri         = flag.String("uri", "http://feed.feedsky.com/199it", "feed rss url")
 	method      = flag.String("method", "subscribe", "subscribe/unsubscribe/retrieve")
 	provider    = flag.String("provider", "superfeedr", "superfeedr/google")
 	verify_mode = flag.String("verify", "async", "async/sync")
@@ -21,7 +21,7 @@ func main() {
 	if *provider == "google" {
 		sub = pubsub.NewGooglePubSubscriber()
 	} else {
-		sub = pubsub.NewSuperFeedrPubSubscriber(*verify_mode)
+		sub = pubsub.NewSuperFeedrPubSubscriber(*verify_mode, "Hearts", "Refresh")
 	}
 	switch *method {
 	case "subscribe":
