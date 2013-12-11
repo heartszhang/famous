@@ -1,6 +1,7 @@
 package pubsub
 
 import (
+	"fmt"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/oauth2"
 	"github.com/heartszhang/unixtime"
@@ -22,21 +23,18 @@ func NewGooglePubSubscriber() PubSubscriber {
 	return pubsuber{"async", hub_google, curl.CurlProxyPolicyAlwayseProxy}
 }
 
-func NewSuperFeedrPubSubscriber(verify_mode string) PubSubscriber {
+func NewSuperFeedrPubSubscriber(verify_mode, user, password string) PubSubscriber {
 	if verify_mode != "sync" && verify_mode != "async" {
 		verify_mode = "async"
 	}
-	return pubsuber{verify_mode, hub_superfeed, 0}
+	svc := fmt.Sprintf("https://%v:%v@push.superfeedr.com", user, password)
+	return pubsuber{verify_mode, svc, 0}
 }
 
 const (
-	//hub_callback = "http://famousfront.appspot.com/hub/callback"
 	hub_callback = "http://iweizhi2.duapp.com/hub_callback"
-	//	hub_superfeed = "https://pubsubhubbub.superfeedr.com"
-	hub_superfeed  = "https://Hearts:Refresh@push.superfeedr.com"
-	hub_google     = "https://pubsubhubbub.appspot.com/subscribe"
-	superfeed_user = "Hearts"
-	password       = "Refresh"
+	//	hub_superfeed = "https://Hearts:Refresh@push.superfeedr.com"
+	hub_google = "https://pubsubhubbub.appspot.com/subscribe"
 )
 
 func strptr(s string) *string {
@@ -108,12 +106,12 @@ type PubsubMessage struct { // same as FeedSource
 		StatusCode        int               `json:"code" xml:"code,attr"`
 		StatusReason      string            `json:"http,omitempty" xml:"http,omitempty"`
 		Feed              string            `json:"feed" xml:"feed,attr,omitempty"`
-		LastParse         unixtime.UnixTime `json:"lastParse" xml:"last_parse"`
 		Period            int64             `json:"period" xml:"period"`
+		LastParse         unixtime.UnixTime `json:"lastParse" xml:"last_parse"`
 		LastMaintenanceAt unixtime.UnixTime `json:"lastMaintenanceAt" xml:"last_maintenance_at"`
 		NextFetch         unixtime.UnixTime `json:"nextFetch" xml:"next_fetch"`
 		LastFetch         unixtime.UnixTime `json:"lastFetch" xml:"last_fetch"`
-		EntriesCount      int               `json:"-" xml:"entries_count_since_last_maintenance"`
+		EntriesCount      int               `json:"entriesCountSinceLastMaintenance" xml:"entries_count_since_last_maintenance"`
 	} `json:"status" xml:"status"`
 	Title         string               `json:"title,omitempty" xml:"title"`
 	Subtitle      string               `json:"subtitle,omitempty" xml:"subtitle,omitempty"`
