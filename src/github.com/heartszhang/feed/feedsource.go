@@ -19,10 +19,16 @@ type FeedSource struct {
 	FeedSourceMeta `json:",inline" bson:",inline"`
 	Local          string            `json:"local,omitempty" bson:"local,omitempty"`
 	EnableProxy    int               `json:"enable_proxy" bson:"enable_proxy"`
-	Disabled       bool              `json:"disabled" bson:"disabled"` //auto refresh enabled
+	SubscribeState int               `json:"subscribe_state" bson:"subscribe_state"` //auto refresh enabled
 	Categories     []string          `json:"categories,omitempty" bson:"categories,omitempty"`
 	Update         unixtime.UnixTime `json:"update" bson:"update"`
 	LastTouch      unixtime.UnixTime `json:"last_touch" bson:"last_touch"`
 	NextTouch      unixtime.UnixTime `json:"next_touch" bson:"next_touch"`
 	LastUpdate     unixtime.UnixTime `json:"last_update" bson:"last_update"`
 }
+
+const (
+	FeedSourceSubscribeStateSubscribed = 1 << iota
+	FeedSourceSubscribeStateUnsubscribed
+	FeedSourceSubscribeStatusDisabled
+)

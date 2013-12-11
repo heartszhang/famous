@@ -13,24 +13,8 @@ import (
 )
 
 type GoogleFeedApiService interface {
-	Find(q, hl string) ([]FeedSourceFindEntry, error)
-	Load(uri, hl string, num int, scoring bool) (feed.FeedSource, []feed.FeedEntry, error)
-}
-
-type FeedSourceFindEntry struct {
-	Url        string `json:"url,omitempty`
-	Title      string `json:"title,omitempty`
-	Summary    string `json:"summary,omitempty`
-	Website    string `json:"website,omitempty"`
-	Subscribed bool   `json:"subscribed"`
-}
-type googlefeed_error struct {
-	code   int
-	reason string
-}
-
-func (this googlefeed_error) Error() string {
-	return fmt.Sprintf("%v: %v", this.code, this.reason)
+	Find(q, hl string) ([]feed.FeedEntity, error)
+	Load(uri, hl string, num int, scoring bool) (feed.FeedEntity, error)
 }
 
 type find_result struct {
@@ -47,19 +31,25 @@ type find_result struct {
 	} `json:"responseData,omitempty"`
 }
 
-func findresult_to_findentry(x find_result) ([]FeedSourceFindEntry, error) {
+func findresult_to_entity(x find_result) ([]feed.FeedEntity, error) {
 	if x.ResponseStatus != 200 {
 		return nil, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
 	}
-	v := make([]FeedSourceFindEntry, 0)
+	v := make([]feed.FeedEntity, 0)
 	if x.ResponseData == nil {
 		return v, nil
 	}
 	for _, e := range x.ResponseData.Entries {
-		v = append(v, FeedSourceFindEntry{e.Url,
-			strip_html_tags(e.Title),
-			strip_html_tags(e.ContentSnippet),
-			e.Website, false})
+		v = append(v, feed.FeedEntity{
+			FeedSource: feed.FeedSource{
+				FeedSourceMeta: feed.FeedSourceMeta{Uri: e.Url,
+					Period:      120, // minutes
+					Name:        strip_html_tags(e.Title),
+					Description: strip_html_tags(e.ContentSnippet),
+					WebSite:     e.Website,
+				},
+			},
+		})
 	}
 	return v, nil
 }
@@ -93,9 +83,9 @@ func media_type(mime string) string {
 	s := strings.Split(mime, "/")
 	return s[0]
 }
-func loadresult_to_feedsource(x load_result) (feed.FeedSource, []feed.FeedEntry, error) {
+func loadresult_to_feedentity(x load_result) (feed.FeedEntity, error) {
 	if x.ResponseStatus != 200 || x.ResponseData == nil || x.ResponseData.Feed == nil {
-		return feed.FeedSource{}, nil, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
+		return feed.FeedEntity{feed.FeedSource{}, nil}, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
 	}
 
 	v := make([]feed.FeedEntry, 0)
@@ -124,7 +114,7 @@ func loadresult_to_feedsource(x load_result) (feed.FeedSource, []feed.FeedEntry,
 		}
 		v = append(v, ne)
 	}
-	return s, v, nil
+	return feed.FeedEntity{s, v}, nil
 }
 
 type google_feedapi struct {
@@ -143,7 +133,7 @@ func (this google_feedapi) RoundTrip(r *http.Request) {
 	r.Header.Set("refer", this.refer)
 }
 
-func (this google_feedapi) Find(q, hl string) ([]FeedSourceFindEntry, error) {
+func (this google_feedapi) Find(q, hl string) ([]feed.FeedEntity, error) {
 	p := struct {
 		q  string `param:"q"`
 		hl string `param:"hl"` // default en, nil means en
@@ -156,7 +146,7 @@ func (this google_feedapi) Find(q, hl string) ([]FeedSourceFindEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	x, err := findresult_to_findentry(v)
+	x, err := findresult_to_entity(v)
 	return x, err
 }
 func make_num(num int) *int {
@@ -171,7 +161,7 @@ func make_scoring(scoring bool) string {
 	}
 	return ""
 }
-func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (feed.FeedSource, []feed.FeedEntry, error) {
+func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (feed.FeedEntity, error) {
 	p := struct {
 		q       string `param:"q"`
 		hl      string `param:"hl"`      // default en
@@ -185,10 +175,10 @@ func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (feed.Fee
 	err := c.GetAsJson(url, &v)
 
 	if err != nil {
-		return feed.FeedSource{}, nil, err
+		return feed.FeedEntity{}, err
 	}
-	s, e, err := loadresult_to_feedsource(v)
-	return s, e, err
+	s, err := loadresult_to_feedentity(v)
+	return s, err
 }
 
 // http://www.google.com/uds/Gfeeds?context=0&num=20&hl=en&output=json&q=http%3A%2F%2Fpansci.tw%2Ffeed&v=1.0
@@ -245,4 +235,13 @@ func extract_html_text(node *html.Node) string {
 		v += extract_html_text(child)
 	}
 	return v
+}
+
+type googlefeed_error struct {
+	code   int
+	reason string
+}
+
+func (this googlefeed_error) Error() string {
+	return fmt.Sprintf("%v: %v", this.code, this.reason)
 }

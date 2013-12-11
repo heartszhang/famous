@@ -2,7 +2,9 @@ package backend
 
 import (
 	"fmt"
+	"github.com/heartszhang/feed"
 	"github.com/heartszhang/gfwlist"
+	"github.com/qiniu/log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -10,8 +12,8 @@ import (
 )
 
 type FeedTick struct {
-	Tick  int64        `json:"tick"`
-	Feeds []FeedEntity `json:"feeds,omitempty"`
+	Tick  int64             `json:"tick"`
+	Feeds []feed.FeedEntity `json:"feeds,omitempty"`
 }
 type FeedsBackendConfig struct {
 	BackendIp             string `json:"web_ip"`
@@ -85,7 +87,7 @@ func load_gfwrules() {
 		defer reader.Close()
 		backend_context.ruler, err = gfwlist.NewGfwRuler(reader)
 	}
-	fmt.Println("gfwlist-load", err, fp)
+	log.Println("gfwlist-load", err, fp)
 }
 func (this FeedsBackendConfig) Address() string {
 	return fmt.Sprintf("%v:%d", this.BackendIp, this.BackendPort)
@@ -96,7 +98,7 @@ var backend_context struct {
 	config       FeedsBackendConfig
 	startup      time.Time
 	working      int64
-	feed_updates []FeedEntity
+	feed_updates []feed.FeedEntity
 	ruler        gfwlist.GfwRuler
 }
 

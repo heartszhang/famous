@@ -2,7 +2,7 @@ package backend
 
 import (
 	"github.com/heartszhang/feed"
-	"log"
+	"github.com/qiniu/log"
 	"net/http"
 	"strconv"
 )

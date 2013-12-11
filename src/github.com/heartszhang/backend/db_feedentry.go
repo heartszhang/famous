@@ -4,7 +4,6 @@ import (
 	"github.com/heartszhang/feed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	"log"
 	"time"
 )
 
@@ -130,7 +129,6 @@ func (this feedentry_op) topn(skip, limit int) ([]feed.FeedEntry, error) {
 }
 
 func (this feedentry_op) topn_by_feedsource(skip, limit int, source string) ([]feed.FeedEntry, error) {
-	log.Println("topn-source", source, skip, limit)
 	var rtn []feed.FeedEntry
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false, "src": source}).Sort("-pubdate").Skip(skip).Limit(limit).All(&rtn)
@@ -157,7 +155,6 @@ func insert_entry(coll *mgo.Collection, entry feed.FeedEntry) (interface{}, erro
 	}{entry, time.Now()}
 	ci, err := coll.Upsert(bson.M{"uri": entry.Uri}, bson.M{"$setOnInsert": &xe})
 	if ci == nil {
-		log.Println(err)
 		return nil, err
 	}
 	return ci.UpsertedId, err

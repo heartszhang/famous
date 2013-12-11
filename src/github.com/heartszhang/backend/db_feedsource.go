@@ -4,7 +4,6 @@ import (
 	"github.com/heartszhang/feed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	//	"time"
 )
 
 func new_feedsource_operator() feedsource_operator {

@@ -7,7 +7,6 @@ import (
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/markhtml"
 	"io/ioutil"
-	"log"
 	"strings"
 	"sync"
 )
@@ -190,7 +189,6 @@ func feedentry_content_exists(hash uint64) bool {
 	co := new_feedcontent_operator()
 	cnt, err := co.touch(int64(hash))
 	if err != nil {
-		log.Println("feedcontent-hashs failed", err)
 		return false
 	}
 	return cnt > backend_context.config.SummaryDuplicateCount

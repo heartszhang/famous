@@ -4,7 +4,7 @@ import (
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/pubsub"
 	"github.com/heartszhang/unixtime"
-	"log"
+	"github.com/qiniu/log"
 	"math/rand"
 	"sync/atomic"
 	"time"
@@ -18,14 +18,6 @@ func tick() (FeedTick, error) {
 
 func meta() (FeedsBackendConfig, error) {
 	return backend_config(), nil
-}
-
-func update_popup() (*FeedEntity, error) {
-	fs, fes, err := feedentries_updated()
-	if err == nil {
-		return &FeedEntity{FeedSource: *fs, Entries: fes}, nil
-	}
-	return nil, err
 }
 
 func meta_cleanup() error {
@@ -53,7 +45,7 @@ func backend_push_update(fs feed.FeedSource, fes []feed.FeedEntry, err error) {
 	if err != nil {
 		return
 	}
-	backend_context.feed_updates = append(backend_context.feed_updates, FeedEntity{fs, fes})
+	backend_context.feed_updates = append(backend_context.feed_updates, feed.FeedEntity{fs, fes})
 }
 
 func update_work() {
@@ -78,22 +70,20 @@ func update_work() {
 		newfs.Logo = fs.Logo
 	}
 
-	newfs.Disabled = fs.Disabled
+	newfs.SubscribeState = fs.SubscribeState
 	newfs.LastTouch = unixtime.UnixTimeNow()
 	newfs.LastUpdate = newfs.LastTouch
 	newfs.NextTouch = unixtime.UnixTime(newfs.Period) + newfs.LastTouch
 	err = feedsource_save(newfs)
 	fes = feedentry_filter(fes)
 	backend_push_update(newfs, fes, err)
-	ps := pubsub.NewSuperFeedrPubSubscriber("async")
+	ps := pubsub.NewSuperFeedrPubSubscriber("async", "Hearts", "Refresh")
 	sc, err := ps.Subscribe(fs.Uri)
 	if err != nil {
 		log.Println("pubsub-google", sc, err)
 	}
 	ps = pubsub.NewGooglePubSubscriber()
 	sc, err = ps.Subscribe(fs.Uri)
-	if err != nil {
-		log.Println("pubsub-superfeedr", sc, err)
-	}
+	log.Println(sc, err)
 	log.Println("update-tick", fs.Name, err)
 }

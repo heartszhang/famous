@@ -3,7 +3,6 @@ package bing
 import (
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/oauth2"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -61,7 +60,6 @@ func (this bing_search) SpellingSuggestion(params BingSearchParameters) (curl.Ca
 	q := oauth2.HttpQueryEncode(params)
 	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyNoProxy, 0, this, nil)
 	x := BingSearchServiceRoot + ServiceOperationSpellingSuggestion + "?" + q
-	log.Println(x)
 	return c.Get(x)
 }
 

@@ -103,10 +103,10 @@ func (this atom_feed) to_feed_source(local string) FeedSource {
 			WebSite:     this.website(),
 			Description: this.Subtitle,
 		},
-		Update:      this.Updated,
-		Local:       local,
-		Disabled:    false,
-		EnableProxy: 0,
+		Update:         this.Updated,
+		Local:          local,
+		SubscribeState: FeedSourceSubscribeStateSubscribed,
+		EnableProxy:    0,
 	}
 	f.Tags = make([]string, len(this.Categories))
 	for i, c := range this.Categories {

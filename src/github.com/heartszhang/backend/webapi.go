@@ -3,8 +3,8 @@ package backend
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/qiniu/log"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"

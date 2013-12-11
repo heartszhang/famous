@@ -47,14 +47,11 @@ func (this *local_webauth_broker) Authorize(force bool, extras *map[string]strin
 		return token, nil
 	}
 	code_req_url := this.authcode_url(this.code_receiver.redirect_url(), extras)
-	//	fmt.Println(code_req_url)
 	code, err := this.code_receiver.receive_code(code_req_url)
-	//	fmt.Println(code, err)
 	if err != nil {
 		return token, err
 	}
 	token, err = this.exchange_code(code)
-	//	fmt.Println(token, err)
 	if token != nil && err != nil {
 		this.store_token(*token)
 	}
@@ -71,7 +68,6 @@ func (this *local_webauth_broker) exchange_code(code string) (*Token, error) {
 	if this.config.Scope != "" {
 		vals.Add("scope", this.config.Scope)
 	}
-	//	fmt.Println(this.config.TokenUrl, vals)
 	resp, err := http.DefaultClient.PostForm(this.config.TokenUrl, vals)
 	if err != nil {
 		return nil, err

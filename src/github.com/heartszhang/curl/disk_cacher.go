@@ -2,7 +2,6 @@ package curl
 
 import (
 	"encoding/json"
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -29,10 +28,8 @@ func (this *disk_cacher) load_index(uri string) (*Cache, error) {
 }
 func (this *disk_cacher) save_index(uri string, cache Cache) error {
 	name := this.name(uri)
-	log.Println("save-cache", uri, name)
 	f, err := os.Create(name)
 	if err != nil {
-		log.Println("save-cache fail", uri, err)
 		return err
 	}
 	defer f.Close()

@@ -1,11 +1,10 @@
 package backend
 
 import (
-	"fmt"
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
-	"log"
+	"github.com/qiniu/log"
 	"net/url"
 )
 
@@ -36,7 +35,7 @@ func feedentry_unread(source string, count int, page int) ([]feed.FeedEntry, err
 
 		ext := curl.MimeToExt(cache.Mime)
 		if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
-			return nil, fmt.Errorf("unsupported mime: %v, %d", cache.Mime, cache.StatusCode), 0
+			return nil, new_backenderror(cache.StatusCode, "unsupported mime: "+cache.Mime), 0
 		}
 		fs, v, err := feed.NewFeedMaker(cache.LocalUtf8, source).MakeFeed()
 		if err == nil {
@@ -90,7 +89,7 @@ func feedentry_fulldoc(uri string) (v feed.FeedContent, err error) {
 	v.Uri = uri
 	v.Local = cache.LocalUtf8
 	if curl.MimeToExt(cache.Mime) != "html" {
-		return v, fmt.Errorf("unsupported mime %v", cache.Mime)
+		return v, new_backenderror(-1, "unsupported mime: "+cache.Mime)
 	}
 	doc, err := html_create_from_file(cache.LocalUtf8)
 	if err != nil {

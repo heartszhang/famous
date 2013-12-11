@@ -1,7 +1,7 @@
 package backend
 
 import (
-	"log"
+	"github.com/qiniu/log"
 	"net/http"
 	"strconv"
 )
@@ -11,7 +11,8 @@ func init() {
 	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail)       // ?uri= return image/jpeg
 	http.HandleFunc("/api/image/origin.json", webapi_image_origin)             // ?uri=, return image/xxx
 	http.HandleFunc("/api/image/dimension.json", webapi_image_dimension)       // ?uri=, return FeedMedia
-	http.HandleFunc("/api/image/video.thumbnail", webapi_image_videothumbnail) //?uri=, return image/xxx
+	http.HandleFunc("/api/image/video.thumbnail", webapi_image_videothumbnail) // ?uri=, return image/xxx
+	http.HandleFunc("/api/image/icon", webapi_image_icon)                      // ?uri=, return image/xxx
 }
 
 // uri: /image/description.json?uri=
@@ -84,5 +85,17 @@ func webapi_image_origin(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, cache.OriginLocal)
 	default:
 		webapi_write_error_code(w, err, cache.Code)
+	}
+}
+
+func webapi_image_icon(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
+	uri := r.URL.Query().Get("uri")
+	switch cache, err := image_icon(uri); err {
+	default:
+		webapi_write_error_code(w, err, cache.StatusCode)
+	case nil:
+		w.Header().Set("content-type", cache.Mime)
+		http.ServeFile(w, r, cache.Local)
 	}
 }

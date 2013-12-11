@@ -1,21 +1,14 @@
 package backend
 
 import (
-	"fmt"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/google"
-	"log"
-	"net/url"
 )
 
 func feedsource_all() ([]feed.FeedSource, error) {
 	dbo := new_feedsource_operator()
 	fs, err := dbo.all()
-	for i := 0; i < len(fs); i++ {
-		f := &fs[i]
-		f.Logo = resolve_logo(*f)
-	}
 	return fs, err
 }
 func feed_fetch(uri string) (v feed.FeedSource, fes []feed.FeedEntry, err error) {
@@ -25,9 +18,9 @@ func feed_fetch(uri string) (v feed.FeedSource, fes []feed.FeedEntry, err error)
 	}
 	ext := curl.MimeToExt(cache.Mime)
 	if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
-		return v, nil, fmt.Errorf("unsupported mime: %v", cache.Mime)
+		return v, nil, new_backenderror(-1, "unsupported mime: "+cache.Mime)
 	} else if cache.LocalUtf8 == "" {
-		return v, nil, fmt.Errorf("unrecognized encoding %v", cache.Local)
+		return v, nil, new_backenderror(-1, "unrecognized encoding: "+cache.Local)
 	}
 	v, fes, err = feed.NewFeedMaker(cache.LocalUtf8, uri).MakeFeed()
 	if v.Uri == "" {
@@ -66,16 +59,17 @@ const (
 	refer = "http://iweizhi2.duapp.com"
 )
 
-func feedsource_show(uri string) (FeedEntity, error) {
-	fs, entries, err := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder).Load(uri, backend_context.config.Language, 4, false)
+func feedsource_show(uri string) (feed.FeedEntity, error) {
+	g := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder)
+	fs, err := g.Load(uri, backend_context.config.Language, 4, false)
 	if err != nil {
-		return FeedEntity{}, err
+		return feed.FeedEntity{}, err
 	}
-	entries = feedentry_filter(entries)
-	return FeedEntity{fs, entries}, err
+	fs.Entries = feedentry_filter(fs.Entries)
+	return fs, err
 }
 
-func feedsource_find(q string) ([]google.FeedSourceFindEntry, error) {
+func feedsource_find(q string) ([]feed.FeedEntity, error) {
 	svc := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder)
 	v, err := svc.Find(q, backend_context.config.Language)
 	if err != nil {
@@ -83,7 +77,7 @@ func feedsource_find(q string) ([]google.FeedSourceFindEntry, error) {
 	}
 	uris := make([]string, 0)
 	for _, ve := range v {
-		uris = append(uris, ve.Url)
+		uris = append(uris, ve.Uri)
 	}
 	dbo := new_feedsource_operator()
 	subed, err := dbo.findbatch(uris)
@@ -92,14 +86,15 @@ func feedsource_find(q string) ([]google.FeedSourceFindEntry, error) {
 	}
 	for _, fs := range subed {
 		for i := 0; i < len(v); i++ {
-			if v[i].Url == fs.Uri {
-				v[i].Subscribed = true
+			if v[i].Uri == fs.Uri {
+				v[i].SubscribeState = feed.FeedSourceSubscribeStateSubscribed
 			}
 		}
 	}
 	return v, err
 }
 
+/*
 func resolve_logo(f feed.FeedSource) string {
 	baseu, _ := url.Parse(f.WebSite)
 	u, err := url.Parse(f.Logo)
@@ -113,3 +108,4 @@ func resolve_logo(f feed.FeedSource) string {
 	log.Println("web-site:", u.String())
 	return v
 }
+*/

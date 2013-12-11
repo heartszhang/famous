@@ -61,8 +61,8 @@ func (this opml_outline) export_feedsource(v []FeedSource) []FeedSource {
 				WebSite:     this.Link,
 				Description: this.Description,
 			},
-			Disabled:    false,
-			EnableProxy: 0,
+			SubscribeState: FeedSourceSubscribeStateSubscribed,
+			EnableProxy:    0,
 		}
 		v = append(v, x)
 	}

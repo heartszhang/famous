@@ -20,7 +20,8 @@ const (
 //application/x-www-form-urlencoded
 
 func main() {
-	bq := baidu.NewBcms(bcmsq, access_token, client_id, client_secret)
+	//	bq := baidu.NewBcms(bcmsq, access_token, client_id, client_secret)
+	bq := baidu.NewBcmsProxy("http://iweizhi2.duapp.com/pop.json")
 	var v pubsub.PubsubMessage
 	err := bq.FetchOneAsJson(&v)
 	fmt.Println(v, err)

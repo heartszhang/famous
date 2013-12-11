@@ -28,3 +28,8 @@ type FeedEntry struct {
 	Status        uint64         `json:"status" bson:"status"`
 	Readed        bool           `json:"readed" bson:"readed"`
 }
+
+type FeedEntity struct {
+	FeedSource `json:",inline"`
+	Entries    []FeedEntry `json:"entries,omitempty"`
+}

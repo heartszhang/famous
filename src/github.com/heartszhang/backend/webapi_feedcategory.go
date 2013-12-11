@@ -1,7 +1,7 @@
 package backend
 
 import (
-	"log"
+	"github.com/qiniu/log"
 	"net/http"
 )
 

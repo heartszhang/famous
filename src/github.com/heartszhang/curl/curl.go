@@ -6,7 +6,6 @@ import (
 	"github.com/heartszhang/gfwlist"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -71,7 +70,6 @@ func (this *curler) new_proxy() proxy_func {
 		return func(req *http.Request) (*url.URL, error) {
 			uri := req.URL.String()
 			blocked := this.ruler.IsBlocked(uri)
-			log.Println("gfwlist-check", uri, blocked)
 			if blocked {
 				return http.ProxyFromEnvironment(req)
 			}
@@ -146,7 +144,6 @@ func (this *curler) do_get(uri string, cache *Cache) (*http.Response, error) {
 	var proxy = this.new_proxy()
 	resp, err := this.new_client(proxy, cache).Get(uri)
 	if err != nil && retry {
-		fmt.Println("try again with proxy", uri, err)
 		resp, err = this.new_client(http.ProxyFromEnvironment, cache).Get(uri)
 	}
 	return resp, err
@@ -208,8 +205,6 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 		return v, err
 	}
 	defer out.Close()
-
-	log.Println(v.Local, " =>", out.Name())
 
 	v.LengthUtf8, err = io.Copy(out, in2)
 
@@ -303,7 +298,6 @@ func (this *curler) get(uri string, savecache bool) (Cache, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotModified {
-		log.Println("from-cache", uri, v.Local)
 		return *v, err
 	}
 	v = &Cache{Uri: uri}

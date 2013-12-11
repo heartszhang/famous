@@ -2,7 +2,6 @@ package feed
 
 import (
 	"encoding/xml"
-	"fmt"
 	"github.com/heartszhang/unixtime"
 	"io"
 	"net/url"
@@ -109,10 +108,10 @@ func (this rss_channel) to_source(local string) FeedSource {
 			Description: this.Description,
 			WebSite:     this.website(),
 		},
-		Disabled:    false,
-		EnableProxy: 0,
-		Local:       local, // filled later
-		Update:      this.LastBuildDate,
+		SubscribeState: FeedSourceSubscribeStateSubscribed,
+		EnableProxy:    0,
+		Local:          local, // filled later
+		Update:         this.LastBuildDate,
 	}
 
 	if this.Image != nil {
@@ -121,7 +120,6 @@ func (this rss_channel) to_source(local string) FeedSource {
 	if v.Logo == "" {
 		v.Logo = favicon(this.website())
 	}
-	fmt.Println("rss:", this.Title)
 	return v
 }
 
@@ -239,7 +237,6 @@ func (this rss_item) to_feed_entry(feed_url string) FeedEntry {
 
 	default:
 	}
-	fmt.Println(v.Title)
 	return v
 }
 

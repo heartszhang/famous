@@ -1,12 +1,11 @@
 package backend
 
 import (
-	"fmt"
 	"github.com/heartszhang/baidu"
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/pubsub"
 	"github.com/heartszhang/unixtime"
-	"log"
+	"github.com/qiniu/log"
 )
 
 const (
@@ -17,11 +16,12 @@ func feedentries_updated() (*feed.FeedSource, []feed.FeedEntry, error) {
 	bcms := baidu.NewBcmsProxy(baiduq)
 	var v pubsub.PubsubMessage
 	err := bcms.FetchOneAsJson(&v)
+	log.Println(v, err)
 	if err != nil {
 		return nil, nil, err
 	}
 	if (v.Status.StatusCode != 200 && v.Status.StatusCode != 0) || v.Status.Feed == "" {
-		return nil, nil, fmt.Errorf("%d: %v", v.Status.StatusCode, v.Status.StatusReason)
+		return nil, nil, new_backenderror(v.Status.StatusCode, v.Status.StatusReason)
 	}
 
 	fs := feed.FeedSource{
@@ -86,4 +86,12 @@ func feedentry_init_from_links(links []pubsub.PubsubLink, fe feed.FeedEntry) {
 			fe.Uri = link.Href
 		}
 	}
+}
+
+func update_popup() (*feed.FeedEntity, error) {
+	fs, fes, err := feedentries_updated()
+	if err == nil {
+		return &feed.FeedEntity{FeedSource: *fs, Entries: fes}, nil
+	}
+	return nil, err
 }
