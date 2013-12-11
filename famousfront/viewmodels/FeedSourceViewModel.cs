@@ -38,13 +38,15 @@ namespace famousfront.viewmodels
     {
       get { return _drop_self ?? (_drop_self = drop_self()); }
     }
-    public string Logo { get { return _.logo; }  }
+    public string Logo { get { return logo(); }  }
     string logo()
     {
-//      var rel = "/api/image/thumbnail.json?uri=" + System.Uri.UnescapeDataString(_.logo);
-//      var x = ServiceLocator.BackendPath(rel);
-      return _.logo;
-//      return x;
+      var hint = _.logo;
+      if (string.IsNullOrEmpty(hint))
+        hint = _.website;
+      var rel = "/api/image/icon?uri=" + System.Uri.UnescapeDataString(hint);
+      var x = ServiceLocator.BackendPath(rel);
+      return x;
     }
     string _news;
     public string News { get { return _news; } private set { Set(ref _news, value); } }
