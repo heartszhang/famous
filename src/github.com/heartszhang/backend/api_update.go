@@ -12,16 +12,16 @@ const (
 	baiduq = "http://iweizhi2.duapp.com/hub/popup.json"
 )
 
-func feedentries_updated() (*feed.FeedSource, []feed.FeedEntry, error) {
+func feedentries_updated() (feed.FeedSource, []feed.FeedEntry, error) {
 	bcms := baidu.NewBcmsProxy(baiduq)
 	var v pubsub.PubsubMessage
 	err := bcms.FetchOneAsJson(&v)
 	log.Println(v, err)
 	if err != nil {
-		return nil, nil, err
+		return feed.FeedSource{}, nil, err
 	}
 	if (v.Status.StatusCode != 200 && v.Status.StatusCode != 0) || v.Status.Feed == "" {
-		return nil, nil, new_backenderror(v.Status.StatusCode, v.Status.StatusReason)
+		return feed.FeedSource{}, nil, new_backenderror(v.Status.StatusCode, v.Status.StatusReason)
 	}
 
 	fs := feed.FeedSource{
@@ -58,10 +58,12 @@ func feedentries_updated() (*feed.FeedSource, []feed.FeedEntry, error) {
 	}
 	if err == nil {
 		fes = feedentry_filter(fes)
-		err = new_feedsource_operator().touch(fs.Uri, int64(fs.LastTouch), int64(fs.NextTouch), fs.Period)
+		fo := new_feedsource_operator()
+		// ignore touch error, because, source may not be subscribed
+		fo.touch(fs.Uri, int64(fs.LastTouch), int64(fs.NextTouch), fs.Period)
 		log.Println("updated", fs.Name, fs.Update, fs.Logo)
 	}
-	return &fs, fes, err
+	return fs, fes, err
 }
 
 func feedentry_init_from_standardlinks(links *pubsub.PubsubStandardLink, fe feed.FeedEntry) {
@@ -88,10 +90,11 @@ func feedentry_init_from_links(links []pubsub.PubsubLink, fe feed.FeedEntry) {
 	}
 }
 
-func update_popup() (*feed.FeedEntity, error) {
+func update_popup() (feed.FeedEntity, error) {
 	fs, fes, err := feedentries_updated()
 	if err == nil {
-		return &feed.FeedEntity{FeedSource: *fs, Entries: fes}, nil
+		return feed.FeedEntity{FeedSource: fs, Entries: fes}, nil
 	}
-	return nil, err
+	log.Println("update-popup", err)
+	return feed.FeedEntity{}, err
 }

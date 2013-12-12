@@ -37,7 +37,13 @@ func (this *UnixTime) UnmarshalText(body []byte) error {
 }
 
 func unixtime_unmarshal(data []byte, format_quoted bool) (int64, error) {
+	if len(data) == 0 {
+		return 0, nil
+	}
 	str := string(data)
+	if str == "null" { // some times
+		return 0, nil
+	}
 	v, err := strconv.ParseInt(str, 0, 0)
 	if err == nil {
 		return v, nil

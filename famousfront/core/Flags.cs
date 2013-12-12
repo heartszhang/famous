@@ -13,6 +13,7 @@ namespace famousfront.core
       ContentMarginHeight = 16.0;
       FeedSourceWidth = 360.0;
       ContentMarginMinWidth = 180.0;
+      ContentMaxWidth = 800d;
       TinyFontSize = 12.0;
       SmallFontSize = 13.333;
       NormalFontSize = 14.667;
@@ -28,6 +29,8 @@ namespace famousfront.core
       ThemeContrast = System.Windows.Media.Colors.White;
       MarginTopDown = new Thickness(0, 8, 0, 8);
       MarginAllBounds = new Thickness(4);
+      EntryMargin = new Thickness(16d, 12d, 16d, 12d);
+      SourceMargin = new Thickness(12d);
       ImageMaxHeight = 640.0;
       ImageMaxWidth = 400.0;
       VideoElementHeight = 331.0;
@@ -65,6 +68,8 @@ namespace famousfront.core
 
     [DataMember(Name = "contentmargin_minwidth")]
     public double ContentMarginMinWidth { get; set; }
+    [DataMember(Name = "content_maxwidth")]
+    public double ContentMaxWidth { get; set; }
 
     [DataMember(Name = "tiny_fontsize")]
     public double TinyFontSize { get; set; }
@@ -99,6 +104,10 @@ namespace famousfront.core
     public Thickness MarginAllBounds { get; set; }
     [DataMember(Name = "image_maxheight")]
     public double ImageMaxHeight { get; set; }
+    [DataMember(Name = "entry_margin")]
+    public Thickness EntryMargin { get; set; }
+    [DataMember(Name = "source_margin")]
+    public Thickness SourceMargin { get; set; }
 
     [DataMember(Name = "image_maxwidth")]
     public double ImageMaxWidth { get; set; }

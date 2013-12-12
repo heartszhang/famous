@@ -53,7 +53,7 @@ type feedsource_operator interface {
 	all() ([]feed.FeedSource, error)
 	touch(uri string, last, next, period int64) error
 	drop(uri string) error
-	disable(uri string, dis bool) error
+	set_subscribe_state(uri string, s int) error
 	save_one(f feed.FeedSource) error
 	findbatch(uris []string) ([]feed.FeedSource, error)
 	expired(beforeunxtime int64) ([]feed.FeedSource, error)

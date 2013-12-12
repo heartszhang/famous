@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"github.com/heartszhang/unixtime"
 	"io"
-	"net/url"
 	"os"
 	"strings"
 )
@@ -116,9 +115,6 @@ func (this rss_channel) to_source(local string) FeedSource {
 
 	if this.Image != nil {
 		v.Logo = this.Image.Url // this may be relative
-	}
-	if v.Logo == "" {
-		v.Logo = favicon(this.website())
 	}
 	return v
 }
@@ -243,15 +239,4 @@ func (this rss_item) to_feed_entry(feed_url string) FeedEntry {
 // file has been converted to utf-8, so we just ignore internal encoding-declaration
 func charset_reader_passthrough(charset string, input io.Reader) (io.Reader, error) {
 	return input, nil
-}
-
-func favicon(uri string) string {
-	u, err := url.Parse(uri)
-	if err == nil {
-		u, err = u.Parse("/favicon.ico")
-	}
-	if err == nil {
-		return u.String()
-	}
-	return ""
 }

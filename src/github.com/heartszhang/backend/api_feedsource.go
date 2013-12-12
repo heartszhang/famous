@@ -69,13 +69,33 @@ func feedsource_show(uri string) (feed.FeedEntity, error) {
 	return fs, err
 }
 
+func feedsource_mark_subscribed(sources []feed.FeedSource) []feed.FeedSource {
+	var uris []string
+	u2fs := make(map[string]bool)
+	for i := 0; i < len(sources); i++ {
+		uri := sources[i].Uri
+		uris = append(uris, uri)
+	}
+	subed, _ := new_feedsource_operator().findbatch(uris)
+	for _, s := range subed {
+		u2fs[s.Uri] = true
+	}
+	var v []feed.FeedSource
+	for _, s := range sources {
+		if _, ok := u2fs[s.Uri]; ok {
+			s.SubscribeState = feed.FeedSourceSubscribeStateSubscribed
+		}
+		v = append(v, s)
+	}
+	return v
+}
 func feedsource_find(q string) ([]feed.FeedEntity, error) {
 	svc := google.NewGoogleFeedApi(refer, backend_context.config.FeedSourceFolder)
 	v, err := svc.Find(q, backend_context.config.Language)
 	if err != nil {
 		return v, err
 	}
-	uris := make([]string, 0)
+	var uris []string
 	for _, ve := range v {
 		uris = append(uris, ve.Uri)
 	}

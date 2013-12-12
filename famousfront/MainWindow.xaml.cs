@@ -9,7 +9,7 @@ namespace famousfront
   /// </summary>
   public partial class MainWindow : Elysium.Controls.Window
   {
-    MainViewModel _main_viewmodel = null;
+//    MainViewModel _main_viewmodel = null;
     public MainWindow()
     {
       InitializeComponent();
@@ -17,6 +17,7 @@ namespace famousfront
       SetIsMainWindow(this, true);
       Elysium.Parameters.General.SetShadowBrush(this, Brushes.Black);
     }
+    /*
     protected override void OnInitialized(EventArgs e)
     {
       base.OnInitialized(e);
@@ -24,7 +25,8 @@ namespace famousfront
       if (locator == null)
         return;
       _main_viewmodel = locator.MainViewModel;
-      _content.Content = _main_viewmodel;
+      Content = _main_viewmodel;
     }
+     * */
   }
 }

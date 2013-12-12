@@ -4,4 +4,8 @@
   {
 
   }
+  internal class ShowMessagesView : GenericMessage
+  {
+
+  }
 }

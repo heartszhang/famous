@@ -6,21 +6,12 @@
                     xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     mc:Ignorable="d">
 	<DataTemplate DataType="{x:Type vm:FeedSourcesViewModel}" d:IsDesignTimeCreatable="false">
-	  <DataTemplate.Resources>
-	    <Style TargetType="{x:Type ListBox}" x:Key="FeedSourcesListStyle" BasedOn="{StaticResource {x:Type ListBox}}" >
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
-      </Style>
-      <Style x:Key="FeedSourceItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-        <Setter Property="Padding" Value="{Binding Path=(params:General.BoldPaddingValue), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
-      </Style>
+    <DataTemplate.Resources>
+      <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}"/>
     </DataTemplate.Resources>
-		<Grid >
+    <Grid Background="{StaticResource BackgroundBrush}">
       <ListBox x:Name="_sources" ItemsSource="{Binding Sources}"
-               SelectedItem="{Binding Selected,Mode=TwoWay}"
-               Style="{StaticResource FeedSourcesListStyle}"/>
+               SelectedItem="{Binding Selected,Mode=TwoWay}"/>
 		</Grid>
 	</DataTemplate>
 </ResourceDictionary>

@@ -1,11 +1,21 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
   <DataTemplate x:Key="OfflineTemplate">
     <Grid Background="Gray" Opacity="0.2"></Grid>
   </DataTemplate>
   <DataTemplate DataType="{x:Type vm:MainViewModel}">
-    <ContentPresenter x:Name="_content" Content="{x:Null}"/>
+    <Grid params:General.TextFontSize="{StaticResource FiveTextSize}"
+        params:General.ContentFontSize="{StaticResource LittleFourTextSize}"
+        params:General.TitleFontSize="{StaticResource ThreeTextSize}"
+        params:General.HeaderFontSize="{StaticResource LittleTwoTextSize}">
+      <ContentPresenter x:Name="_content" Content="{x:Null}"/>
+      <DockPanel x:Name="_docker_container"></DockPanel>
+      <Grid x:Name="_overlap_container">
+        <ContentPresenter Content="{Binding OverlappedViewModel}"/>
+      </Grid>
+    </Grid>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding Status}" Value="READY">
         <Setter TargetName="_content" Property="Content" Value="{Binding ContentViewModel}"/>

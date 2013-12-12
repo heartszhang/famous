@@ -3,6 +3,7 @@ package backend
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/heartszhang/feed"
 	"github.com/qiniu/log"
 	"io"
 	"net/http"
@@ -19,6 +20,7 @@ func init() {
 
 	http.HandleFunc("/api/link/origin.json", webapi_link_origin)   // ?uri=
 	http.HandleFunc("/api/suggest/bing.json", webapi_suggest_bing) // ?q=
+	http.HandleFunc("/api/opml/upload.json", webapi_opml_upload)
 }
 
 const uint64_bits int = 64
@@ -73,9 +75,9 @@ func webapi_update_popup(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.RequestURI())
 	switch v, err := update_popup(); err {
 	case nil:
-		webapi_write_error(w, err)
-	default:
 		webapi_write_as_json(w, v)
+	default:
+		webapi_write_error(w, err)
 	}
 }
 
@@ -88,6 +90,33 @@ func webapi_meta_cleanup(w http.ResponseWriter, r *http.Request) {
 func webapi_link_origin(w http.ResponseWriter, r *http.Request) {
 	webapi_write_error(w, nil)
 	log.Println(r.URL.RequestURI())
+}
+
+const (
+	_1M = 1024 * 1024
+)
+
+func webapi_opml_upload(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(_1M)
+	if err != nil {
+		webapi_write_error(w, err)
+	}
+	for _, headers := range r.MultipartForm.File {
+		for _, header := range headers {
+			f, err := header.Open()
+			defer f.Close()
+			fs, err := feed.OpmlExportFeedSource(f)
+			switch err {
+			case nil:
+				fs = feedsource_mark_subscribed(fs)
+				webapi_write_as_json(w, fs)
+			default:
+				webapi_write_error(w, err)
+			}
+			return
+		}
+	}
+	webapi_write_error(w, nil)
 }
 
 type counted_writer struct {

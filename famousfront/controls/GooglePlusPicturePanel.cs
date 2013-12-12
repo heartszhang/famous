@@ -64,6 +64,8 @@ namespace famousfront.controls
       {
         mheight = first_line;
       }
+      if (double.IsInfinity(avail.Width))
+        avail.Width = unit_width;
       return new Size(avail.Width, mheight);
     }
 

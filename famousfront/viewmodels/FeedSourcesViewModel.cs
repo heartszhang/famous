@@ -28,6 +28,8 @@ namespace famousfront.viewmodels
       var s = _sources.FirstOrDefault(v => obj.uri == v.Uri);
       if (s == null)
         return;
+      if (obj.entries == null)
+        return;
       s.AddUnreadCount(obj.entries.Length);
     }
 

@@ -10,59 +10,15 @@
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntriesViewModel}" d:IsDesignTimeCreatable="false">
     <DataTemplate.Resources>
-      <!--
-      <Style TargetType="{x:Type ListBox}" x:Key="FeedEntriesListStyle" BasedOn="{StaticResource {x:Type ListBox}}" >
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/> 
-        <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
-        <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
-        <Setter Property="Background" Value="Transparent"/>
-      </Style>
-      -->
-      <Style x:Key="FeedEntryItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">       
-<!--        <Setter Property="Margin" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
-        <Setter Property="Padding" Value="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.BoldPadding), Mode=OneWay}"/>
-        -->
-        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
-        <Setter Property="Template">
-          <Setter.Value>
-            <ControlTemplate TargetType="{x:Type ListBoxItem}">
-              <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                
-                <Grid >
-                  <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                </Grid>
-              </Border>
-            </ControlTemplate>
-          </Setter.Value>
-        </Setter>
-        <Style.Triggers>
-          <MultiTrigger>
-            <MultiTrigger.Conditions>
-              <Condition Property="IsEnabled" Value="True" />
-              <Condition Property="IsSelected" Value="True" />
-            </MultiTrigger.Conditions>
-            <MultiTrigger.Setters>
-              <Setter Property="Background" Value="{StaticResource SemiPaleBrush}" />
-              <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}" />
-            </MultiTrigger.Setters>
-          </MultiTrigger>
-          <MultiTrigger>
-            <MultiTrigger.Conditions>
-              <Condition Property="IsEnabled" Value="False" />
-              <Condition Property="IsSelected" Value="True" />
-            </MultiTrigger.Conditions>
-            <MultiTrigger.Setters>
-              <Setter Property="Background" Value="{StaticResource DisabledBrush}" />
-              <Setter Property="Foreground" Value="{StaticResource ContrastBrush}" />
-            </MultiTrigger.Setters>
-          </MultiTrigger>
-        </Style.Triggers>
+      <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}">
+        <Style.Resources>
+          <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource BasicListBoxItemStyle}">
+            <Setter Property="Padding" Value="{Binding Source={StaticResource _locator}, Path=Flags.EntryMargin}"/>
+          </Style>
+        </Style.Resources>
       </Style>
     </DataTemplate.Resources>
-    <Grid><!-- Background="{StaticResource SemiPaleBrush}">-->
+    <Grid Background="{StaticResource BackgroundBrush}">
       <ListBox ItemsSource="{Binding Entries}" >
         <i:Interaction.Behaviors>
           <ctrls:ListBoxScrollToTopBehavior />
@@ -73,7 +29,8 @@
             <GroupStyle.HeaderTemplate>
               <DataTemplate DataType="{x:Type CollectionViewGroup}">
                 <TextBlock Text="{Binding Name}" TextElement.FontWeight="SemiBold"
-                           Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource Self}}"
+                           Background="{StaticResource BackgroundBrush}"
+                           Padding="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource Self}}"
                            TextElement.FontSize="{Binding Path=(params:General.TitleFontSize), RelativeSource={RelativeSource Self}}"/>
               </DataTemplate>
             </GroupStyle.HeaderTemplate>
@@ -82,11 +39,11 @@
                 <Setter Property="Template">
                   <Setter.Value>
                     <ControlTemplate TargetType="{x:Type GroupItem}">
-                      <StackPanel Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource Self}}">
+                      <VirtualizingStackPanel>
                         <ContentPresenter x:Name="PART_Header"/>
                         <Rectangle StrokeThickness="1" Stroke="{StaticResource SemiPaleBrush}"/>
-                        <ItemsPresenter x:Name="ItemsPresenter" Margin="0"/>
-                      </StackPanel>
+                        <ItemsPresenter x:Name="ItemsPresenter"/>
+                      </VirtualizingStackPanel>
                     </ControlTemplate>
                   </Setter.Value>
                 </Setter>

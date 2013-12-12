@@ -7,6 +7,6 @@
   <SolidColorBrush Color="#FFDEDEDE" x:Key="PaleBrush"/>
   <SolidColorBrush Color="#FFEFEFEF" x:Key="SemiPaleBrush"/>
   <SolidColorBrush Color="#8FEFEFEF" x:Key="SemiTransparentForegroundBrush"/>
-  <!-- <SolidColorBrush Color="#7FDEDEDE" x:Key="SemiPaleBrush"/>-->
+  <SolidColorBrush Color="#8FFDFDFD" x:Key="SemiTransparentPaleBrush"/>
 
 </ResourceDictionary>

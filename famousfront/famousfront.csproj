@@ -134,6 +134,9 @@
     <Compile Include="datamodels\FeedTag.cs" />
     <Compile Include="datamodels\FeedTitle.cs" />
     <Compile Include="datamodels\FeedTypes.cs" />
+    <Compile Include="designtime\WindowProto.xaml.cs">
+      <DependentUpon>WindowProto.xaml</DependentUpon>
+    </Compile>
     <Compile Include="messages\BackendError.cs" />
     <Compile Include="messages\BackendInitialized.cs" />
     <Compile Include="messages\BackendInitializing.cs" />
@@ -210,6 +213,10 @@
     <Page Include="designtime\Prototype.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="designtime\WindowProto.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -356,14 +363,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\" />
+    <Folder Include="SampleData\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="gnote.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <DesignData Include="SampleData\BootstrapViewModelSampleData.xaml" />
-    <DesignData Include="SampleData\FeedSourcesViewModelSampleData.xaml" />
-    <DesignData Include="SampleData\FeedSourceViewModelSampleData.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="title-32.png" />

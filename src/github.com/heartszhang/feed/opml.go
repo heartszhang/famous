@@ -2,7 +2,7 @@ package feed
 
 import (
 	"encoding/xml"
-	"os"
+	"io"
 )
 
 //<head><title/></head> is omitted
@@ -24,22 +24,16 @@ type opml_outline struct {
 	Children    []opml_outline `xml:"outline,omitempty" bson:"children,omitempty" json:"omitempty"`
 }
 
-func CreateFeedsCategoryOpml(opmlfile string) ([]FeedSource, error) {
-	return feeds_category_create_opml(opmlfile)
+func OpmlExportFeedSource(data io.Reader) ([]FeedSource, error) {
+	return feeds_category_create_opml(data)
 }
 
-func feeds_category_create_opml(filepath string) ([]FeedSource, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
+func feeds_category_create_opml(data io.Reader) ([]FeedSource, error) {
 	var o opml
-	d := xml.NewDecoder(f)
+	d := xml.NewDecoder(data)
 	d.CharsetReader = charset_reader_passthrough
 
-	err = d.Decode(&o)
+	err := d.Decode(&o)
 	return o.to_feedscategory(), err
 }
 

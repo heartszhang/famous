@@ -25,7 +25,7 @@
 
     </DataTemplate.Resources>
     <Grid>
-      <Grid Background="{StaticResource SemiPaleBrush}">
+      <Grid>
         <Grid x:Name="_thumb" Visibility="{Binding Url, Mode=OneWay,Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}">
           <Image Source="{Binding Url,Mode=OneWay,Converter={StaticResource NullImageConverter}}" StretchDirection="DownOnly" Stretch="UniformToFill" MaxHeight="331"/>
         </Grid>

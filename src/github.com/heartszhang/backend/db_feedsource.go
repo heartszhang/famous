@@ -44,9 +44,9 @@ func (this feedsource_op) drop(uri string) error {
 	})
 }
 
-func (this feedsource_op) disable(uri string, dis bool) error {
+func (this feedsource_op) set_subscribe_state(uri string, s int) error {
 	return do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"disabled": dis}})
+		return coll.Update(bson.M{"uri": uri}, bson.M{"$set": bson.M{"subscribe_state": s}})
 	})
 }
 

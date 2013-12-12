@@ -6,17 +6,19 @@
   xmlns:metro="http://schemas.codeplex.com/elysium"
   xmlns:params="http://schemas.codeplex.com/elysium/params"
   mc:Ignorable="d" x:Class="famousfront.MainWindow"
+  HasDropShadow="True"
   Background="{StaticResource BackgroundBrush}"
   Icon="title-32.png"
   WindowStartupLocation="CenterScreen"
   DataContext="{StaticResource _locator}"
+  Content="{Binding Source={StaticResource _locator}, Path=Main}"
   FontFamily="{StaticResource LightFont}"
   TextElement.FontFamily="{StaticResource LightFont}"
-  FocusManager.FocusedElement="{Binding ElementName=_content}"
   Title="FamousFront" Height="960" Width="1400" x:Name="root">
   <Window.Resources>
 
   </Window.Resources>
+  
   <metro:Window.TitleBar>
     <Grid>
       <Grid.ColumnDefinitions>
@@ -36,8 +38,10 @@
       </StackPanel>
     </Grid>
   </metro:Window.TitleBar>
+ 
   <metro:Window.InputBindings>
     <KeyBinding Key="Q" Command="{Binding FindFeedSourceCommand}"/>
+    <KeyBinding Key="M" Command="{Binding ShowMessagesCommand}"/>
   </metro:Window.InputBindings>
   <!--
   <metro:Window.ApplicationBar>
@@ -49,13 +53,8 @@
       </metro:CommandButton>
     </metro:ApplicationBar>
   </metro:Window.ApplicationBar>
-   -->
-  <Grid
-  params:General.TextFontSize="{StaticResource FiveTextSize}"
-  params:General.ContentFontSize="{StaticResource LittleFourTextSize}"
-  params:General.TitleFontSize="{StaticResource ThreeTextSize}"
-  params:General.HeaderFontSize="{StaticResource LittleTwoTextSize}"    >
+  
+  <Grid  >
     <ContentPresenter x:Name="_content"/>
-    <!-- a event stack should be here-->
-  </Grid>
+  </Grid> -->
 </metro:Window>

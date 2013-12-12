@@ -3,6 +3,7 @@
                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                     xmlns:vm="clr-namespace:famousfront.viewmodels" 
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:ctrls="clr-namespace:famousfront.controls"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
   <DataTemplate DataType="{x:Type vm:ContentViewModel}" d:IsDesignTimeCreatable="false">
@@ -18,7 +19,7 @@
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
       </Grid.ColumnDefinitions>
-      <Grid Grid.Column="1" x:Name="_left" >
+      <Grid Grid.Column="1" x:Name="_center" Background="{StaticResource SemiPaleBrush}">
         <Grid.RenderTransform>
           <TransformGroup>
             <ScaleTransform/>
@@ -27,11 +28,17 @@
             <TranslateTransform x:Name="_entries_trans" />
           </TransformGroup>
         </Grid.RenderTransform>
-        <ContentPresenter Content="{Binding FeedEntriesViewModel}"/>
+        <ContentPresenter Content="{Binding FeedEntriesViewModel}" MaxWidth="{Binding Source={StaticResource _locator}, Path=Flags.ContentMaxWidth}"/>
       </Grid>
       <Grid Width="{Binding Flags.FeedSourceWidth, Source={StaticResource _locator}}" 
-            HorizontalAlignment="Left" Grid.ColumnSpan="3" Grid.Column="0"
+            HorizontalAlignment="Left" 
+            Grid.ColumnSpan="3" 
+            Grid.Column="0"
+            x:Name="_right"
             Visibility="{Binding ShowFeedSources, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+        <Grid.Effect>
+           <DropShadowEffect Color="{Binding RelativeSource={RelativeSource Self}, Path=(params:General.ShadowBrush).(SolidColorBrush.Color)}" BlurRadius="4" ShadowDepth="2" Direction="315" Opacity="0.3" />
+        </Grid.Effect>
         <ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
       </Grid>
       <ContentPresenter Grid.Column="0" VerticalAlignment="Center"
@@ -46,7 +53,7 @@
     </Grid>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding ShowFeedSources}" Value="True">
-        <Setter TargetName="_left" Property="RenderTransform">
+        <Setter TargetName="_center" Property="RenderTransform">
           <Setter.Value>
             <TranslateTransform X="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}" />
           </Setter.Value>

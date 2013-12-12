@@ -160,6 +160,7 @@ namespace famousfront.viewmodels
         if (entity == null)
           break;
         MessengerInstance.Send(entity);
+        ServiceLocator.Log("pub-sub: {0}", entity.name??entity.uri);
       }
     }
   }

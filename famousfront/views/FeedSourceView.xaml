@@ -35,7 +35,8 @@
 
     </StackPanel>
       <Grid Grid.Column="0" Background="{StaticResource SemiPaleBrush}" Width="32" Height="32">
-        <Image Source="{Binding Logo,Mode=OneWay,Converter={StaticResource NullImageConverter}, IsAsync=True}"/>
+        <Image StretchDirection="DownOnly"
+          Source="{Binding Logo,Mode=OneWay,Converter={StaticResource NullImageConverter}, IsAsync=True}"/>
       </Grid>
     </Grid>
     <DataTemplate.Triggers>

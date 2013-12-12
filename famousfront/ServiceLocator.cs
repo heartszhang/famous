@@ -18,7 +18,6 @@ namespace famousfront
 {
   internal class ServiceLocator
   {
-    //        private static ILogger _log = LogManagerFactory.DefaultLogManager.GetLogger<ServiceLocator>();
     private static MainViewModel _main;
 
     private static SettingsViewModel _settings;
@@ -32,7 +31,7 @@ namespace famousfront
     /// <summary>
     /// Gets the Main property.
     /// </summary>
-    internal static MainViewModel Main
+    public static MainViewModel Main
     {
       get
       {
@@ -140,6 +139,7 @@ namespace famousfront
       {
         using (var p = Process.Start(BackendModule))
         {
+          Messenger.Default.Send(new messages.BackendError { reason = BackendModule });
         }
       });
       await StartKeepaliver();
@@ -246,6 +246,20 @@ namespace famousfront
       Messenger.Default.Send(new ShowFindFeedSourceView());
     }
 
+    ICommand _show_messages_view;
+    public ICommand ShowMessagesCommand
+    {
+      get { return _show_messages_view ?? (_show_messages_view = show_messages_view()); }
+    }
+    ICommand show_messages_view()
+    {
+      return new RelayCommand(ExecuteShowMessageView);
+    }
+    void ExecuteShowMessageView()
+    {
+      Messenger.Default.Send(new ShowMessagesView());
+    }
+
     ICommand _hyperlink_navigate;
     public ICommand HyperlinkNavigateCommand
     {
@@ -260,6 +274,11 @@ namespace famousfront
       if (url == null)
         return;
       using (var p = Process.Start(url.ToString())) { };
+    }
+
+    internal static void Log(string format, params object[] args){
+      var m = string.Format(format, args);
+      Messenger.Default.Send(new messages.BackendError { reason = m });
     }
   }
 }

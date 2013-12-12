@@ -115,9 +115,6 @@ func (this atom_feed) to_feed_source(local string) FeedSource {
 	if len(this.Authors) > 0 && this.Logo == "" && this.Authors[0].Avatar != nil {
 		f.Logo = this.Authors[0].Avatar.Src
 	}
-	if f.Logo == "" {
-		f.Logo = favicon(f.WebSite)
-	}
 	return f
 }
 

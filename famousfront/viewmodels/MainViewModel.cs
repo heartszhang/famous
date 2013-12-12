@@ -16,6 +16,7 @@ namespace famousfront.viewmodels
     {
       MessengerInstance.Register<BackendInitialized>(this, OnBackendInitialized);
       MessengerInstance.Register<ShowFindFeedSourceView>(this, ExecuteShowFindFeedSourceView);
+      MessengerInstance.Register<ShowMessagesView>(this, ExecuteShowMessagesView);
       _content = new ContentViewModel();
       _offline = new OfflineViewModel();
       _booting = new BootstrapViewModel();
@@ -66,7 +67,13 @@ namespace famousfront.viewmodels
         Set(ref _settings, value);
       }
     }
-
+    OverlappedViewModel _overlapped;
+    public OverlappedViewModel OverlappedViewModel
+    {
+      get { return _overlapped; }
+      set { Set(ref _overlapped, value); }
+    }
+    MessagesViewModel _messages = new MessagesViewModel();
     FeedSourceFindViewModel _feedsourcefind;
     public FeedSourceFindViewModel FeedSourceFindViewModel
     {
@@ -114,7 +121,18 @@ namespace famousfront.viewmodels
       ShowFeedSourceFindView = !ShowFeedSourceFindView;
       if (!ShowFeedSourceFindView)
       {
-        //            FeedSourceFindViewModel = null;  // reserve previous search
+      }
+    }
+
+    private void ExecuteShowMessagesView(ShowMessagesView obj)
+    {
+      if (OverlappedViewModel == _messages)
+      {
+        OverlappedViewModel = null;
+      }
+      else
+      {
+        OverlappedViewModel = _messages;
       }
     }
   }
