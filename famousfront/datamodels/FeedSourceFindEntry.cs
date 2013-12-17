@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace famousfront.datamodels
 {
+  /*
   [DataContract]
 internal class FeedSourceFindEntry
 {
@@ -16,4 +17,5 @@ internal class FeedSourceFindEntry
     [DataMember(EmitDefaultValue = false)]
     public bool subscribed { get; set; }
 }
+   * */
 }

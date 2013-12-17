@@ -13,7 +13,7 @@
       <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}">
         <Style.Resources>
           <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource BasicListBoxItemStyle}">
-            <Setter Property="Padding" Value="{Binding Source={StaticResource _locator}, Path=Flags.EntryMargin}"/>
+            <Setter Property="Padding" Value="{Binding Source={StaticResource _locator}, Path=FrontFlags.EntryMargin}"/>
           </Style>
         </Style.Resources>
       </Style>

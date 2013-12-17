@@ -117,7 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DayBeforeYeserday" xml:space="preserve">
+    <value>前天</value>
+  </data>
   <data name="EventHandlerUtils_MakeWeak_Only_instance_methods_are_supported_" xml:space="preserve">
     <value>Only instance methods are supported.</value>
+  </data>
+  <data name="Friday" xml:space="preserve">
+    <value>周五</value>
+  </data>
+  <data name="Monday" xml:space="preserve">
+    <value>周一</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>周六</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>周日</value>
+  </data>
+  <data name="ThreeDaysAgo" xml:space="preserve">
+    <value>大前天</value>
+  </data>
+  <data name="Thusday" xml:space="preserve">
+    <value>周四</value>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>今天</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>周二</value>
+  </data>
+  <data name="Wednesday" xml:space="preserve">
+    <value>周三</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>昨天</value>
   </data>
 </root>

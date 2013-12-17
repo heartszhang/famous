@@ -10,13 +10,17 @@ namespace famousfront.viewmodels
 {
   internal class FeedSourceViewModel : core.TaskViewModel
   {
+    readonly ICommand _drop_self;
+    readonly ICommand _goto_page;
     int _page;
     static readonly DateTime Utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-    readonly FeedSource _ = null;
+    readonly FeedSource _;
     internal FeedSourceViewModel(FeedSource val)
     {
       _ = val;
       News = _.description;
+      _goto_page = new RelayCommand<int>(ExecuteGotoPage);
+      _drop_self = new RelayCommand(ExecuteDropSelf);
       LoadUnreadCount();
     }
     public string Category { get { return _category ?? first_or_default_category(); } }
@@ -24,28 +28,23 @@ namespace famousfront.viewmodels
     public string Uri { get { return _.uri; } }
     public string Description { get { return _.description; } }
 
-    ICommand _goto_page;
     public ICommand GotoPageCommand
     {
-      get { return _goto_page ?? (_goto_page = goto_page()); }
+      get { return _goto_page ; }
     }
-    ICommand goto_page()
-    {
-      return new RelayCommand<int>(ExecuteGotoPage);
-    }
-    ICommand _drop_self;
+
     public ICommand DropSelfCommand
     {
-      get { return _drop_self ?? (_drop_self = drop_self()); }
+      get { return _drop_self ; }
     }
     public string Logo { get { return logo(); }  }
     string logo()
     {
-      var hint = _.logo;
-      if (string.IsNullOrEmpty(hint))
-        hint = _.website;
-      var rel = "/api/image/icon?uri=" + System.Uri.UnescapeDataString(hint);
-      var x = ServiceLocator.BackendPath(rel);
+      var uri = _.logo;
+      if (string.IsNullOrEmpty(uri))
+        uri = _.website;
+      //var rel = "/api/image/icon?uri=" + System.Uri.UnescapeDataString(hint);
+      var x = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.ImageIcon, new{uri });
       return x;
     }
     string _news;
@@ -72,7 +71,7 @@ namespace famousfront.viewmodels
     readonly string _category = null;
     private string first_or_default_category()
     {
-      return _.categories == null || _.categories.Length <= 0 ? "" : _.categories[0];
+      return _.categories.FirstOrDefault();
     }
     private bool append_category(string val)
     {
@@ -80,20 +79,17 @@ namespace famousfront.viewmodels
       {
         return false;
       }
-      var n = new string[] { val };
+      var n = new[] { val };
       _.categories = n.Concat(_.categories).ToArray();
       return true;
     }
 
-    ICommand drop_self()
-    {
-      return new RelayCommand(ExecuteDropSelf);
-    }
     async void ExecuteDropSelf()
     {
       Debug.Assert(!string.IsNullOrEmpty(_.uri));
-      var rel = "/api/feed_source/unsubscribe.json?uri=" + System.Uri.EscapeDataString(_.uri);
-      var s = await HttpClientUtils.Get<famousfront.datamodels.BackendError>(ServiceLocator.BackendPath(rel));
+      //var rel = "/api/feed_source/unsubscribe.json?uri=" + System.Uri.EscapeDataString(_.uri);
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.FeedSourceUnsubscribe, new { _.uri });
+      var s = await HttpClientUtils.Get<famousfront.datamodels.BackendError>(uri);
       var code = s.code != 0 ? s.code : s.data.code;
       var reason = s.code != 0 ? s.reason : s.data.reason;
       MessengerInstance.Send(new DropFeedSource() { model = this, code = code, reason = reason });
@@ -101,8 +97,9 @@ namespace famousfront.viewmodels
     async void LoadUnreadCount()
     {      
       IsBusying = true;
-      var rel = "/api/feed_entry/source/unread_count.json?uri=" + System.Uri.EscapeDataString(_.uri);
-      var s = await HttpClientUtils.Get<int>(ServiceLocator.BackendPath(rel));
+      //var rel = "/api/feed_entry/source/unread_count.json?uri=" + System.Uri.EscapeDataString(_.uri);
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.FeedEntrySourceUnreadcount, new { _.uri });
+      var s = await HttpClientUtils.Get<int>(uri);
       IsBusying = false;
       if (s.code != 0)
       {

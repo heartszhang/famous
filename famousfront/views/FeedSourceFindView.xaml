@@ -11,8 +11,8 @@
                              BorderThickness="0" x:Name="_returnback">
           <Path Width="18" Height="18" Stroke="{Binding BorderBrush,RelativeSource={RelativeSource AncestorType={x:Type metro:CommandButton}}}" StrokeThickness="3.5" Stretch="Uniform" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="{StaticResource PathDataLeftArrow}" />
         </metro:CommandButton>
-        <Grid Height="{Binding Flags.SearchBoxTopOffset,Mode=OneWay,Source={StaticResource _locator}}"/>
-        <Grid Margin="{Binding Flags.SearchBoxMargin,Source={StaticResource _locator}}">
+        <Grid Height="{Binding FrontFlags.SearchBoxTopOffset,Mode=OneWay,Source={StaticResource _locator}}"/>
+        <Grid Margin="{Binding FrontFlags.SearchBoxMargin,Source={StaticResource _locator}}">
           <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto"/>
@@ -35,8 +35,8 @@
             </Button>
           </Grid>
         </Grid>
-        
-        <Grid Margin="{Binding Flags.SearchBoxMargin,Source={StaticResource _locator}}">
+
+        <Grid Margin="{Binding FrontFlags.SearchBoxMargin,Source={StaticResource _locator}}">
           <ContentPresenter Content="{Binding Content}"/>
           
          <!-- <ItemsControl ItemsSource="{Binding Sources}" HorizontalContentAlignment="Stretch"/>-->

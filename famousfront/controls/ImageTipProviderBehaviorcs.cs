@@ -37,13 +37,13 @@ namespace famousfront.controls
       AssociatedObject.MouseLeave += (new MouseEventHandler(ImageMouseLeave)).MakeWeakSpecial(eh => AssociatedObject.MouseLeave -= eh);
     }
 
-    async void ImageMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    async void ImageMouseLeave(object sender, MouseEventArgs e)
     {
       var iu = GetFeedImage(AssociatedObject);
       if (iu == null )
         return;
       var prevaid = ++action_id;
-      await Task.Delay(ServiceLocator.Flags.ImageTipHideDelay).ConfigureAwait(false);
+      await Task.Delay(ServiceLocator.FrontFlags.ImageTipHideDelay).ConfigureAwait(false);
       await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
       {
         if (AssociatedObject.IsMouseOver)
@@ -54,13 +54,13 @@ namespace famousfront.controls
       }), System.Windows.Threading.DispatcherPriority.ContextIdle);
     }
 
-    async void ImageMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+    async void ImageMouseEnter(object sender, MouseEventArgs e)
     {
       var iu = GetFeedImage(AssociatedObject);
       if (iu == null )
         return;
       var prevaid = ++action_id;
-      await Task.Delay(ServiceLocator.Flags.ImageTipShowDelay).ConfigureAwait(false);
+      await Task.Delay(ServiceLocator.FrontFlags.ImageTipShowDelay).ConfigureAwait(false);
       await DispatcherHelper.UIDispatcher.BeginInvoke((Action)(() =>
       {
         if (prevaid != action_id)

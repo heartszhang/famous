@@ -18,7 +18,7 @@ namespace famousfront.controls
     }
     void OnItemsSourceChanged(object o, EventArgs args)
     {
-      var sc = VisualTreeExtensions.FindVisualChild<ScrollViewer>(AssociatedObject) as ScrollViewer;
+      var sc = VisualTreeExtensions.FindVisualChild<ScrollViewer>(AssociatedObject);
       if (sc == null)
         return;
       sc.ScrollToTop();

@@ -98,6 +98,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CommandsService.cs" />
     <Compile Include="controls\ExpandableStackPanel.cs" />
     <Compile Include="controls\GooglePlusPanel.cs" />
     <Compile Include="controls\ImageTipProviderBehaviorcs.cs" />
@@ -129,6 +130,7 @@
     <Compile Include="datamodels\FeedMediaTypes.cs" />
     <Compile Include="datamodels\FeedsBackendConfig.cs" />
     <Compile Include="datamodels\FeedSource.cs" />
+    <Compile Include="datamodels\FeedSourceSubscribeStates.cs" />
     <Compile Include="datamodels\FeedSourceTypes.cs" />
     <Compile Include="datamodels\FeedStatuses.cs" />
     <Compile Include="datamodels\FeedTag.cs" />
@@ -156,10 +158,13 @@
     <Compile Include="utils\VisualTreeExtensions.cs" />
     <Compile Include="utils\WeakEventHandlerSpecial.cs" />
     <Compile Include="viewmodels\FeedSourceFindEntryViewModel.cs" />
+    <Compile Include="viewmodels\FeedSourceFindResultViewModel.cs" />
     <Compile Include="viewmodels\FeedSourceFindViewModel.cs" />
     <Compile Include="utils\FriendlyDateTime.cs" />
+    <Compile Include="viewmodels\FeedSourceShowResultViewModel.cs" />
     <Compile Include="viewmodels\ImageBaseViewModel.cs" />
     <Compile Include="viewmodels\ImageTipViewModel.cs" />
+    <Compile Include="viewmodels\MessagesViewModel.cs" />
     <Compile Include="views\FeedEntryTemplateSelector.cs" />
     <Compile Include="controls\FlowTextBlock.cs" />
     <Compile Include="controls\GooglePlusPicturePanel.cs" />
@@ -263,7 +268,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="views\FeedSourceFindResultView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="views\FeedSourceFindView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\FeedSourceShowResultView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

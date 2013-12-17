@@ -1,37 +1,64 @@
-﻿using famousfront.core;
+﻿using System.CodeDom;
+using System.Linq;
+using famousfront.core;
 using famousfront.datamodels;
 using famousfront.messages;
 using famousfront.utils;
 using famousfront.viewmodels;
-using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
-//using MetroLog;
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace famousfront
 {
-  internal class ServiceLocator
+  internal static class BackendService
   {
-    private static MainViewModel _main;
+    internal static string Compile(string address, string pattern, object paras = null, object paths = null)
+    {
+      var ps = new string[2]{pattern, null};
 
-    private static SettingsViewModel _settings;
-    static Flags _flags = new Flags();
+      if (paths != null)
+      {
+        ps[0] = paths.QueryPath(pattern);
+      }
+      if (paras != null)
+      {
+        ps[1] = paras.QueryString();
+      }
+      var rel = string.Join("?", ps.Where(s => !string.IsNullOrEmpty(s)));
+      return "http://" + address + rel;
+    }
+
+    internal const string Tick = "/api/tick.json";
+    internal const string FeedSourceSubscribe = "/api/feed_source/subscribe.json";
+    internal const string FeedSourceFind = "/api/feed_source/find.json";
+    internal const string ImageDimension = "/api/image/dimension.json";
+    internal const string ImageDescription = "/api/image/description.json";
+    internal const string Meta = "/api/meta.json";
+    internal const string UpdatePopup = "/api/update/popup.json";
+    internal const string FeedEntryUnread = "/api/feed_entry/unread.json";
+    internal const string FeedEntrySourceUnreadcount = "/api/feed_entry/source/unread_count.json";
+    internal const string FeedEntryFulldoc = "/api/feed_entry/fulldoc.json";
+    internal const string FeedSourceAll = "/api/feed_source/all.json";
+    internal const string FeedSourceShow = "/api/feed_source/show.json";
+    internal const string FeedSourceUnsubscribe = "/api/feed_source/unsubscribe.json";
+    internal const string ImageIcon = "/api/image/icon";
+
+  }
+  internal class ServiceLocator : CommandsService
+  {
     static FeedsBackendConfig _backend;
-
-    public static Flags Flags
+    static FrontFlags _flags = new FrontFlags();
+    public static FrontFlags FrontFlags
     {
       get { return _flags; }
     }
-    /// <summary>
-    /// Gets the Main property.
-    /// </summary>
-    public static MainViewModel Main
+
+    private static MainViewModel _main;
+    public static MainViewModel MainViewModel
     {
       get
       {
@@ -44,53 +71,6 @@ namespace famousfront
       }
     }
 
-    /// <summary>
-    /// Gets the Settings property.
-    /// </summary>
-    internal static SettingsViewModel Settings
-    {
-      get
-      {
-        if (_settings == null)
-        {
-          CreateSettings();
-        }
-
-        return _settings;
-      }
-    }
-
-    /// <summary>
-    /// Gets the Main property.
-    /// </summary>
-    [SuppressMessage("Microsoft.Performance",
-        "CA1822:MarkMembersAsStatic",
-        Justification = "This non-static member is needed for data binding purposes.")]
-    internal MainViewModel MainViewModel
-    {
-      get
-      {
-        return Main;
-      }
-    }
-
-    /// <summary>
-    /// Gets the Settings property.
-    /// </summary>
-    [SuppressMessage("Microsoft.Performance",
-        "CA1822:MarkMembersAsStatic",
-        Justification = "This non-static member is needed for data binding purposes.")]
-    internal SettingsViewModel SettingsViewModel
-    {
-      get
-      {
-        return Settings;
-      }
-    }
-
-    /// <summary>
-    /// Provides a deterministic way to delete the Main property.
-    /// </summary>
     internal static void ClearMain()
     {
       if (_main != null)
@@ -98,20 +78,7 @@ namespace famousfront
       _main = null;
     }
 
-    /// <summary>
-    /// Provides a deterministic way to delete the Settings property.
-    /// </summary>
-    internal static void ClearSettings()
-    {
-      if (_settings != null)
-        _settings.Cleanup();
-      _settings = null;
-    }
-
-    /// <summary>
-    /// Provides a deterministic way to create the Main property.
-    /// </summary>
-    internal static void CreateMain()
+    static void CreateMain()
     {
       if (_main == null)
       {
@@ -119,22 +86,11 @@ namespace famousfront
       }
     }
 
-    /// <summary>
-    /// Provides a deterministic way to create the Settings property.
-    /// </summary>
-    internal static void CreateSettings()
-    {
-      if (_settings == null)
-      {
-        _settings = new SettingsViewModel();
-      }
-    }
     internal static async void Startup()
     {
       CreateMain();
       Messenger.Default.Send(new famousfront.messages.BackendInitializing() { reason = Strings.Connecting });
-      var v = await Task.Run(() => DoLoad());
-      if (v != null) _flags = v;
+      _flags = await Task.Run(() => DoLoad());
       await Task.Run(() =>
       {
         using (var p = Process.Start(BackendModule))
@@ -153,7 +109,9 @@ namespace famousfront
     {
       for (; ; )
       {
-        var s = await HttpClientUtils.Get<FeedsBackendConfig>(BackendPath("/api/meta.json"));
+        var uri = BackendService.Compile(BackendAddress(), BackendService.Meta);
+
+        var s = await HttpClientUtils.Get<FeedsBackendConfig>(uri);
         if (s.code == 0)
         {
           _backend = s.data;
@@ -169,7 +127,6 @@ namespace famousfront
     internal static void Shutdown()
     {
       ClearMain();
-      ClearSettings();
       ShutdownBackend();
       Messenger.Default.Send(new BackendShutdown() { });
     }
@@ -180,20 +137,20 @@ namespace famousfront
       using (var writer = new StreamWriter(ConfigFile))
       using (var jwriter = new JsonTextWriter(writer))
       {
-        js.Serialize(writer, Flags);
+        js.Serialize(writer, FrontFlags);
       }
     }
-    private static Flags DoLoad()
+    private static FrontFlags DoLoad()
     {
-      Flags v = null;
+      FrontFlags v = null;
       var c = ConfigFile;
       if (!File.Exists(c))
-        return v;
+        return new FrontFlags();
       var js = new JsonSerializer();
       using (var reader = new StreamReader(c))
       using (var jreader = new JsonTextReader(reader))
       {
-        v = js.Deserialize<Flags>(jreader);
+        v = js.Deserialize<FrontFlags>(jreader);
       }
       return v;
     }
@@ -213,69 +170,14 @@ namespace famousfront
     {
       get { return Path.Combine(RootFolder, "backend.bat"); }
     }
-    internal static string BackendPath(string rel)
+    
+    internal static string BackendAddress()
     {
-      return "http://" + _flags.Backend + rel;
+      return _flags.Backend;
+      //return BackendService.Compile(_flags.Backend, rel);
+      //return "http://" + _flags.Backend + rel;
     }
-
-    ICommand _toggle_feedsources_view;
-    public ICommand ToggleFeedSourcesViewCommand
-    {
-      get { return _toggle_feedsources_view ?? (_toggle_feedsources_view = toggle_feedsources_view()); }
-    }
-    ICommand toggle_feedsources_view()
-    {
-      return new RelayCommand(ExecuteToggleFeedSource);
-    }
-    void ExecuteToggleFeedSource()
-    {
-      Messenger.Default.Send(new ToggleFeedSource());
-    }
-
-    ICommand _show_find_feedsource_view;
-    public ICommand FindFeedSourceCommand
-    {
-      get { return _show_find_feedsource_view ?? (_show_find_feedsource_view = show_find_feedsource_view()); }
-    }
-    ICommand show_find_feedsource_view()
-    {
-      return new RelayCommand(ExecuteShowFindFeedSourceView);
-    }
-    void ExecuteShowFindFeedSourceView()
-    {
-      Messenger.Default.Send(new ShowFindFeedSourceView());
-    }
-
-    ICommand _show_messages_view;
-    public ICommand ShowMessagesCommand
-    {
-      get { return _show_messages_view ?? (_show_messages_view = show_messages_view()); }
-    }
-    ICommand show_messages_view()
-    {
-      return new RelayCommand(ExecuteShowMessageView);
-    }
-    void ExecuteShowMessageView()
-    {
-      Messenger.Default.Send(new ShowMessagesView());
-    }
-
-    ICommand _hyperlink_navigate;
-    public ICommand HyperlinkNavigateCommand
-    {
-      get { return _hyperlink_navigate ?? (_hyperlink_navigate = hyperlink_navigate()); }
-    }
-    ICommand hyperlink_navigate()
-    {
-      return new RelayCommand<Uri>(ExecuteHyperlinkNavigate);
-    }
-    void ExecuteHyperlinkNavigate(Uri url)
-    {
-      if (url == null)
-        return;
-      using (var p = Process.Start(url.ToString())) { };
-    }
-
+   
     internal static void Log(string format, params object[] args){
       var m = string.Format(format, args);
       Messenger.Default.Send(new messages.BackendError { reason = m });

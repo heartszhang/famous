@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using famousfront.datamodels;
 using famousfront.core;
 using System.Windows.Input;
@@ -8,6 +9,11 @@ namespace famousfront.viewmodels
 {
   class FeedEntryViewModel : TaskViewModel
   {
+    bool _expanded;
+    readonly ICommand _toggle_expandsummary;
+    bool _has_document = true;
+    bool _is_document_expanded;
+    TaskViewModel _media;
     static readonly DateTime Utime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
     readonly FeedEntry _ = new FeedEntry();
 
@@ -32,13 +38,15 @@ namespace famousfront.viewmodels
       }
       if (_.videos != null)
       {
+        Debug.Assert(_.images != null);
         Media = new MediaElementViewModel(_.videos[0], (imgone | imgmany) != 0 ? _.images[0] : new FeedMedia());
       }
       else if (_.audios != null)
       {
+        Debug.Assert(_.images != null);
         Media = new MediaElementViewModel(_.audios[0], (imgone | imgmany) != 0 ? _.images[0] : new FeedMedia());
       }
-
+      _toggle_expandsummary = new RelayCommand(ExecuteToggleExpandSummary);
     }
     public DateTime PubDate
     {
@@ -50,11 +58,6 @@ namespace famousfront.viewmodels
     public bool HasMedia
     {
       get { return Media != null; }
-    }
-    bool is_media_inline()
-    {
-      var inline = _.status & (FeedStatuses.FeedStatusSummaryMediainline | FeedStatuses.FeedStatusContentMediainline);
-      return inline != 0;
     }
     public bool HasImageGallery
     {
@@ -82,19 +85,16 @@ namespace famousfront.viewmodels
       var p = Utime.AddSeconds(_.pubdate);
       return new FriendlyDateTime(p);
     }
-    TaskViewModel _media;
     public TaskViewModel Media
     {
       get { return _media; }
       private set { Set(ref _media, value); }
     }
-    bool _is_document_expanded;
     public bool IsDocumentExpanded
     {
       get { return _is_document_expanded; }
       set { Set(ref _is_document_expanded, value); }
     }
-    bool _has_document = true;
     public bool HasDocument
     {
       get { return _has_document; }
@@ -104,16 +104,12 @@ namespace famousfront.viewmodels
     {
       get { return _.uri; }
     }
-    ICommand _toggle_expandsummary;
+
     public ICommand ToggleExpandSummaryCommand
     {
-      get { return _toggle_expandsummary ?? (_toggle_expandsummary = toggle_expandsummary()); }
+      get { return _toggle_expandsummary ; }
     }
-    ICommand toggle_expandsummary()
-    {
-      return new RelayCommand(ExecuteToggleExpandSummary);
-    }
-    bool _expanded;
+
     public bool IsExpanded
     {
       get { return _expanded; }
@@ -134,13 +130,15 @@ namespace famousfront.viewmodels
     async void LoadExternalDoc()
     {
       IsBusying = true;
-      var rel = "/api/feed_entry/fulldoc.json?uri=" + Uri.EscapeDataString(_.uri);
-      var v = await HttpClientUtils.Get<FeedContent>(ServiceLocator.BackendPath(rel));
+      //var rel = "/api/feed_entry/fulldoc.json?uri=" + Uri.EscapeDataString(_.uri);
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.FeedEntryFulldoc, new { _.uri});
+      ServiceLocator.Log(uri);
+      var v = await HttpClientUtils.Get<FeedContent>(uri);
       IsBusying = false;
       if (v.code != 0)
       {
         Reason = v.reason;
-        MessengerInstance.Send(new BackendError() { code = v.code, reason = v.reason });
+        MessengerInstance.Send(new BackendError { code = v.code, reason = v.reason });
         _external_doc_status = 0;
         return;
       }
@@ -148,6 +146,11 @@ namespace famousfront.viewmodels
       _.content = v.data.doc;
       Summary = v.data.doc;
       IsExpanded = !IsExpanded;
+    }
+    bool is_media_inline()
+    {
+      var inline = _.status & (FeedStatuses.FeedStatusSummaryMediainline | FeedStatuses.FeedStatusContentMediainline);
+      return inline != 0;
     }
   }
 }

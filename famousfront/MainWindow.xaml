@@ -4,17 +4,16 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:metro="http://schemas.codeplex.com/elysium"
-  xmlns:params="http://schemas.codeplex.com/elysium/params"
   mc:Ignorable="d" x:Class="famousfront.MainWindow"
   HasDropShadow="True"
-  Background="{StaticResource BackgroundBrush}"
+  Background="{DynamicResource BackgroundBrush}"
   Icon="title-32.png"
   WindowStartupLocation="CenterScreen"
   DataContext="{StaticResource _locator}"
-  Content="{Binding Source={StaticResource _locator}, Path=Main}"
+  Content="{Binding Source={StaticResource _locator}, Path=MainViewModel}"
   FontFamily="{StaticResource LightFont}"
   TextElement.FontFamily="{StaticResource LightFont}"
-  Title="FamousFront" Height="960" Width="1400" x:Name="root">
+  Title="FamousFront" Height="960" Width="1400" x:Name="_root">
   <Window.Resources>
 
   </Window.Resources>

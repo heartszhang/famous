@@ -15,7 +15,7 @@ namespace famousfront.utils
         throw new ArgumentException(Resources.EventHandlerUtils_MakeWeak_Only_instance_methods_are_supported_, "eventHandler");
 
       var wehType = typeof(WeakEventHandler<,>).MakeGenericType(eventHandler.Method.DeclaringType, typeof(TE));
-      var wehConstructor = wehType.GetConstructor(new Type[] { typeof(EventHandler<TE>), 
+      var wehConstructor = wehType.GetConstructor(new[] { typeof(EventHandler<TE>), 
         typeof(UnregisterCallback<TE>) });
 
       Debug.Assert(wehConstructor != null);

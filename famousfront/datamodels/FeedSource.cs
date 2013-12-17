@@ -36,7 +36,7 @@ namespace famousfront.datamodels
       get;set;
     }
     [DataMember(EmitDefaultValue = false)]
-    public bool disabled
+    public int subscribe_state
     {
       get;set;
     }

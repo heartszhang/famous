@@ -37,9 +37,9 @@ using FeedEntries = System.Collections.ObjectModel.ObservableCollection<FeedEntr
     {
       IsBusying = true;
       Debug.Assert(!string.IsNullOrEmpty(_parent.Uri));
-      var rel = "/api/feed_entry/unread.json?" + new { uri = _parent.Uri, count = 10, page = _page }.QueryString();
-      //var rel = "/api/feed_entry/unread.json?uri=" + Uri.EscapeDataString(_parent.Uri);
-      var v = await HttpClientUtils.Get<FeedEntry[]>(ServiceLocator.BackendPath(rel));
+      //var rel = "/api/feed_entry/unread.json?" + new { uri = _parent.Uri, count = 10, page = _page }.QueryString();
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.FeedEntryUnread, new { uri = _parent.Uri, count = 10, page = _page });
+      var v = await HttpClientUtils.Get<FeedEntry[]>(uri);
       IsBusying = false;
       if (v.code != 0)
       {

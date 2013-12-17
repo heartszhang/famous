@@ -18,9 +18,9 @@
 			<KeyBinding Key="P" Command="{Binding PreviousSourceCommand}" Modifiers="Control"/>
 		</Grid.InputBindings>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
+      <ColumnDefinition />
 			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="{Binding Flags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
+      <ColumnDefinition />
 		</Grid.ColumnDefinitions>
 		<Grid Grid.Column="1" x:Name="_center">
 			<Grid.RenderTransform>
@@ -33,8 +33,8 @@
 			</Grid.RenderTransform>
 			<ContentPresenter Content="{Binding FeedEntriesViewModel}"/>
 		</Grid>
-		<Grid Width="{Binding Flags.FeedSourceWidth, Source={StaticResource _locator}}" 
-			Background="{StaticResource BackgroundBrush}"
+    <Grid  
+			Background="{DynamicResource BackgroundBrush}"
 			HorizontalAlignment="Left" Grid.ColumnSpan="3" Grid.Column="0"
 			Visibility="{Binding ShowFeedSources, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
 			<Grid.Effect>
@@ -43,9 +43,8 @@
 			<ContentPresenter Content="{Binding FeedSourcesViewModel}"/>
 		</Grid>
 		<ContentPresenter Grid.Column="0" VerticalAlignment="Center"
-			Content="{Binding ImageTipViewModel}" HorizontalAlignment="Center" Grid.ColumnSpan="3" 
-			MaxWidth="{Binding Flags.ImageTipMaxWidth, Source={StaticResource _locator}}"/>
-		<Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}" Focusable="False" VerticalAlignment="Bottom" Grid.ColumnSpan="3"
+			Content="{Binding ImageTipViewModel}" HorizontalAlignment="Center" Grid.ColumnSpan="3"/>
+    <Rectangle Focusable="False" VerticalAlignment="Bottom" Grid.ColumnSpan="3"
 			Grid.Column="0" Fill="{StaticResource FadeOutBottomBrush}"/>
 	</Grid>
 

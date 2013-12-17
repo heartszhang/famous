@@ -17,12 +17,12 @@ namespace famousfront.controls
     {
       get
       {
-        return (string)this.GetValue(DocumentProperty);
+        return (string)GetValue(DocumentProperty);
       }
 
       set
       {
-        this.SetValue(DocumentProperty, value);
+        SetValue(DocumentProperty, value);
       }
     }
 

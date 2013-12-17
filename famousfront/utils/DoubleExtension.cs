@@ -6,7 +6,7 @@ using System.Windows;
 namespace famousfront.utils
 {
   [DebuggerNonUserCode]
-  [System.Diagnostics.Contracts.Pure]
+  [Pure]
   internal static class DoubleExtension
   {
     internal const double Epsilon = 0.000001;

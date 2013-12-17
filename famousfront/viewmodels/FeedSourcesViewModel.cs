@@ -15,12 +15,17 @@ namespace famousfront.viewmodels
 
   class FeedSourcesViewModel : core.TaskViewModel
   {
+    FeedSourceViewModel _selected;
+    int _selected_index = -1;
+    readonly FeedSources _sources = new FeedSources();
+    readonly ICollectionView _grouped_sources;
     internal FeedSourcesViewModel()
     {
       MessengerInstance.Register<DropFeedSource>(this, OnDropFeedSource);
       MessengerInstance.Register<SubscribeFeedSource>(this, OnSubscribeFeedSource);
       MessengerInstance.Register<UnsubscribeFeedSource>(this, OnUnsubscribeFeedSource);
       MessengerInstance.Register<FeedEntity>(this, OnFeedEntity);
+      _grouped_sources = CollectionViewSource.GetDefaultView(_sources);
     }
 
     private void OnFeedEntity(FeedEntity obj)
@@ -53,20 +58,15 @@ namespace famousfront.viewmodels
       }), System.Windows.Threading.DispatcherPriority.ContextIdle);
 
     }
-
-    readonly FeedSources _sources = new FeedSources();
-    ICollectionView _grouped_sources = null;
     public ICollectionView Sources
     {
-      get { return _grouped_sources ?? (_grouped_sources = grouped_sources()); }
+      get { return _grouped_sources ; }
     }
-    int _selected_index = -1;
     public int SelectedIndex
     {
       get { return _selected_index; }
       set { Set(ref _selected_index, value); }
     }
-    FeedSourceViewModel _selected;
     public FeedSourceViewModel Selected
     {
       get { return _selected; }
@@ -79,16 +79,12 @@ namespace famousfront.viewmodels
       }
     }
 
-    ICollectionView grouped_sources()
-    {
-      var v = CollectionViewSource.GetDefaultView(_sources);
-      v.GroupDescriptions.Add(new PropertyGroupDescription("Category"));
-      return v;
-    }
     internal async Task Reload()
     {
       IsBusying = true;
-      var fs = await HttpClientUtils.Get<FeedSource[]>(ServiceLocator.BackendPath("/api/feed_source/all.json"));
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.FeedSourceAll);
+
+      var fs = await HttpClientUtils.Get<FeedSource[]>(uri);
       IsBusying = false;
       if (fs.code != 0)
       {

@@ -7,19 +7,23 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using GalaSoft.MvvmLight.Command;
+using System.Windows.Input;
 
 namespace famousfront.viewmodels
 {
-  using GalaSoft.MvvmLight.Command;
-  using System.Windows.Input;
   using FeedImages = System.Collections.ObjectModel.ObservableCollection<ImageUnitViewModel>;
   class ImagePanelViewModel : TaskViewModel
   {
+    bool _show_panel;
+    bool _initialized;
+    readonly ICommand _toggle_show_panel;
     readonly FeedMedia[] _;
 
     public ImagePanelViewModel(FeedMedia[] imgs)
     {
       _ = imgs;
+      _toggle_show_panel = new RelayCommand(ExecuteToggleShowPanel);
       DescribeImages();
     }
     FeedImages _coll_images = null;
@@ -36,7 +40,6 @@ namespace famousfront.viewmodels
       await LoadImages();
       IsBusying = false;
     }
-    bool _initialized;
     internal async Task LoadImages()
     {
       if (_ == null || _.Length == 0)
@@ -71,8 +74,9 @@ namespace famousfront.viewmodels
     {
       if (img.width * img.height != 0)
         return;
-      var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(img.uri);
-      var v = await HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
+      //var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(img.uri);
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.ImageDimension, new { img.uri });
+      var v = await HttpClientUtils.Get<FeedImage>(uri);
       if (v.code != 0)
       {
         img.duration = v.code;
@@ -86,21 +90,17 @@ namespace famousfront.viewmodels
       img.local = v.data.origin;
       img.thumbanil = v.data.thumbnail;
     }
-    bool _show_panel;
     public bool IsShowPanel
     {
       get { return _show_panel; }
       protected set { Set(ref _show_panel, value); }
     }
-    ICommand _toggle_show_panel;
+
     public ICommand ToggleShowPanelCommand
     {
-      get { return _toggle_show_panel ?? (_toggle_show_panel = toggle_show_panel()); }
+      get { return _toggle_show_panel; }
     }
-    ICommand toggle_show_panel()
-    {
-      return new RelayCommand(ExecuteToggleShowPanel);
-    }
+
     void ExecuteToggleShowPanel()
     {
       IsShowPanel = !IsShowPanel;

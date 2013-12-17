@@ -4,9 +4,9 @@ using System.Windows;
 namespace famousfront.core
 {
   [DataContract]
-  class Flags
+  class FrontFlags
   {
-    public Flags()
+    public FrontFlags()
     {
       Backend = "127.0.0.1:8002";
       KaPeriod = 100;  // milliseconds

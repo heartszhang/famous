@@ -56,8 +56,10 @@ namespace famousfront.viewmodels
     {
       if (_.width * _.height != 0 || string.IsNullOrEmpty(_.uri))
         return;
-      var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(_.uri);
-      var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
+      //var rel = "/api/image/dimension.json?uri=" + Uri.EscapeDataString(_.uri);
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.ImageDimension, new { _.uri });
+
+      var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(uri);
       if (v.code != 0)
       {
         _.duration = v.code;
@@ -73,6 +75,7 @@ namespace famousfront.viewmodels
       if (!string.IsNullOrEmpty(v.data.thumbnail))
         _.thumbanil = v.data.thumbnail;
       if (Width * Height != 0)
+// ReSharper disable once ExplicitCallerInfoArgument
         RaisePropertyChanged("Scale");
     }
     async void LoadImage()
@@ -80,9 +83,10 @@ namespace famousfront.viewmodels
       if (string.IsNullOrEmpty(_.uri))
         return;
       IsBusying = true;
-//      await DescribeImage();
-      var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(_.uri);
-      var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(ServiceLocator.BackendPath(rel));
+      //var rel = "/api/image/description.json?uri=" + Uri.EscapeDataString(_.uri);
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.ImageDescription, new { _.uri });
+
+      var v = await famousfront.utils.HttpClientUtils.Get<FeedImage>(uri);
       IsBusying = false;
       if (v.code != 0)
       {

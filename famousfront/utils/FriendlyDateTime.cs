@@ -1,4 +1,5 @@
 ﻿using System;
+using famousfront.Properties;
 
 namespace famousfront.utils
 {
@@ -30,10 +31,10 @@ namespace famousfront.utils
       if (ndw < 0)
         ndw = 6;
 
-      var firstdthisweek = now.AddDays(-(int)ndw);
+      var firstdthisweek = now.AddDays(-ndw);
       var prevweek = firstdthisweek.AddDays(-7d);
-      var ns = new[] { "今天", "昨天", "前天", "大前天" };
-      var cws = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
+      var ns = new[] { Resources.Today, Resources.Yesterday, Resources.DayBeforeYeserday, Resources.ThreeDaysAgo };
+      var cws = new[] { Resources.Monday, Resources.Tuesday, Resources.Wednesday, Resources.Thusday, Resources.Friday, Resources.Saturday, Resources.Sunday };
       if (diff >= 0 && diff < ns.Length)
       {
         v = ns[diff];

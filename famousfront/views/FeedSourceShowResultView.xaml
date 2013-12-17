@@ -1,0 +1,28 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:famousfront.viewmodels"
+                    xmlns:params="http://schemas.codeplex.com/elysium/params">
+  <DataTemplate DataType="{x:Type vm:FeedSourceShowResultViewModel}">
+    <DataTemplate.Resources>
+      <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}"/>
+    </DataTemplate.Resources>
+    <StackPanel Background="Transparent">
+      <StackPanel.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Subscribe" Command="{Binding SubscribeCommand,Mode=OneWay}" CommandParameter="True"/>
+        </ContextMenu>
+      </StackPanel.ContextMenu>
+      <Grid>
+        <TextBlock Text="{Binding Name,Mode=OneWay}" FontSize="{StaticResource LittleThreeTextSize}"/>
+        <TextBlock Text="&#x2714;" 
+                     TextElement.FontSize="{Binding Path=(params:General.ContentFontSize),RelativeSource={RelativeSource Self}}" FontFamily="{StaticResource SymbolFont}" 
+                     Visibility="{Binding HasSubscribed,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}" 
+                     HorizontalAlignment="Right"/>
+      </Grid>
+      <Grid Margin="{Binding Source={StaticResource _locator}, Path=FrontFlags.MarginTopDown}">
+        <ListBox ItemsSource="{Binding Entries}" />
+      </Grid>
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

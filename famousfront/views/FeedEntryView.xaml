@@ -29,6 +29,13 @@
       </Style>
       <Style TargetType="{x:Type FlowDocument}" x:Key="FeedEntryFlowDocumentStyle">
         <Style.Resources>
+          <!--
+            <Style TargetType="{x:Type Hyperlink}" >
+              <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Mode=OneWay}"/>
+              <Setter Property="Command" Value="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}"/>
+              <Setter Property="CommandParameter" Value="{Binding NavigateUri, RelativeSource={RelativeSource Self}}"/>
+            </Style>
+-->
           <Style TargetType="{x:Type Image}">
             <Setter Property="Stretch" Value="UniformToFill"/>
             <Setter Property="StretchDirection" Value="DownOnly"/>
@@ -38,13 +45,12 @@
             <Setter Property="HorizontalAnchor" Value="PageLeft"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Width" Value="{Binding Flags.ImageMaxWidth, Source={StaticResource _locator}}"/>
           </Style>
         </Style.Resources>
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
         <Setter Property="IsOptimalParagraphEnabled" Value="True"/>
         <Setter Property="IsHyphenationEnabled" Value="True"/>
-        <Setter Property="Block.LineHeight" Value="{Binding Flags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
+        <Setter Property="Block.LineHeight" Value="{Binding FrontFlags.FlowDocumentBlockLineHeight,Source={StaticResource _locator}}" />
       </Style>
       
       <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}" x:Key="LightToggleButtonStyle">
@@ -121,7 +127,7 @@
                           Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
           </ctrls:ExpandableStackPanel>
           <Grid VerticalAlignment="Bottom" Focusable="False" Visibility="{Binding IsDocumentExpanded,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=false}">
-          <Rectangle Height="{Binding Flags.ContentMarginHeight, Source={StaticResource _locator}}"  Fill="{StaticResource FadeOutBottomBrush}" 
+            <Rectangle Height="{Binding FrontFlags.ContentMarginHeight, Source={StaticResource _locator}}"  Fill="{StaticResource FadeOutBottomBrush}" 
                      Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"/>
           </Grid>
           <Grid Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"

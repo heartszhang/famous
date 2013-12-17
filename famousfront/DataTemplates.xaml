@@ -14,6 +14,8 @@
     <ResourceDictionary Source="views/FeedSourceView.xaml"/>
     <ResourceDictionary Source="views/FeedSourcesView.xaml"/>
     <ResourceDictionary Source="views/FeedSourceFindEntryView.xaml"/>
+    <ResourceDictionary Source="views/FeedSourceFindResultView.xaml"/>
+    <ResourceDictionary Source="views/FeedSourceShowResultView.xaml"/>
     <ResourceDictionary Source="views/FeedSourceFindView.xaml"/>
     <ResourceDictionary Source="views/ImageTipView.xaml"/>
     <ResourceDictionary Source="views/ContentView.xaml"/>

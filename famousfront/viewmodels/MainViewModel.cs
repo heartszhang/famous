@@ -58,14 +58,11 @@ namespace famousfront.viewmodels
         Set(ref _offline, value);
       }
     }
-    SettingsViewModel _settings;
+
+    readonly SettingsViewModel _settings = new SettingsViewModel();
     public SettingsViewModel SettingsViewModel
     {
       get { return _settings; }
-      internal set
-      {
-        Set(ref _settings, value);
-      }
     }
     OverlappedViewModel _overlapped;
     public OverlappedViewModel OverlappedViewModel
@@ -73,7 +70,8 @@ namespace famousfront.viewmodels
       get { return _overlapped; }
       set { Set(ref _overlapped, value); }
     }
-    MessagesViewModel _messages = new MessagesViewModel();
+
+    readonly MessagesViewModel _messages = new MessagesViewModel();
     FeedSourceFindViewModel _feedsourcefind;
     public FeedSourceFindViewModel FeedSourceFindViewModel
     {
@@ -126,14 +124,7 @@ namespace famousfront.viewmodels
 
     private void ExecuteShowMessagesView(ShowMessagesView obj)
     {
-      if (OverlappedViewModel == _messages)
-      {
-        OverlappedViewModel = null;
-      }
-      else
-      {
-        OverlappedViewModel = _messages;
-      }
+      OverlappedViewModel = OverlappedViewModel == _messages ? null : _messages;
     }
   }
 }

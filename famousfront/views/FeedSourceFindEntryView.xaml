@@ -3,59 +3,6 @@
                     xmlns:params="http://schemas.codeplex.com/elysium/params"
                     xmlns:utils="clr-namespace:famousfront.utils"
                     xmlns:vm="clr-namespace:famousfront.viewmodels">
-  <Style x:Key="FeedSourceFindItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-    <Setter Property="Padding" Value="{Binding Path=(params:General.BoldPaddingValue), RelativeSource={RelativeSource self}, Mode=OneWay}"/>
-    <Setter Property="utils:HyperlinkOptions.ForegroundBrush" Value="{DynamicResource AccentBrush}"/>
-    <Style.Triggers>
-      <MultiTrigger>
-        <MultiTrigger.Conditions>
-          <Condition Property="IsEnabled" Value="True" />
-          <Condition Property="IsSelected" Value="True" />
-        </MultiTrigger.Conditions>
-        <MultiTrigger.Setters>
-          <!--            <Setter Property="Background" Value="{StaticResource AccentBrush}" />-->
-          <Setter Property="utils:HyperlinkOptions.ForegroundBrush" Value="{StaticResource ContrastBrush}" />
-        </MultiTrigger.Setters>
-      </MultiTrigger>
-      <MultiTrigger>
-        <MultiTrigger.Conditions>
-          <Condition Property="IsEnabled" Value="False" />
-          <Condition Property="IsSelected" Value="True" />
-        </MultiTrigger.Conditions>
-        <MultiTrigger.Setters>
-          <!--              <Setter Property="Background" Value="{StaticResource DisabledBrush}" />-->
-          <Setter Property="utils:HyperlinkOptions.ForegroundBrush" Value="{StaticResource ContrastBrush}" />
-        </MultiTrigger.Setters>
-      </MultiTrigger>
-    </Style.Triggers>
-  </Style>
-
-  <DataTemplate DataType="{x:Type vm:FeedSourceFindResultViewModel}">
-    <DataTemplate.Resources>
-        <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}"/>
-    </DataTemplate.Resources>
-    <ListBox ItemsSource="{Binding Sources}"/>
-
-  </DataTemplate>
-  <DataTemplate DataType="{x:Type vm:FeedSourceShowResultViewModel}">
-    <StackPanel Background="Transparent">
-      <StackPanel.ContextMenu>
-        <ContextMenu>
-          <MenuItem Header="Subscribe" Command="{Binding SubscribeCommand,Mode=OneWay}" CommandParameter="True"/>
-        </ContextMenu>
-      </StackPanel.ContextMenu>
-      <Grid>
-        <TextBlock Text="{Binding Name,Mode=OneWay}" FontSize="{StaticResource LittleThreeTextSize}"/>
-        <TextBlock Text="&#x2714;" 
-                     TextElement.FontSize="{Binding Path=(params:General.ContentFontSize),RelativeSource={RelativeSource Self}}" FontFamily="{StaticResource SymbolFont}" 
-                     Visibility="{Binding HasSubscribed,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}" 
-                     HorizontalAlignment="Right"/>
-      </Grid>
-      <Grid Margin="{Binding Source={StaticResource _locator}, Path=Flags.MarginTopDown}">
-        <ListBox ItemsSource="{Binding Entries}" />
-      </Grid>
-    </StackPanel>
-  </DataTemplate>
   <DataTemplate DataType="{x:Type vm:FeedSourceFindEntryViewModel}">
     <Border>
       <StackPanel Background="Transparent">
@@ -71,7 +18,7 @@
                      Visibility="{Binding HasSubscribed,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}" 
                      HorizontalAlignment="Right"/>
         </Grid>
-        <TextBlock Text="{Binding Summary}" Margin="{Binding Source={StaticResource _locator}, Path=Flags.MarginTopDown}"
+        <TextBlock Text="{Binding Summary}" Margin="{Binding Source={StaticResource _locator}, Path=FrontFlags.MarginTopDown}"
                    TextElement.FontSize="{Binding Path=(params:General.ContentFontSize),RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
       </StackPanel>
     </Border>

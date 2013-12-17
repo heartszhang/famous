@@ -1,4 +1,5 @@
-﻿using famousfront.datamodels;
+﻿using System.Threading.Tasks;
+using famousfront.datamodels;
 using famousfront.messages;
 using famousfront.utils;
 using GalaSoft.MvvmLight.Command;
@@ -10,7 +11,7 @@ namespace famousfront.viewmodels
   class ContentViewModel : core.TaskViewModel
   {
     readonly FeedSourcesViewModel _sources = new FeedSourcesViewModel();
-    FeedEntriesViewModel _entries = null;
+    FeedEntriesViewModel _entries;
     readonly ImageTipViewModel _image_tip = new ImageTipViewModel();
     readonly System.Windows.Threading.DispatcherTimer _update_worker = new System.Windows.Threading.DispatcherTimer();
     bool _show_sources = true;
@@ -28,15 +29,16 @@ namespace famousfront.viewmodels
 
       MessengerInstance.Register<FeedSourceViewModel>(this, OnSelectedFeedSourceChanged);
       MessengerInstance.Register<ToggleFeedSource>(this, OnToggleFeedSource);
-      _update_worker.Interval = TimeSpan.FromMinutes(ServiceLocator.Flags.FeedUpdateInterval);
+      _update_worker.Interval = TimeSpan.FromMinutes(ServiceLocator.FrontFlags.FeedUpdateInterval);
       _update_worker.Tick += do_updating;
       _update_worker.Start();
     }
 
     async void do_updating(object sender, EventArgs e)
     {
-      const string rel = "/api/tick.json";
-      var v = await HttpClientUtils.Get<BackendTick>(ServiceLocator.BackendPath(rel));
+      var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.Tick);
+      //const string rel = "/api/tick.json";
+      var v = await HttpClientUtils.Get<BackendTick>(uri);
       if (v.code != 0)
       {
         MessengerInstance.Send(new famousfront.messages.BackendError() { code = v.code, reason = v.reason });
@@ -148,8 +150,10 @@ namespace famousfront.viewmodels
       for (; ; )
       {
         IsBusying = true;
-        const string rel = "/api/update/popup.json";
-        var v = await HttpClientUtils.Get<famousfront.datamodels.FeedEntity>(ServiceLocator.BackendPath(rel));
+        //const string rel = "/api/update/popup.json";
+        var uri = BackendService.Compile(ServiceLocator.BackendAddress(), BackendService.UpdatePopup);
+
+        var v = await HttpClientUtils.Get<famousfront.datamodels.FeedEntity>(uri);
         IsBusying = false;
         if (v.code != 0)
         {
@@ -161,6 +165,7 @@ namespace famousfront.viewmodels
           break;
         MessengerInstance.Send(entity);
         ServiceLocator.Log("pub-sub: {0}", entity.name??entity.uri);
+        await Task.Delay(ServiceLocator.FrontFlags.KaPeriod * 7);
       }
     }
   }
