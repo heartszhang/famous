@@ -65,6 +65,9 @@ func feedsource_show(uri string) (feed.FeedEntity, error) {
 	if err != nil {
 		return feed.FeedEntity{}, err
 	}
+	if _, err := new_feedsource_operator().find(uri); err != nil {
+		fs.SubscribeState = feed.FeedSourceSubscribeStateUnsubscribed
+	}
 	fs.Entries = feedentry_filter(fs.Entries)
 	return fs, err
 }
@@ -104,11 +107,13 @@ func feedsource_find(q string) ([]feed.FeedEntity, error) {
 	if err != nil {
 		return v, err
 	}
-	for _, fs := range subed {
-		for i := 0; i < len(v); i++ {
-			if v[i].Uri == fs.Uri {
-				v[i].SubscribeState = feed.FeedSourceSubscribeStateSubscribed
-			}
+	urims := make(map[string]bool)
+	for _, ve := range subed {
+		urims[ve.Uri] = true
+	}
+	for i := 0; i < len(v); i++ {
+		if _, ok := urims[v[i].Uri]; !ok {
+			v[i].SubscribeState = feed.FeedSourceSubscribeStateUnsubscribed
 		}
 	}
 	return v, err

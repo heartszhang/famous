@@ -16,7 +16,6 @@ func feedentries_updated() (feed.FeedSource, []feed.FeedEntry, error) {
 	bcms := baidu.NewBcmsProxy(baiduq)
 	var v pubsub.PubsubMessage
 	err := bcms.FetchOneAsJson(&v)
-	log.Println(v, err)
 	if err != nil {
 		return feed.FeedSource{}, nil, err
 	}
@@ -61,8 +60,8 @@ func feedentries_updated() (feed.FeedSource, []feed.FeedEntry, error) {
 		fo := new_feedsource_operator()
 		// ignore touch error, because, source may not be subscribed
 		fo.touch(fs.Uri, int64(fs.LastTouch), int64(fs.NextTouch), fs.Period)
-		log.Println("updated", fs.Name, fs.Update, fs.Logo)
 	}
+	log.Println("updated", fs.Name, fs.Update)
 	return fs, fes, err
 }
 

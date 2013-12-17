@@ -99,19 +99,18 @@ func feedentry_fulldoc(uri string) (v feed.FeedContent, err error) {
 	if err != nil {
 		return v, err
 	}
-	for _, img := range sum.Images {
-		x := feed.FeedMedia{
-			Uri:         url_resolve(uri, img.Uri),
-			Width:       int(img.Width),
-			Height:      int(img.Height),
-			Description: img.Alt,
-		}
-		v.Images = append(v.Images, x)
+	v.Local, err = html_write_file(article, backend_context.config.DocumentFolder)
+	redirector := func(turi string) string {
+		return redirect_thumbnail(url_resolve(uri, turi))
 	}
-
+	imgurl_maker := func(reluri string) string {
+		u := url_resolve(uri, reluri)
+		return imageurl_from_video(u)
+	}
+	v.Images = append_unique(v.Images, feedmedias_from_docsummary(sum.Images, redirector)...)
+	v.Images = append_unique(v.Images, feedmedias_from_docsummary(sum.Medias, imgurl_maker)...)
 	v.Words = uint(sum.WordCount)
 	v.Links = uint(sum.LinkCount)
-	v.Local, err = html_write_file(article, backend_context.config.DocumentFolder)
 	v.FlowDoc = new_flowdoc_maker().make(article, v.Images)
 	return v, err
 }
