@@ -144,6 +144,20 @@ func node_set_attribute(n *html.Node, name, val string) {
 		n.Attr = append(n.Attr, html.Attribute{Key: name, Val: val})
 	}
 }
+func node_style_to_attribute(n *html.Node) {
+	style := node_get_attribute(n, "style")
+	lines := strings.FieldsFunc(style, func(r rune) bool {
+		return strings.ContainsRune(";\n", r)
+	})
+	for _, line := range lines {
+		fields := strings.FieldsFunc(line, func(r rune) bool {
+			return strings.ContainsRune(": ", r)
+		})
+		if len(fields) == 2 {
+			node_set_attribute(n, fields[0], fields[1])
+		}
+	}
+}
 func node_get_attribute(n *html.Node, name string) string {
 	for _, a := range n.Attr {
 		if a.Key == name {
@@ -152,7 +166,19 @@ func node_get_attribute(n *html.Node, name string) string {
 	}
 	return ""
 }
-
+func node_get_attribute_length(n *html.Node, name string) (int, string) {
+	v := node_get_attribute(n, name)
+	rs := regexp.MustCompile(`([0-9.]+)(px|%)?`)
+	vs := rs.FindStringSubmatch(v)
+	if len(vs) != 2 {
+		return 100, "%"
+	}
+	x, _ := strconv.Atoi(vs[0])
+	if vs[1] == "px" || vs[1] == "pc" || vs[1] == "pixel" {
+		return x, ""
+	}
+	return x, vs[1]
+}
 func merge_tail_spaces(txt string) string {
 	txt = continue_spaces.ReplaceAllString(txt, "")
 	txt = lb_spaces.ReplaceAllString(txt, "\n")
@@ -398,14 +424,31 @@ func media_get_dim(img *html.Node) (w, h int64, ok bool) {
 	}
 	return
 }
-
 func node_is_in_a(n *html.Node) bool {
+	return node_is_in(n, "a")
+}
+func node_is_in(n *html.Node, grand string) bool {
 	for p := n.Parent; p != nil; p = p.Parent {
-		if p.Type == html.ElementNode && p.Data == "a" {
+		if p.Type == html.ElementNode && p.Data == grand {
 			return true
 		}
 	}
 	return false
+}
+func node_query_select(n *html.Node, grand string) *html.Node {
+	if n.Type == html.ElementNode && n.Data == grand {
+		return n
+	}
+	for child := n.FirstChild; child != nil; child = child.NextSibling {
+		if child.Type == html.ElementNode && child.Data == grand {
+			return child
+		}
+		x := node_query_select(child, grand)
+		if x != nil {
+			return x
+		}
+	}
+	return nil
 }
 
 var (

@@ -29,6 +29,7 @@ type html_cleaner struct {
 	ols          []*html.Node
 	forms        []*html.Node
 	tables       []*html.Node
+	iframes      []*html.Node
 	tds          []boilerpipe_score
 	pages        []string
 	titles       []string
@@ -67,8 +68,7 @@ func (this *html_cleaner) from_link(link *html.Node) {
 		this.icon = href
 	}
 }
-func html_clean_fragment(root *html.Node) *html.Node {
-	cleaner := &html_cleaner{}
+func (cleaner *html_cleaner) html_drop_unprintable(root *html.Node) {
 	var (
 		dropping []*html.Node = []*html.Node{}
 	)
@@ -78,10 +78,12 @@ func html_clean_fragment(root *html.Node) *html.Node {
 		p := drop.Parent
 		p.RemoveChild(drop)
 	}
+}
+func html_clean_fragment(root *html.Node) *html.Node {
+	cleaner := &html_cleaner{}
+	cleaner.html_drop_unprintable(root)
+	cleaner.remove_head()
 
-	if cleaner.head != nil {
-		cleaner.head.Parent.RemoveChild(cleaner.head)
-	}
 	cleaner.article = root
 	cleaner.clean_body()
 
@@ -90,24 +92,17 @@ func html_clean_fragment(root *html.Node) *html.Node {
 
 	return cleaner.article
 }
-
-func html_clean_root(root *html.Node, uribase string) *html.Node {
-	cleaner := &html_cleaner{}
-	cleaner.current_url, _ = url.Parse(uribase)
-
-	var (
-		dropping []*html.Node = []*html.Node{}
-	)
-	cleaner.clean_unprintable_element(&dropping, root)
-
-	for _, drop := range dropping {
-		p := drop.Parent
-		p.RemoveChild(drop)
-	}
-
+func (cleaner *html_cleaner) remove_head() {
 	if cleaner.head != nil {
 		cleaner.head.Parent.RemoveChild(cleaner.head)
 	}
+}
+func html_clean_root(root *html.Node, uribase string) (*html.Node, []*html.Node) {
+	cleaner := &html_cleaner{}
+	cleaner.current_url, _ = url.Parse(uribase)
+	cleaner.html_drop_unprintable(root)
+	cleaner.remove_head()
+
 	var (
 		h1l = len(cleaner.header1s)
 		h2l = len(cleaner.header2s)
@@ -148,12 +143,27 @@ func html_clean_root(root *html.Node, uribase string) *html.Node {
 	cleaner.clean_body()
 	cleaner.clean_empty_nodes(cleaner.article)
 	cleaner.clean_attributes(cleaner.article)
-	return cleaner.article
+
+	return cleaner.article, cleaner.iframes
 }
 
 func (this *html_cleaner) title_similar(t string) bool {
-	for _, i := range this.titles {
-		if strings.Contains(t, i) || strings.Contains(i, t) {
+	var tk = make(map[rune]int)
+	for _, r := range t {
+		tk[r] = 1
+	}
+	for _, title := range this.titles {
+		var tik = make(map[rune]int)
+		for _, r := range title {
+			tik[r] = 1
+		}
+		var incommon int
+		for k, v := range tk {
+			if tik[k]+v >= 2 {
+				incommon++
+			}
+		}
+		if incommon > 0 && incommon*100/(len(tk)+len(tik)) > 50 {
 			return true
 		}
 	}
@@ -191,7 +201,6 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 			*dropping = append(*dropping, child)
 		} else if child.Type == html.ElementNode {
 			drop := false
-			child.Data = strings.ToLower(child.Data)
 			idc := node_get_attribute(child, "class") + node_get_attribute(child, "id")
 
 			if unlikely.MatchString(idc) {
@@ -199,10 +208,15 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 				*dropping = append(*dropping, child)
 			} else {
 				switch child.Data {
+				case "iframe":
+					cleaner.try_append_frame(child)
+					//cleaner.iframes = append(cleaner.iframes, child)
+					*dropping = append(*dropping, child)
+					drop = true
 				case "link":
 					cleaner.from_link(child)
 					fallthrough
-				case "script", "iframe", "nav", "aside", "noscript", "style", "input", "textarea", "marquee", "menu":
+				case "script", "nav", "aside", "noscript", "style", "input", "textarea", "marquee", "menu":
 					*dropping = append(*dropping, child)
 					drop = true
 				case "meta":
@@ -275,8 +289,10 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 		} else if child.Type == html.TextNode {
 			child.Data = strings.TrimSpace(merge_tail_spaces(child.Data))
 			l := new_boilerpipe_score(child).words
-			cleaner.text_words += l
-			if node_is_in_a(child) {
+			if !node_is_in(child, "iframe") {
+				cleaner.text_words += l
+			}
+			if node_is_in(child, "a") {
 				cleaner.anchor_words += l
 			}
 		}
@@ -284,7 +300,15 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 
 	return
 }
-
+func (this *html_cleaner) try_append_frame(frame *html.Node) {
+	node_style_to_attribute(frame)
+	display := node_get_attribute(frame, "display")             // none, nil
+	width, wunit := node_get_attribute_length(frame, "width")   //\d+unit, unit = px,%, nil
+	height, hunit := node_get_attribute_length(frame, "height") //\d+unit
+	if display == "none" || (wunit == "" && width < 400) || (hunit == "" && height < 400) {
+		return
+	}
+}
 func (this *html_cleaner) try_update_article(candi *html.Node) bool {
 	if candi == nil {
 		return false
@@ -579,7 +603,7 @@ func clean_fragment(cont, uri string) (string, *DocumentSummary) {
 		return cont, &DocumentSummary{}
 	}
 
-	article := html_clean_root(doc, uri)
+	article, _ := html_clean_root(doc, uri)
 	_, body := flat_html(article)
 	body.Data = "div" // remvoe body
 

@@ -111,7 +111,7 @@ func (this feedsource_op) expired(beforeunxtime int64) ([]feed.FeedSource, error
 func (this feedsource_op) all() (feds []feed.FeedSource, err error) {
 	feds = make([]feed.FeedSource, 0)
 	err = do_in_session(this.coll, func(coll *mgo.Collection) error {
-		return coll.Find(bson.M{"disabled": false, "uri": bson.M{"$ne": ""}}).Sort("-last_touch").All(&feds)
+		return coll.Find(bson.M{"uri": bson.M{"$ne": ""}}).Sort("-last_touch").All(&feds)
 	})
 	return
 }

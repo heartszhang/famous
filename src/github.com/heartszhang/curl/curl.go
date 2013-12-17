@@ -178,6 +178,7 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 			}
 		}
 	}
+	cacher := disk_cacher{data_folder: this.data_dir}
 
 	// some website use cht by declaring gb2312 encoded
 	if v.Charset == "" || v.Charset == "gb2312" {
@@ -186,6 +187,7 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 	if v.Charset == "utf-8" {
 		v.LocalUtf8 = v.Local
 		v.LengthUtf8 = v.Length
+		cacher.save_index(uri, v)
 		return v, err
 	}
 
@@ -211,7 +213,6 @@ func (this *curler) GetUtf8(uri string) (Cache, error) {
 	if err == nil {
 		v.LocalUtf8 = out.Name()
 	}
-	cacher := disk_cacher{data_folder: this.data_dir}
 	cacher.save_index(uri, v)
 	return v, err
 }

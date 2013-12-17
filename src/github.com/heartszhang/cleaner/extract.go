@@ -4,7 +4,7 @@ package cleaner
 import (
 	"code.google.com/p/go.net/html"
 	"io/ioutil"
-	//	"log"
+	"log"
 )
 
 type Extractor interface {
@@ -54,10 +54,27 @@ func (this html_extractor) CleanFragment(doc *html.Node) (*html.Node, *DocumentS
 // cleaned html
 // return filepath, *SummaryScore, error
 func (this html_extractor) MakeHtmlReadable(doc *html.Node, url string) (*html.Node, *DocumentSummary, error) {
-	article := html_clean_root(doc, url)
+	article, iframes := html_clean_root(doc, url)
+	var bestarc *html.Node
+	var bestscore *DocumentSummary
+	for _, iframe := range iframes {
+		iuri := node_get_attribute(iframe, "src")
+		x := node_query_select(iframe, "html")
+		iarc, _ := html_clean_root(x, iuri)
+		iarc, iscore, err := this.make_article_readable(iarc)
+		if err == nil && (bestscore == nil || bestscore.WordCount < iscore.WordCount) {
+			bestarc = iarc
+			bestscore = iscore
+		}
+		log.Println(bestarc, bestscore)
+	}
 	write_file(doc, this.temp_dir)
 	//	log.Println("1-step", n)
-	return this.make_article_readable(article)
+	arc, score, err := this.make_article_readable(article)
+	if err == nil && score.WordCount+len(score.Images)*40+len(score.Medias)*40 < 140 && bestscore != nil && bestscore.WordCount > score.WordCount {
+		return bestarc, bestscore, nil
+	}
+	return arc, score, err
 }
 
 func write_file(doc *html.Node, temp string) (string, error) {
