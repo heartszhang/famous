@@ -21,7 +21,6 @@ func webapi_feedcategory_all(w http.ResponseWriter, r *http.Request) {
 	default:
 		webapi_write_error(w, err)
 	}
-	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_category/create.json/{name}

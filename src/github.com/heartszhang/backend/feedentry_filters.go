@@ -41,6 +41,10 @@ func feed_entries_downloaded(entries []feed.FeedEntry) []feed.FeedEntry {
 }
 
 func feed_entries_clean(entries []feed.FeedEntry) []feed.FeedEntry {
+	for i := 0; i < len(entries); i++ {
+		entries[i].Title.Main = strings.TrimSpace(entries[i].Title.Main)
+		entries[i].Summary = strings.TrimSpace(entries[i].Summary)
+	}
 	return entries
 }
 
