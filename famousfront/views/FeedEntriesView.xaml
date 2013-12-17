@@ -10,16 +10,16 @@
                     mc:Ignorable="d">
     <DataTemplate DataType="{x:Type vm:FeedEntriesViewModel}" d:IsDesignTimeCreatable="false">
     <DataTemplate.Resources>
+      <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource NoSelectiveListBoxItemStyle}" x:Key="FeedEntryItemContainerStyle">
+        <Setter Property="Padding" Value="{Binding Source={StaticResource _locator}, Path=FrontFlags.EntryMargin}"/>
+      </Style>
       <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}">
         <Style.Resources>
-          <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource BasicListBoxItemStyle}">
-            <Setter Property="Padding" Value="{Binding Source={StaticResource _locator}, Path=FrontFlags.EntryMargin}"/>
-          </Style>
         </Style.Resources>
       </Style>
     </DataTemplate.Resources>
     <Grid Background="{StaticResource BackgroundBrush}">
-      <ListBox ItemsSource="{Binding Entries}" >
+      <ListBox ItemsSource="{Binding Entries}" ItemContainerStyle="{StaticResource FeedEntryItemContainerStyle}" >
         <i:Interaction.Behaviors>
           <ctrls:ListBoxScrollToTopBehavior />
           <ctrls:ListBoxPreventRequestBringIntoViewBehavior/>

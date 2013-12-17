@@ -29,13 +29,10 @@
       </Style>
       <Style TargetType="{x:Type FlowDocument}" x:Key="FeedEntryFlowDocumentStyle">
         <Style.Resources>
-          <!--
             <Style TargetType="{x:Type Hyperlink}" >
-              <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Mode=OneWay}"/>
               <Setter Property="Command" Value="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}"/>
               <Setter Property="CommandParameter" Value="{Binding NavigateUri, RelativeSource={RelativeSource Self}}"/>
             </Style>
--->
           <Style TargetType="{x:Type Image}">
             <Setter Property="Stretch" Value="UniformToFill"/>
             <Setter Property="StretchDirection" Value="DownOnly"/>
@@ -45,6 +42,7 @@
             <Setter Property="HorizontalAnchor" Value="PageLeft"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="{Binding Source={StaticResource _locator}, Path=FrontFlags.ImageMaxWidth}"/>
           </Style>
         </Style.Resources>
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
@@ -61,88 +59,95 @@
         <Setter Property="Padding" Value="{Binding Path=(params:General.DefaultPadding), RelativeSource={RelativeSource Self}}"/>
       </Style>
     </DataTemplate.Resources>
-    <StackPanel x:Name="_root" metro:ApplicationBar.PreventsOpen="true" Background="Transparent">
-      <StackPanel.ContextMenu>
-        <ContextMenu x:Name="_menu">
-          <MenuItem Header="Expand/Unexpand Body" 
+      <StackPanel x:Name="_root" metro:ApplicationBar.PreventsOpen="true" Background="Transparent">
+        <StackPanel.ContextMenu>
+          <ContextMenu x:Name="_menu">
+          <MenuItem Header="显示原文内容" 
                     Command="{Binding ToggleExpandSummaryCommand}" 
                     IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
-          <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
-          <MenuItem Header="Unsubscribe this" />
-        </ContextMenu>
-      </StackPanel.ContextMenu>
-      <Grid>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-      <TextBlock x:Name="_title" 
+            <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
+            <MenuItem Header="Unsubscribe this" />
+          </ContextMenu>
+        </StackPanel.ContextMenu>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock x:Name="_title" 
                  Text="{Binding Title}" 
-                 Style="{StaticResource TextBlockHeaderStyle}" TextWrapping="WrapWithOverflow" TextTrimming="CharacterEllipsis"/>
-        <Grid Grid.Column="1" params:General.ContentFontSize="{StaticResource FiveTextSize}"
+                 Style="{StaticResource TextBlockHeaderStyle}" TextWrapping="WrapWithOverflow"
+                 TextTrimming="CharacterEllipsis"/>
+          <Grid Grid.Column="1" params:General.ContentFontSize="{StaticResource FiveTextSize}"
               Visibility="{Binding IsMouseOver,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}, ElementName=_root,FallbackValue=Collapsed}" 
               TextElement.FontFamily="{StaticResource SymbolFont}">
-          <metro:DropDownCommandButton Content="&#xe015;" Padding="0" 
+            <metro:DropDownCommandButton Content="&#xe015;" Padding="0" 
                                        Style="{DynamicResource DropDownCommandButtonSimpleStyle}">
-            <metro:DropDownCommandButton.Submenu>
-              <metro:Submenu>
-                <MenuItem Header="Expand/Unexpand Body" 
+              <metro:DropDownCommandButton.Submenu>
+                <metro:Submenu>
+                  <MenuItem Header="显示原文内容" 
+                    Command="{Binding ToggleExpandSummaryCommand}" 
                     IsChecked="{Binding IsExpanded,Mode=OneWay}"/>
-                <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
-                <MenuItem Header="Unsubscribe this" />
-              </metro:Submenu>
-            </metro:DropDownCommandButton.Submenu>
-          </metro:DropDownCommandButton>
+                  <MenuItem Header="Open in browser..." Command="{Binding HyperlinkNavigateCommand, Source={StaticResource _locator}}" CommandParameter="{Binding Url,Mode=OneWay,Converter={StaticResource StringToUriConverter}}"/>
+                  <MenuItem Header="Unsubscribe this" />
+                </metro:Submenu>
+              </metro:DropDownCommandButton.Submenu>
+            </metro:DropDownCommandButton>
+          </Grid>
         </Grid>
-      </Grid>
-      <Grid x:Name="_headnote">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        <Grid TextElement.Foreground="{StaticResource PaleBrush}">
-          <TextBlock VerticalAlignment="Center" Text="{Binding PubDate,Mode=OneWay, StringFormat=D, ConverterCulture=zh-CN}" />
-        </Grid>
-        <StackPanel Grid.Column="1"
+        <Grid x:Name="_headnote">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <Grid TextElement.Foreground="{StaticResource PaleBrush}">
+            <TextBlock VerticalAlignment="Center" Text="{Binding PubDate,Mode=OneWay, StringFormat=D, ConverterCulture=zh-CN}" />
+          </Grid>
+          <StackPanel Grid.Column="1"
           Orientation="Horizontal" params:General.ContentFontSize="{StaticResource LittleFiveTextSize}">
-        </StackPanel>
-      </Grid>
-      <Grid x:Name="_media_room" Margin="0,8" 
+          </StackPanel>
+        </Grid>
+        <Grid x:Name="_media_room" Margin="0,8" 
             Visibility="{Binding HasMedia,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter},FallbackValue=Collapsed}">
-        <ContentPresenter Content="{Binding Media}"/>
-      </Grid>
-      <Grid x:Name="_document_room" Margin="0,8"
+          <ContentPresenter Content="{Binding Media}"/>
+        </Grid>
+        <Grid x:Name="_document_room" Margin="0,8"
             Visibility="{Binding HasDocument,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
-        <Grid.RowDefinitions>
-          <RowDefinition/>
-          <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid>
-          <ctrls:ExpandableStackPanel x:Name="_doc" ClipToBounds="True" IsExpanded="{Binding IsDocumentExpanded}">
-            <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
+          <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <Grid>
+            <ctrls:ExpandableStackPanel x:Name="_doc" ClipToBounds="True" IsExpanded="{Binding IsDocumentExpanded}">
+              <ctrls:FlowTextBlock Document="{Binding Summary}" Style="{StaticResource {x:Type RichTextBox}}"
                           IsReadOnly="True" BorderThickness="0" FocusVisualStyle="{x:Null}"
                              Padding="0" ContextMenu="{x:Null}" VerticalScrollBarVisibility="Disabled"
                              HorizontalScrollBarVisibility="Disabled" FontFamily="{StaticResource LightFont}"
-                          Background="Transparent" IsDocumentEnabled="True"
-                          Foreground="{Binding Foreground, ElementName=_title, Mode=OneWay}"/>
-          </ctrls:ExpandableStackPanel>
-          <Grid VerticalAlignment="Bottom" Focusable="False" Visibility="{Binding IsDocumentExpanded,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=false}">
-            <Rectangle Height="{Binding FrontFlags.ContentMarginHeight, Source={StaticResource _locator}}"  Fill="{StaticResource FadeOutBottomBrush}" 
+                          Background="Transparent" IsDocumentEnabled="True"/>
+            </ctrls:ExpandableStackPanel>
+            <Grid VerticalAlignment="Bottom" Focusable="False" Visibility="{Binding IsDocumentExpanded,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=false}">
+              <Rectangle Height="{Binding FrontFlags.ContentMarginHeight, Source={StaticResource _locator}}"  Fill="{StaticResource FadeOutBottomBrush}" 
                      Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"/>
-          </Grid>
-          <Grid Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
+            </Grid>
+            <Grid Visibility="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}"
                 VerticalAlignment="Bottom">
-            <metro:ProgressBar Value="100"
+              <metro:ProgressBar Value="100"
             State="{Binding IsBusying,Mode=OneWay,Converter={StaticResource BoolToBusyIndicatorConverter}}"/>
+            </Grid>
           </Grid>
-        </Grid>
-        <StackPanel Grid.Row="1" Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
-          <ToggleButton Content="&#x00B7;&#x00B7;&#x00B7; &#x00B7;&#x00B7;&#x00B7;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}" HorizontalAlignment="Center"
+          <StackPanel Grid.Row="1" Visibility="{Binding CanExpand,ElementName=_doc,Mode=OneWay,Converter={StaticResource BoolToVisibilityConverter}}">
+            <ToggleButton Content="&#x00B7;&#x00B7;&#x00B7; &#x00B7;&#x00B7;&#x00B7;" IsChecked="{Binding IsDocumentExpanded}" TextElement.FontFamily="{StaticResource SymbolFont}" HorizontalAlignment="Center"
                         x:Name="_doc_btn" Style="{StaticResource LightToggleButtonStyle}"/>
 
-        </StackPanel>
-      </Grid>
-    </StackPanel>
+          </StackPanel>
+        </Grid>
+      </StackPanel>
+
+    <DataTemplate.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Foreground" TargetName="_title" Value="{StaticResource AccentBrush}"/>
+      </Trigger>
+    </DataTemplate.Triggers>
   </DataTemplate>
 
 </ResourceDictionary>

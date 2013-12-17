@@ -3,7 +3,7 @@
   <SolidColorBrush Color="#40000000" x:Key="LowestLightBrush"/>
   <!--from elysium-->
   <SolidColorBrush Color="#1F000000" x:Key="SemitransparentBackgroundContrastBrush"/>
-  <SolidColorBrush Color="#FF000000" x:Key="ForegroundBrush"/>
+ <!-- <SolidColorBrush Color="#FF333333" x:Key="ForegroundBrush"/>-->
   <SolidColorBrush Color="#FFDEDEDE" x:Key="PaleBrush"/>
   <SolidColorBrush Color="#FFEFEFEF" x:Key="SemiPaleBrush"/>
   <SolidColorBrush Color="#8FEFEFEF" x:Key="SemiTransparentForegroundBrush"/>

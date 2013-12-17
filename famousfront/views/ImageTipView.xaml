@@ -5,7 +5,8 @@
   <DataTemplate DataType="{x:Type vm:ImageTipViewModel}">
     <Border>
       <Border.Effect>
-        <DropShadowEffect Opacity="0.5" ShadowDepth="1" Direction="0"/>
+<!--        <DropShadowEffect Opacity="0.5" ShadowDepth="1" Direction="0"/>-->
+        <DropShadowEffect BlurRadius="4" ShadowDepth="2" Direction="315" Opacity="0.3" />
       </Border.Effect>
       <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
         <Image Stretch="Uniform" StretchDirection="DownOnly"

@@ -170,7 +170,7 @@
     <Compile Include="controls\GooglePlusPicturePanel.cs" />
     <Compile Include="converters\BoolToVisibilityConverter.cs" />
     <Compile Include="core\DialogViewModel.cs" />
-    <Compile Include="core\Flags.cs" />
+    <Compile Include="core\FrontFlags.cs" />
     <Compile Include="utils\DoubleExtension.cs" />
     <Compile Include="utils\HttpClientUtils.cs" />
     <Compile Include="core\TaskViewModel.cs" />

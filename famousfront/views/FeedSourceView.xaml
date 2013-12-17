@@ -11,7 +11,7 @@
         <ColumnDefinition Width="Auto"/>
         <ColumnDefinition/>
       </Grid.ColumnDefinitions>
-      <StackPanel Grid.Column="1">
+      <StackPanel Grid.Column="1" Margin="{Binding Source={StaticResource _locator}, Path=FrontFlags.FeedSourceMargin}">
         <Grid x:Name="_label_wrap" Background="Transparent" metro:ApplicationBar.PreventsOpen="true">
         <DockPanel HorizontalAlignment="Right">
           <TextBlock x:Name="_label"

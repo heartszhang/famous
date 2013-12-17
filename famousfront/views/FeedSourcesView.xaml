@@ -7,10 +7,11 @@
                     mc:Ignorable="d">
 	<DataTemplate DataType="{x:Type vm:FeedSourcesViewModel}" d:IsDesignTimeCreatable="false">
     <DataTemplate.Resources>
-      <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}"/>
+      <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BasicListBoxStyle}">
+      </Style>
     </DataTemplate.Resources>
     <Grid Background="{StaticResource BackgroundBrush}">
-      <ListBox x:Name="_sources" ItemsSource="{Binding Sources}"
+          <ListBox x:Name="_sources" ItemsSource="{Binding Sources}"
                SelectedItem="{Binding Selected,Mode=TwoWay}"/>
 		</Grid>
 	</DataTemplate>

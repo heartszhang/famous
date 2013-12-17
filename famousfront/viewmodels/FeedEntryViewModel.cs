@@ -120,7 +120,7 @@ namespace famousfront.viewmodels
     {
       if (_external_doc_status == 0)
       {
-        _external_doc_status = 0;
+        _external_doc_status = 1;
         LoadExternalDoc();
         return;
       }

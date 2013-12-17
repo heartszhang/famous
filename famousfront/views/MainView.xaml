@@ -6,7 +6,8 @@
     <Grid Background="Gray" Opacity="0.2"></Grid>
   </DataTemplate>
   <DataTemplate DataType="{x:Type vm:MainViewModel}">
-    <Grid params:General.TextFontSize="{StaticResource FiveTextSize}"
+    <Grid
+      params:General.TextFontSize="{StaticResource FiveTextSize}"
         params:General.ContentFontSize="{StaticResource LittleFourTextSize}"
         params:General.TitleFontSize="{StaticResource ThreeTextSize}"
         params:General.HeaderFontSize="{StaticResource LittleTwoTextSize}">

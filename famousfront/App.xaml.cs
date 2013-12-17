@@ -1,5 +1,4 @@
-﻿//using MetroLog;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,18 +8,11 @@ using Elysium;
 using System.Windows.Media;
 namespace famousfront
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
-//      private ILogger Log ;
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-//            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new StreamingFileTarget { PathUnderAppData = "famous" });
-//            Log = LogManagerFactory.DefaultLogManager.GetLogger<Application>();
             WireUnhandledExceptionHandlers();
             ServiceLocator.Startup();
             this.Apply(Elysium.Theme.Light);
@@ -29,14 +21,13 @@ namespace famousfront
         void AlterDefaultBrushes()
         {
           var eg = new Uri("/Elysium;component/Themes/Generic.xaml", UriKind.Relative);
-          var egds = this.Resources.MergedDictionaries.Where(d => d.Source == eg).ToList();
-          Debug.Assert(egds.Count == 1);
-          var uri = new Uri("/Elysium;component/Themes/LightBrushes.xaml", UriKind.Relative);
-          var dictionaries = egds[0].MergedDictionaries.Where(d => d.Source == uri).ToList();
-          Debug.Assert(dictionaries.Count == 1);
-          var result = dictionaries[0];
-          result["ForegroundBrush"] = ((SolidColorBrush)(new BrushConverter().ConvertFrom("#FF040404"))).GetAsFrozen();
-//          result["BackgroundBrush"] = ((SolidColorBrush)(new BrushConverter().ConvertFrom("#FFEEEEEE"))).GetAsFrozen();
+          var lb = new Uri("/Elysium;component/Themes/LightBrushes.xaml", UriKind.Relative);
+          var egds = this.Resources.MergedDictionaries.Where(d => d.Source == eg).ToList().SingleOrDefault();
+          Debug.Assert(egds != null);
+          var brushes = egds.MergedDictionaries.Where(d => d.Source == lb).ToList().SingleOrDefault();
+          Debug.Assert(brushes != null);
+          brushes["ForegroundBrush"] = ((SolidColorBrush)(new BrushConverter().ConvertFrom("#FF232323"))).GetAsFrozen();
+//          brushes["BackgroundBrush"] = ((SolidColorBrush)(new BrushConverter().ConvertFrom("#FFFEFEFE"))).GetAsFrozen();
         }
         static App()
         {

@@ -19,6 +19,8 @@
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="{Binding FrontFlags.ContentMarginMinWidth, Source={StaticResource _locator}}"/>
       </Grid.ColumnDefinitions>
+      <Grid Background="{StaticResource SemiPaleBrush}" Grid.Column="0"/>
+      <Grid Background="{StaticResource SemiPaleBrush}" Grid.Column="2"/>
       <Grid Grid.Column="1" x:Name="_center" Background="{StaticResource SemiPaleBrush}">
         <Grid.RenderTransform>
           <TransformGroup>
