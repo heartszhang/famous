@@ -37,6 +37,7 @@ namespace famousfront.core
       BodyMaxWidth = 800.0;
       SearchBoxTopOffset = 64.0;
       SearchBoxMargin = new Thickness(160.0, 12, 160, 12);
+      FeedSourceMargin = new Thickness(8d, 0d, 8d, 0d);
       FeedSourceFindEntriesMaxWidth = 800;
       ProgressRingLargeSize = 80.0;
       ImageTipShowDelay = 150;
@@ -118,6 +119,8 @@ namespace famousfront.core
     [DataMember(Name = "video_elementheight")]
     public double VideoElementHeight { get; set; }
 
+    [DataMember(Name = "feedsource_margin")]
+    public Thickness FeedSourceMargin { get; set; }
     [DataMember(Name = "searchbox_margin")]
     public Thickness SearchBoxMargin { get; set; }
     [DataMember(Name = "searchbox_topoffset")]
