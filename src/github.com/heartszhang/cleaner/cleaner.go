@@ -42,6 +42,7 @@ type html_cleaner struct {
 	link_imgs    int
 	lis          int
 	description  string
+	icon         string
 }
 
 /*
@@ -54,10 +55,18 @@ GFW BLOG（功夫网与翻墙）: 通过 ToyVPN 网站获取 5 个免费的 PPTP
 译言网 | 南非零售销售额六月份缓慢增长
 南方周末 - 广州公安局原副局长受贿600余万被起诉
 */
-func (cleaner *html_cleaner) grab_title(title *html.Node) {
-
+func (this *html_cleaner) from_title(title *html.Node) {
+	t := strings.TrimSpace(title.Data)
+	this.titles = append(this.titles, t)
 }
-
+func (this *html_cleaner) from_link(link *html.Node) {
+	rel := node_get_attribute(link, "rel")
+	href := node_get_attribute(link, "href")
+	//t := node_get_attribute(link, "type")
+	if rel == "icon" || rel == "shortcut icon" {
+		this.icon = href
+	}
+}
 func html_clean_fragment(root *html.Node) *html.Node {
 	cleaner := &html_cleaner{}
 	var (
@@ -110,6 +119,10 @@ func html_clean_root(root *html.Node, uribase string) *html.Node {
 	if h1l == 1 { // only one h1
 		ab := find_article_via_header_i(cleaner.header1s[0])
 		alter = cleaner.try_update_article(ab)
+		if !alter && cleaner.title_similar(cleaner.header1s[0].Data) {
+			alter = true
+			cleaner.article = ab
+		}
 	}
 	//如果文档中只有一个h2，这时又没有h1，h2就是其中的标题，所在的div就是文档内容
 	if h1l == 0 && h2l == 1 {
@@ -136,6 +149,15 @@ func html_clean_root(root *html.Node, uribase string) *html.Node {
 	cleaner.clean_empty_nodes(cleaner.article)
 	cleaner.clean_attributes(cleaner.article)
 	return cleaner.article
+}
+
+func (this *html_cleaner) title_similar(t string) bool {
+	for _, i := range this.titles {
+		if strings.Contains(t, i) || strings.Contains(i, t) {
+			return true
+		}
+	}
+	return false
 }
 
 //discuzz和phpwnd论坛页面以table构成，这种页面通过table中的文字数量判定原帖正文。如果原帖内容很少会可能造成误判
@@ -177,14 +199,18 @@ func (cleaner *html_cleaner) clean_unprintable_element(dropping *[]*html.Node, n
 				*dropping = append(*dropping, child)
 			} else {
 				switch child.Data {
-				case "script", "link", "iframe", "nav", "aside", "noscript", "style", "input", "textarea", "marquee", "menu":
+				case "link":
+					cleaner.from_link(child)
+					fallthrough
+				case "script", "iframe", "nav", "aside", "noscript", "style", "input", "textarea", "marquee", "menu":
 					*dropping = append(*dropping, child)
 					drop = true
 				case "meta":
-					cleaner.grab_keywords(child)
-					cleaner.grab_description(child)
+					cleaner.from_meta(child)
+					//					cleaner.grab_keywords(child)
+					//					cleaner.grab_description(child)
 				case "title":
-					cleaner.grab_title(child)
+					cleaner.from_title(child)
 				case "head":
 					cleaner.head = child
 				case "body":
@@ -495,10 +521,25 @@ func (this *html_cleaner) String() string {
 		", h3:", len(this.header3s))
 }
 
-func (cleaner *html_cleaner) grab_keywords(meta *html.Node) {
+func (this *html_cleaner) from_meta(meta *html.Node) {
+	name := node_get_attribute(meta, "name")
+	content := node_get_attribute(meta, "content")
+	switch name {
+	case "keywords":
+		this.from_meta_keywords(content)
+	case "description":
+		this.from_meta_description(content)
+	case "title":
+		this.titles = append(this.titles, strings.TrimSpace(content))
+	}
+}
+func (this *html_cleaner) from_meta_keywords(content string) {
+	keys := strings.Split(content, ",")
+	this.keywords = append(this.keywords, keys...)
 }
 
-func (cleaner *html_cleaner) grab_description(meta *html.Node) {
+func (cleaner *html_cleaner) from_meta_description(meta string) {
+	cleaner.description = meta
 }
 
 func (this *html_cleaner) fix_forms() {

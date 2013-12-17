@@ -4,6 +4,7 @@ package cleaner
 import (
 	"code.google.com/p/go.net/html"
 	"io/ioutil"
+	//	"log"
 )
 
 type Extractor interface {
@@ -29,17 +30,17 @@ func (this html_extractor) MakeFragmentReadable(doc *html.Node) (*html.Node, *Do
 func (this html_extractor) make_article_readable(article *html.Node) (*html.Node, *DocumentSummary, error) {
 	//查找文档正文节点，并将其平面化
 	doc1, article := readabilitier_make_readable(article)
-	//of, err := write_file(doc1, this.temp_dir)
+	write_file(doc1, this.temp_dir)
 	//	log.Println("make-readable", of, err)
 
 	// 去除正文中的广告群
 	article, images := boiler_clean_by_link_density(article)
-	//of, err = write_file(doc1, this.temp_dir)
+	write_file(doc1, this.temp_dir)
 	//log.Println("clean-by-density", of, err)
 
 	// 对于以table为主的论坛页面，取出其中的正文table节点
 	article = boiler_clean_form_prefix(article)
-	//	of, err = write_file(doc1, this.temp_dir)
+	write_file(doc1, this.temp_dir)
 	//	log.Println("clean-form", of, err)
 	return article, new_docsummary(doc1, images), nil
 
@@ -54,7 +55,7 @@ func (this html_extractor) CleanFragment(doc *html.Node) (*html.Node, *DocumentS
 // return filepath, *SummaryScore, error
 func (this html_extractor) MakeHtmlReadable(doc *html.Node, url string) (*html.Node, *DocumentSummary, error) {
 	article := html_clean_root(doc, url)
-	// n, _ := write_file(article, "")
+	write_file(doc, this.temp_dir)
 	//	log.Println("1-step", n)
 	return this.make_article_readable(article)
 }

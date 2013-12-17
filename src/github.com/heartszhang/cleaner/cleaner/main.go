@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	uri = flag.String("uri", "", "html doc link")
+	uri = flag.String("uri", "http://www.voachinese.com/content/jang-sung-taek-update-20131212/1809311.html", "html doc link")
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
-	c := curl.NewCurl("")
+	c := curl.NewCurl("e:/")
 	cache, err := c.GetUtf8(*uri)
 	if err != nil {
 		panic(err)
@@ -34,7 +34,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	ex := cleaner.NewExtractor("")
+	ex := cleaner.NewExtractor("e:/")
 	article, _, err := ex.MakeHtmlReadable(doc, *uri)
 	if err != nil {
 		panic(err)
