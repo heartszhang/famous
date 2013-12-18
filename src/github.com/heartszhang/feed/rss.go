@@ -8,18 +8,45 @@ import (
 	"strings"
 )
 
+// private wrapper around the RssFeed which gives us the <rss>..</rss> xml
+type rss struct {
+	XMLName xml.Name    `xml:"rss"`
+	Version string      `xml:"version,attr"` // 2.0
+	Channel rss_channel `xml:"channel"`
+}
+
 type rss_channel struct {
 	Title           string            `xml:"title,omityempty"` // required  unique?
 	Links           []rss_link        `xml:"link,omitempty"`
 	Description     string            `xml:"description,omitempty"`
+	Language        string            `xml:"language,omitempty"`
 	LastBuildDate   unixtime.UnixTime `xml:"lastBuildDate,omitemptty"`
+	PubDate         unixtime.UnixTime `xml:pubDate,omitempty`
+	Docs            string            `xml:"docs,omitempty"`
+	Cloud           string            `xml:"cloud,omitempty"`
 	UpdatePeriod    string            `xml:"http://purl.org/rss/1.0/modules/syndication/ updatePeriod,omityempty"`
 	UpdateFrequency int64             `xml:"http://purl.org/rss/1.0/modules/syndication/ updateFrequency,omityempty"`
 	TTL             int64             `xml:"ttl"` // minitues
 	Categories      []string          `xml:"category,omitempty"`
 	Image           *rss_image        `xml:"image,omitempty"` // a img can be displayed
-	Items           []rss_item        `xml:"item"`
+	Items           []rss_item        `xml:"item,omitempty"`
 }
+
+type rss_item struct {
+	Title       string            `xml:"title"`             // required
+	Link        string            `xml:"link"`              // required, like http://nytimes.com/2004/12/07FEST.html
+	PubDate     unixtime.UnixTime `xml:"pubDate,omitempty"` // created or updated
+	Categories  []string          `xml:"category,omitempty"`
+	Author      string            `xml:"author,omitempty"`   // email address of the author
+	Description string            `xml:"description"`        // required
+	Guid        string            `xml:"guid,omitempty"`     // dont care
+	Comments    string            `xml:"comments,omitempty"` // comments url
+	FullText    string            `xml:"http://purl.org/rss/1.0/modules/content/ encoded,omitmepty"`
+	Enclosure   *rss_enclosure    `xml:"enclosure,omitempty"` //attachment
+	Source      string            `xml:"source,omitempty"`
+	Medias      []media_content   `xml:"http://search.yahoo.com/mrss/ content,omitempty"`
+}
+
 type rss_enclosure struct {
 	Url    string `xml:"url,attr,omitempty"`
 	Length int64  `xml:"length,attr"`         // bytes
@@ -39,30 +66,9 @@ type media_content struct {
 	Title  string `xml:"title,omitempty"`
 }
 
-type rss_item struct {
-	Title       string            `xml:"title"`             // required
-	Link        string            `xml:"link"`              // required, http://nytimes.com/2004/12/07FEST.html
-	PubDate     unixtime.UnixTime `xml:"pubDate,omitempty"` // created or updated
-	Categories  []string          `xml:"category,omitempty"`
-	Author      string            `xml:"author,omitempty"`   // email address of the author
-	Description string            `xml:"description"`        // required
-	Guid        string            `xml:"guid,omitempty"`     // dont care
-	Comments    string            `xml:"comments,omitempty"` // comments url
-	FullText    string            `xml:"http://purl.org/rss/1.0/modules/content/ encoded,omitmepty"`
-	Enclosure   rss_enclosure     `xml:"enclosure,omitempty"` //attachment
-	Medias      []media_content   `xml:"http://search.yahoo.com/mrss/ content,omitempty"`
-}
-
 type rss_link struct {
 	atom_link `xml:",inline"`
 	Link      string `xml:",chardata"`
-}
-
-// private wrapper around the RssFeed which gives us the <rss>..</rss> xml
-type rss struct {
-	XMLName xml.Name    `xml:"rss"`
-	Channel rss_channel `xml:"channel"`
-	Version string      `xml:"version,attr"` // 2.0
 }
 
 // file has already converted to utf-8
