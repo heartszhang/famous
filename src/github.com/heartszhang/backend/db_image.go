@@ -1,6 +1,8 @@
 package backend
 
 import (
+	"time"
+
 	"github.com/heartszhang/feed"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
@@ -21,8 +23,12 @@ func (this image_op) find(uri string) (v feed.FeedImage, err error) {
 }
 
 func (this image_op) save(uri string, v feed.FeedImage) error {
+	x := struct {
+		feed.FeedImage `bson:",inline"`
+		TTL            time.Time `bson:"ttl"`
+	}{v, time.Now()}
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
-		_, err := coll.Upsert(bson.M{"uri": uri}, bson.M{"$setOnInsert": &v})
+		_, err := coll.Upsert(bson.M{"uri": uri}, bson.M{"$setOnInsert": x})
 		return err
 	})
 	return err

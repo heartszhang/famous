@@ -16,7 +16,6 @@ func image_videothumbnail(uri string) (vt.VideoDescription, error) {
 	return vt.DescribeVideo(uri)
 }
 
-// /feed/entry/image.json/{url}/{entry_id}
 func image_description(uri string) (feed.FeedImage, error) {
 	imgo := new_imagecache_operator()
 	v, err := imgo.find(uri)
@@ -38,13 +37,16 @@ func image_description(uri string) (feed.FeedImage, error) {
 	return v, err
 }
 
-func image_icon(uri string) (curl.Cache, error) {
-	u, err := url.ParseRequestURI(uri)
-	if err != nil {
-		return curl.Cache{}, err
+func image_icon(uri string) (feed.FeedImage, error) {
+	imgo := new_imagecache_operator()
+	v, err := imgo.find(uri)
+
+	if err == nil {
+		return v, nil
 	}
+	u, err := url.ParseRequestURI(uri)
 	c := curl.NewCurlerDetail(backend_context.config.ImageFolder, 0, 0, nil, backend_context.ruler)
-	candis := []string{u.RequestURI(), "/", "/favicon.ico"}
+	candis := []string{u.String(), "/", "/favicon.ico"}
 	for _, candi := range candis {
 		x, _ := u.Parse(candi)
 		cache, _ := c.Get(x.String())
@@ -52,10 +54,13 @@ func image_icon(uri string) (curl.Cache, error) {
 			cache, _ = icon_from_link_rel(cache.Local)
 		}
 		if strings.Split(cache.Mime, "/")[0] == "image" {
-			return cache, nil
+			v.Mime = cache.Mime
+			v.Origin = cache.Local
+			go imgo.save(uri, v)
+			return v, nil
 		}
 	}
-	return curl.Cache{}, new_backenderror(-1, "icon cannot resolve")
+	return v, new_backenderror(-1, "icon cannot resolve")
 }
 func icon_from_link_rel(local string) (curl.Cache, error) {
 	f, err := os.Open(local)
@@ -84,6 +89,7 @@ func icon_from_link_rel(local string) (curl.Cache, error) {
 	}
 	return curl.Cache{}, new_backenderror(-1, "icon cannot resolved in html")
 }
+
 func image_description_cached(uri string) (feed.FeedImage, error) {
 	imgo := new_imagecache_operator()
 	v, err := imgo.find(uri)

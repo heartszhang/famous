@@ -7,63 +7,18 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"github.com/heartszhang/feed"
-	"github.com/qiniu/log"
 )
 
 func init() {
 	http.HandleFunc("/api/tick.json", webapi_tick)
-	http.HandleFunc("/api/meta.json", webapi_meta)
-	http.HandleFunc("/api/meta/cleanup.json", webapi_meta_cleanup)
 	http.HandleFunc("/api/update/popup.json", webapi_update_popup)
-	http.HandleFunc("/api/feed_tag/all.json", webapi_feedtag_all)
-
-	http.HandleFunc("/api/link/origin.json", webapi_link_origin)   // ?uri=
-	http.HandleFunc("/api/suggest/bing.json", webapi_suggest_bing) // ?q=
-	http.HandleFunc("/api/opml/upload.json", webapi_opml_upload)
-}
-
-const uint64_bits int = 64
-
-func webapi_feedtag_all(w http.ResponseWriter, r *http.Request) {
-	switch ft, err := feedtag_all(); err {
-	case nil:
-		webapi_write_as_json(w, ft)
-	default:
-		webapi_write_error(w, err)
-	}
-	log.Println(r.URL.RequestURI())
-}
-
-func webapi_suggest_bing(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query().Get("q")
-	switch sg, err := suggest_bing(q); err {
-	case nil:
-		webapi_write_as_json(w, sg)
-	default:
-		webapi_write_error(w, err)
-	}
 }
 
 func webapi_assert(w http.ResponseWriter, r *http.Request) {
 	webapi_write_error(w, backend_error{"not implemented yet", -1})
 }
 
-// uri: /meta.json
-func webapi_meta(w http.ResponseWriter, r *http.Request) {
-	m, err := meta()
-
-	if err != nil {
-		webapi_write_error(w, err)
-	} else {
-		webapi_write_as_json(w, m)
-	}
-	log.Println(r.URL.RequestURI())
-}
-
 func webapi_tick(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.RequestURI())
 	switch v, err := tick(); err {
 	case nil:
 		webapi_write_error(w, err)
@@ -72,53 +27,9 @@ func webapi_tick(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func webapi_update_popup(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.RequestURI())
-	switch v, err := update_popup(); err {
-	case nil:
-		webapi_write_as_json(w, v)
-	default:
-		webapi_write_error(w, err)
-	}
-}
-
-func webapi_meta_cleanup(w http.ResponseWriter, r *http.Request) {
-	err := meta_cleanup()
-	webapi_write_error(w, err)
-	log.Println(r.URL.RequestURI())
-}
-
-func webapi_link_origin(w http.ResponseWriter, r *http.Request) {
-	webapi_write_error(w, nil)
-	log.Println(r.URL.RequestURI())
-}
-
 const (
 	_1M = 1024 * 1024
 )
-
-func webapi_opml_upload(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(_1M)
-	if err != nil {
-		webapi_write_error(w, err)
-	}
-	for _, headers := range r.MultipartForm.File {
-		for _, header := range headers {
-			f, err := header.Open()
-			defer f.Close()
-			fs, err := feed.OpmlExportFeedSource(f)
-			switch err {
-			case nil:
-				rs := feedsource_mark_subscribed(new_readsources(fs))
-				webapi_write_as_json(w, rs)
-			default:
-				webapi_write_error(w, err)
-			}
-			return
-		}
-	}
-	webapi_write_error(w, nil)
-}
 
 type counted_writer struct {
 	io.Writer
@@ -161,13 +72,17 @@ func webapi_write_error(w http.ResponseWriter, err error) {
 	webapi_write_error_code(w, err, http.StatusBadGateway)
 }
 
-//http://address/api/image/thumbnail.json?uri=
+//http://address/api/image/thumbnail.jpeg?uri=
 func redirect_thumbnail(uri string) string {
-	return fmt.Sprintf("http://%v/api/image/thumbnail.json?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
+	return fmt.Sprintf("http://%v/api/image/thumbnail.jpeg?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
+}
+
+func redirect_origin(uri string) string {
+	return fmt.Sprintf("http://%v/api/image/origin.jpeg?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
 }
 
 func imageurl_from_video(uri string) string {
-	return fmt.Sprintf("http://%v/api/image/video.thumbnail?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
+	return fmt.Sprintf("http://%v/api/image/video.thumbnail.jpeg?uri=%v", backend_context.config.Address(), url.QueryEscape(uri))
 }
 
 //server/api/link/origin.json?uri=

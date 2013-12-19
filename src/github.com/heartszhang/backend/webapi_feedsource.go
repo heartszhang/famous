@@ -1,75 +1,99 @@
 package backend
 
-import (
-	"github.com/qiniu/log"
-	"net/http"
-	"net/url"
-)
+import "net/http"
 
 func init() {
-
 	http.HandleFunc("/api/feed_source/all.json", webapi_feedsource_all)
 	http.HandleFunc("/api/feed_source/subscribe.json", webapi_feedsource_subscribe)
 	http.HandleFunc("/api/feed_source/unsubscribe.json", webapi_feedsource_unsubscribe)
-	http.HandleFunc("/api/feed_source/find.json", webapi_feedsource_find) // ?q=
-	http.HandleFunc("/api/feed_source/show.json", webapi_feedsource_find) // ?q=
-}
-
-func webapi_feedsource_show(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
-	q := r.URL.Query().Get("q")
-	switch fs, err := feedsource_show(q); err {
-	case nil:
-		webapi_write_as_json(w, fs)
-	default:
-		webapi_write_error(w, err)
-	}
-}
-func webapi_feedsource_find(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
-	q := r.URL.Query().Get("q")
-	if _, err := url.ParseRequestURI(q); err == nil {
-		webapi_feedsource_show(w, r)
-		return
-	}
-	switch fs, err := feedsource_find(q); err {
-	case nil:
-		webapi_write_as_json(w, fs)
-	default:
-		webapi_write_error(w, err)
-	}
+	http.HandleFunc("/api/feed_source/by_category.json", webapi_feedsource_by_category)
+	http.handleFunc("/api/feed_source/addto_category.json", webapi_feedsource_addto_category)
+	http.handleFunc("/api/feed_source/removefrom_category.json", webapi_feedsource_removefrom_category)
+	http.HandleFunc("/api/feed_source/by_tag.json", webapi_feedsource_by_tag)
+	http.handleFunc("/api/feed_source/add_tag.json", webapi_feedsource_add_tag)
+	http.handleFunc("/api/feed_source/remove_tag.json", webapi_feedsource_remove_tag)
+	http.handleFunc("/api/feed_source/count.json", webapi_feedsource_add_tag)
+	http.handleFunc("/api/feed_source/all/count.json", webapi_feedsource_add_tag)
 }
 
 // uri: /feed_source/subscribe.json?uri=
 func webapi_feedsource_subscribe(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
 	source_type := source_type_map(r.URL.Query().Get("source_type"))
 	switch fs, err := feedsource_subscribe(uri, source_type); err {
 	case nil:
-		log.Println(fs, err)
 		webapi_write_as_json(w, fs)
 	default:
-		log.Println(err)
 		webapi_write_error(w, err)
 	}
 }
 
 func webapi_feedsource_all(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	switch fs, err := feedsource_all(); err {
 	case nil:
 		webapi_write_as_json(w, fs)
 	default:
 		webapi_write_error(w, err)
 	}
-	log.Println(r.URL.RequestURI())
 }
 
 // uri: /feed_source/unsubscribe.json/{uri}
 func webapi_feedsource_unsubscribe(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
 	err := feedsource_unsubscribe(uri)
 	webapi_write_error(w, err)
+}
+
+func webapi_feedsource_by_category(w http.ResponseWriter, r *http.Request) {
+	switch fs, err := feedsource_all(); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
+}
+
+func webapi_feedsource_addto_category(w http.ResponseWriter, r *http.Request) {
+	switch fs, err := feedsource_all(); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
+}
+
+func webapi_feedsource_removefrom_category(w http.ResponseWriter, r *http.Request) {
+	switch fs, err := feedsource_all(); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
+}
+
+func webapi_feedsource_by_tag(w http.ResponseWriter, r *http.Request) {
+	switch fs, err := feedsource_all(); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
+}
+
+func webapi_feedsource_add_tag(w http.ResponseWriter, r *http.Request) {
+	switch fs, err := feedsource_all(); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
+}
+
+func webapi_feedsource_remove_tag(w http.ResponseWriter, r *http.Request) {
+	switch fs, err := feedsource_all(); err {
+	case nil:
+		webapi_write_as_json(w, fs)
+	default:
+		webapi_write_error(w, err)
+	}
 }

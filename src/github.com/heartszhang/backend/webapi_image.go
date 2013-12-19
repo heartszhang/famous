@@ -3,22 +3,19 @@ package backend
 import (
 	"net/http"
 	"strconv"
-
-	"github.com/qiniu/log"
 )
 
 func init() {
-	http.HandleFunc("/api/image/description.json", webapi_image_description)
-	http.HandleFunc("/api/image/thumbnail.json", webapi_image_thumbnail)       // ?uri= return image/jpeg
-	http.HandleFunc("/api/image/origin.json", webapi_image_origin)             // ?uri=, return image/xxx
-	http.HandleFunc("/api/image/dimension.json", webapi_image_dimension)       // ?uri=, return FeedMedia
-	http.HandleFunc("/api/image/video.thumbnail", webapi_image_videothumbnail) // ?uri=, return image/xxx
-	http.HandleFunc("/api/image/icon", webapi_image_icon)                      // ?uri=, return image/xxx
+	http.HandleFunc("/api/image/description.json", webapi_image_description)        // ?uri=, return application/json
+	http.HandleFunc("/api/image/thumbnail.jpeg", webapi_image_thumbnail)            // ?uri= return image/jpeg
+	http.HandleFunc("/api/image/origin.jpeg", webapi_image_origin)                  // ?uri=, return image/xxx
+	http.HandleFunc("/api/image/dimension.json", webapi_image_dimension)            // ?uri=, return FeedMedia
+	http.HandleFunc("/api/image/video.thumbnail.jpeg", webapi_image_videothumbnail) // ?uri=, return image/jpeg
+	http.HandleFunc("/api/image/icon", webapi_image_icon)                           // ?uri=, return image/xxx
 }
 
-// uri: /image/description.json?uri=
+// uri: string, required
 func webapi_image_description(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
 
 	v, err := image_description(uri)
@@ -29,9 +26,8 @@ func webapi_image_description(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// uri: /image/dimension.json?uri=
+// uri: string, requried
 func webapi_image_dimension(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
 	v, err := image_dimension(uri)
 	if err != nil {
@@ -40,8 +36,9 @@ func webapi_image_dimension(w http.ResponseWriter, r *http.Request) {
 		webapi_write_as_json(w, v)
 	}
 }
+
+// uri: string, required
 func webapi_image_videothumbnail(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
 	switch vt, err := image_videothumbnail(uri); err {
 	case nil:
@@ -51,52 +48,49 @@ func webapi_image_videothumbnail(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// uri: string, required
 func webapi_image_entity(uri string, w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	switch cache, err := image_description(uri); err {
 	case nil:
-		w.Header().Set("content-type", cache.Mime)
-		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
-		w.Header().Set("x-image-meta-property-width", strconv.Itoa(cache.Width))
-		w.Header().Set("x-image-meta-property-alter", cache.Origin)
-
-		http.ServeFile(w, r, cache.Thumbnail)
+		image_writeheader(w, r, cache.Height, cache.Width, cache.Mime, cache.Thumbnail, cache.Origin)
 	default:
 		webapi_write_error(w, err)
 	}
 }
+func image_writeheader(w http.ResponseWriter, r *http.Request, height, width int, mime, local, alter string) {
+	w.Header().Set("content-type", mime)
+	w.Header().Set("x-image-meta-property-height", strconv.Itoa(height))
+	w.Header().Set("x-image-meta-property-width", strconv.Itoa(width))
+	w.Header().Set("x-image-meta-property-alter", alter)
 
-// /api/image/thumbnail.json?uri=
+	http.ServeFile(w, r, local)
+}
+
+// uri: string, required
 func webapi_image_thumbnail(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	url := r.URL.Query().Get("uri")
 	webapi_image_entity(url, w, r)
 }
 
-// /api/image/origin.json?uri=
+// uri: string, required
 func webapi_image_origin(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
 	switch cache, err := image_description(uri); err {
 	case nil:
-		w.Header().Set("content-type", cache.Mime)
-		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
-		w.Header().Set("x-image-meta-property-width", strconv.Itoa(cache.Width))
-		w.Header().Set("x-image-meta-property-alter", cache.Thumbnail)
-		http.ServeFile(w, r, cache.Origin)
+		image_writeheader(w, r, cache.Height, cache.Width, cache.Mime, cache.Origin, cache.Thumbnail)
 	default:
 		webapi_write_error(w, err)
 	}
 }
 
+// uri: string, required
 func webapi_image_icon(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RequestURI)
 	uri := r.URL.Query().Get("uri")
-	switch cache, err := image_icon(uri); err {
+	switch img, err := image_icon(uri); err {
 	default:
-		webapi_write_error_code(w, err, cache.StatusCode)
+		webapi_write_error(w, err)
 	case nil:
-		w.Header().Set("content-type", cache.Mime)
-		http.ServeFile(w, r, cache.Local)
+		w.Header().Set("content-type", img.Mime)
+		http.ServeFile(w, r, img.Origin)
 	}
 }
