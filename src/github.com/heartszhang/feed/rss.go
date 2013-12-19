@@ -2,10 +2,10 @@ package feed
 
 import (
 	"encoding/xml"
-	"github.com/heartszhang/unixtime"
 	"io"
-	"os"
 	"strings"
+
+	"github.com/heartszhang/unixtime"
 )
 
 // private wrapper around the RssFeed which gives us the <rss>..</rss> xml
@@ -16,35 +16,35 @@ type rss struct {
 }
 
 type rss_channel struct {
-	Title           string            `xml:"title,omityempty"` // required  unique?
-	Links           []rss_link        `xml:"link,omitempty"`
-	Description     string            `xml:"description,omitempty"`
-	Language        string            `xml:"language,omitempty"`
-	LastBuildDate   unixtime.UnixTime `xml:"lastBuildDate,omitemptty"`
-	PubDate         unixtime.UnixTime `xml:pubDate,omitempty`
-	Docs            string            `xml:"docs,omitempty"`
-	Cloud           string            `xml:"cloud,omitempty"`
-	UpdatePeriod    string            `xml:"http://purl.org/rss/1.0/modules/syndication/ updatePeriod,omityempty"`
-	UpdateFrequency int64             `xml:"http://purl.org/rss/1.0/modules/syndication/ updateFrequency,omityempty"`
-	TTL             int64             `xml:"ttl"` // minitues
-	Categories      []string          `xml:"category,omitempty"`
-	Image           *rss_image        `xml:"image,omitempty"` // a img can be displayed
-	Items           []rss_item        `xml:"item,omitempty"`
+	Title           string        `xml:"title,omityempty"` // required  unique?
+	Links           []rss_link    `xml:"link,omitempty"`
+	Description     string        `xml:"description,omitempty"`
+	Language        string        `xml:"language,omitempty"`
+	LastBuildDate   unixtime.Time `xml:"lastBuildDate,omitemptty"`
+	PubDate         unixtime.Time `xml:"pubDate,omitempty"`
+	Docs            string        `xml:"docs,omitempty"`
+	Cloud           string        `xml:"cloud,omitempty"`
+	UpdatePeriod    string        `xml:"http://purl.org/rss/1.0/modules/syndication/ updatePeriod,omityempty"`
+	UpdateFrequency int64         `xml:"http://purl.org/rss/1.0/modules/syndication/ updateFrequency,omityempty"`
+	TTL             int64         `xml:"ttl"` // minitues
+	Categories      []string      `xml:"category,omitempty"`
+	Image           *rss_image    `xml:"image,omitempty"` // a img can be displayed
+	Items           []rss_item    `xml:"item,omitempty"`
 }
 
 type rss_item struct {
-	Title       string            `xml:"title"`             // required
-	Link        string            `xml:"link"`              // required, like http://nytimes.com/2004/12/07FEST.html
-	PubDate     unixtime.UnixTime `xml:"pubDate,omitempty"` // created or updated
-	Categories  []string          `xml:"category,omitempty"`
-	Author      string            `xml:"author,omitempty"`   // email address of the author
-	Description string            `xml:"description"`        // required
-	Guid        string            `xml:"guid,omitempty"`     // dont care
-	Comments    string            `xml:"comments,omitempty"` // comments url
-	FullText    string            `xml:"http://purl.org/rss/1.0/modules/content/ encoded,omitmepty"`
-	Enclosure   *rss_enclosure    `xml:"enclosure,omitempty"` //attachment
-	Source      string            `xml:"source,omitempty"`
-	Medias      []media_content   `xml:"http://search.yahoo.com/mrss/ content,omitempty"`
+	Title       string          `xml:"title"`             // required
+	Link        string          `xml:"link"`              // required, like http://nytimes.com/2004/12/07FEST.html
+	PubDate     unixtime.Time   `xml:"pubDate,omitempty"` // created or updated
+	Categories  []string        `xml:"category,omitempty"`
+	Author      string          `xml:"author,omitempty"`   // email address of the author
+	Description string          `xml:"description"`        // required
+	Guid        string          `xml:"guid,omitempty"`     // dont care
+	Comments    string          `xml:"comments,omitempty"` // comments url
+	FullText    string          `xml:"http://purl.org/rss/1.0/modules/content/ encoded,omitmepty"`
+	Enclosure   []rss_enclosure `xml:"enclosure,omitempty"` //attachment
+	Source      string          `xml:"source,omitempty"`
+	Medias      []media_content `xml:"http://search.yahoo.com/mrss/ content,omitempty"`
 }
 
 type rss_enclosure struct {
@@ -59,69 +59,53 @@ type rss_image struct {
 	Link  string `xml:"link,omitempty"` // may be same as channel's link
 }
 
-// http://search.yahoo.com/mrss/
+// refer http://search.yahoo.com/mrss/
 type media_content struct {
 	Url    string `xml:"url,attr,omitempty"`
 	Medium string `xml:"medium,attr,omitempty"`
 	Title  string `xml:"title,omitempty"`
 }
 
-type rss_link struct {
+type rss_link struct { // many rss files use atom's link
 	atom_link `xml:",inline"`
 	Link      string `xml:",chardata"`
 }
 
-// file has already converted to utf-8
-func feed_from_rss(filepath string) (FeedSource, []FeedEntry, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return FeedSource{}, nil, err
-	}
-	defer f.Close()
-
-	decoder := xml.NewDecoder(f)
-	decoder.CharsetReader = charset_reader_passthrough
-
+func feed_from_rss(f io.Reader, uri string) (FeedSource, []FeedEntry, error) {
 	var (
 		v   rss
 		fs  FeedSource
 		fes []FeedEntry
 	)
-	err = decoder.Decode(&v)
-	fs = v.Channel.to_source(filepath)
-	fes = v.Channel.to_entries()
+	err := new_xml_decoder(f).Decode(&v)
+	fs = v.Channel.export_source(uri)
+	fes = v.Channel.export_entries(fs.Uri)
 
 	return fs, fes, err
 }
 
-func (this rss_channel) to_entries() []FeedEntry {
-	v := make([]FeedEntry, len(this.Items))
-	for idx, i := range this.Items {
-		v[idx] = i.to_feed_entry(this.self())
+func (this rss_channel) export_entries(feeduri string) []FeedEntry {
+	var v []FeedEntry
+	for _, i := range this.Items {
+		v = append(v, i.to_feedentry(feeduri))
 	}
 	return v
 }
 
-func (this rss_channel) to_source(local string) FeedSource {
+func (this rss_channel) export_source(uri string) FeedSource {
 	v := FeedSource{
-		FeedSourceMeta: FeedSourceMeta{
-			Name:        this.Title,
-			Uri:         this.self(),
-			Period:      this.ttl(),
-			Type:        Feed_type_rss,
-			Tags:        this.Categories,
-			Description: this.Description,
-			WebSite:     this.website(),
-		},
-		SubscribeState: FeedSourceSubscribeStateSubscribed,
-		EnableProxy:    0,
-		Local:          local, // filled later
-		Update:         this.LastBuildDate,
+		Name:        this.Title,
+		Uri:         this.self(uri),
+		Period:      this.ttl(),
+		Update:      this.update(),
+		Type:        Feed_type_rss,
+		Tags:        this.Categories,
+		Description: this.Description,
+		WebSite:     this.website(),
+		Logo:        this.logo(),
+		Hub:         this.hub(),
 	}
 
-	if this.Image != nil {
-		v.Logo = this.Image.Url // this may be relative
-	}
 	return v
 }
 
@@ -154,21 +138,17 @@ func (this rss_channel) ttl() int64 {
 	}
 	return v
 }
-
-func (this rss_channel) self() string { // rel = self
-	return query_selector(this.Links, link_rel_self)
-}
-func query_selector(links []rss_link, rel string) string {
-	for _, l := range links {
-		if l.Rel == rel {
-			x := l.Href
-			if x == "" {
-				x = l.Link
-			}
-			return x
-		}
+func (this rss_channel) logo() string {
+	if this.Image != nil {
+		return this.Image.Url
 	}
 	return ""
+}
+func (this rss_channel) self(downloaduri string) string { // rel = self
+	if downloaduri != "" {
+		return downloaduri
+	}
+	return query_selector(this.Links, link_rel_self)
 }
 
 func (this rss_channel) website() string { // rel = alternate
@@ -178,17 +158,17 @@ func (this rss_channel) website() string { // rel = alternate
 	}
 	return l
 }
+
 func (this rss_channel) hub() string {
 	return query_selector(this.Links, link_rel_hub)
 }
 
-func (this rss_enclosure) to_feed_media(mt uint) FeedMedia {
-	return FeedMedia{
-		media_type: Feed_media_type_image,
-		Length:     this.Length,
-		Uri:        this.Url,
-		Mime:       this.Type,
+func query_selector(links []rss_link, rel string) string {
+	var alinks []atom_link
+	for _, l := range links {
+		alinks = append(alinks, l.to_atomlink())
 	}
+	return atom_query_selector(alinks, rel)
 }
 
 func mime_to_feedmediatype(mime string) uint {
@@ -205,44 +185,71 @@ func mime_to_feedmediatype(mime string) uint {
 	return t
 }
 
-func (this rss_item) to_feed_entry(feed_url string) FeedEntry {
+func (this rss_item) to_feedentry(feed_url string) FeedEntry {
 	v := FeedEntry{
-		FeedEntryMeta: FeedEntryMeta{
-			Parent:  feed_url, // rss link
-			Type:    Feed_type_rss,
-			Uri:     this.Link,
-			PubDate: this.PubDate,
-			Summary: this.Description,
-			Tags:    this.Categories,
-			Title:   FeedTitle{Main: this.Title},
-			Content: this.FullText,
-		},
+		Parent:  feed_url, // rss link
+		Title:   this.Title,
+		Uri:     this.Link,
+		Type:    Feed_type_rss,
+		PubDate: int64(this.PubDate),
+		Summary: this.Description,
+		Content: this.FullText,
+		Tags:    this.Categories,
+		Author:  this.Author,
 	}
-	if this.Author != "" {
-		v.Author = &FeedAuthor{Email: this.Author}
+	for _, enclosure := range this.Enclosure {
+		switch mime_to_feedmediatype(enclosure.Type) {
+		case Feed_media_type_image:
+			v.Images = append(v.Images, FeedMedia(enclosure.to_feedmedia()))
+		case Feed_media_type_video:
+			v.Videos = append(v.Videos, enclosure.to_feedmedia())
+		case Feed_media_type_audio:
+			v.Audios = append(v.Audios, enclosure.to_feedmedia())
+		}
 	}
 
-	switch mime_to_feedmediatype(this.Enclosure.Type) {
-	case Feed_media_type_image:
-		v.Images = append(v.Images, FeedMedia(this.Enclosure.to_feed_media(Feed_media_type_image)))
-	case Feed_media_type_video:
-		v.Videos = append(v.Videos, this.Enclosure.to_feed_media(Feed_media_type_video))
-	case Feed_media_type_audio:
-		v.Audios = append(v.Audios, this.Enclosure.to_feed_media(Feed_media_type_audio))
-	case Feed_media_type_url:
-		v.Links = append(v.Links,
-			FeedLink{
-				media_type: Feed_media_type_url,
-				Uri:        this.Enclosure.Url,
-				Length:     this.Enclosure.Length,
-			})
-
-	default:
+	for _, media := range this.Medias {
+		switch mime_to_feedmediatype(media.Medium) {
+		case Feed_media_type_image:
+			v.Images = append(v.Images, FeedMedia(media.to_feedmedia()))
+		case Feed_media_type_video:
+			v.Videos = append(v.Videos, media.to_feedmedia())
+		case Feed_media_type_audio:
+			v.Audios = append(v.Audios, media.to_feedmedia())
+		}
 	}
 	return v
 }
 
-// file has been converted to utf-8, so we just ignore internal encoding-declaration
-func charset_reader_passthrough(charset string, input io.Reader) (io.Reader, error) {
-	return input, nil
+func (this rss_link) to_atomlink() atom_link {
+	var v atom_link = this.atom_link
+	if this.Link != "" {
+		v.Href = this.Link
+	}
+	return v
+}
+
+func (this rss_enclosure) to_feedmedia() FeedMedia {
+	return FeedMedia{
+		Length: this.Length,
+		Uri:    this.Url,
+		Mime:   this.Type,
+	}
+}
+
+func (this media_content) to_feedmedia() FeedMedia {
+	return FeedMedia{
+		Uri:   this.Url,
+		Mime:  this.Medium,
+		Title: this.Title,
+	}
+}
+
+func (this rss_channel) update() int64 {
+	var v int64
+	if this.PubDate != 0 {
+		v = int64(this.PubDate)
+	}
+	v = int64(this.LastBuildDate)
+	return v
 }
