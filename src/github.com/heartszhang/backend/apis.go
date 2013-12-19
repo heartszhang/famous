@@ -1,13 +1,14 @@
 package backend
 
 import (
+	"math/rand"
+	"sync/atomic"
+	"time"
+
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/pubsub"
 	"github.com/heartszhang/unixtime"
 	"github.com/qiniu/log"
-	"math/rand"
-	"sync/atomic"
-	"time"
 )
 
 // /tick.json
@@ -29,11 +30,7 @@ func meta_cleanup() error {
 }
 
 func source_type_map(sourcetype string) uint {
-	v, ok := feed.FeedSourceTypes[sourcetype]
-	if !ok {
-		v = feed.Feed_type_unknown
-	}
-	return v
+	return feed.FeedSourceType(sourcetype)
 }
 
 func feedtag_all() ([]string, error) {
@@ -41,11 +38,11 @@ func feedtag_all() ([]string, error) {
 	return fto.all()
 }
 
-func backend_push_update(fs feed.FeedSource, fes []feed.FeedEntry, err error) {
+func backend_push_update(fs ReadSource, fes []ReadEntry, err error) {
 	if err != nil {
 		return
 	}
-	backend_context.feed_updates = append(backend_context.feed_updates, feed.FeedEntity{fs, fes})
+	backend_context.feed_updates = append(backend_context.feed_updates, ReadEntity{fs, fes})
 }
 
 func update_work() {
@@ -71,11 +68,11 @@ func update_work() {
 	}
 
 	newfs.SubscribeState = fs.SubscribeState
-	newfs.LastTouch = unixtime.UnixTimeNow()
+	newfs.LastTouch = int64(unixtime.TimeNow())
 	newfs.LastUpdate = newfs.LastTouch
-	newfs.NextTouch = unixtime.UnixTime(newfs.Period) + newfs.LastTouch
+	newfs.NextTouch = newfs.Period + newfs.LastTouch
 	err = feedsource_save(newfs)
-	fes = feedentry_filter(fes)
+	fes = readentry_filter(fes)
 	backend_push_update(newfs, fes, err)
 	ps := pubsub.NewSuperFeedrPubSubscriber("async", "Hearts", "Refresh")
 	sc, err := ps.Subscribe(fs.Uri)
@@ -84,6 +81,5 @@ func update_work() {
 	}
 	ps = pubsub.NewGooglePubSubscriber()
 	sc, err = ps.Subscribe(fs.Uri)
-	log.Println(sc, err)
-	log.Println("update-tick", fs.Name, err)
+	log.Println("update-tick", fs.Name, sc, err)
 }

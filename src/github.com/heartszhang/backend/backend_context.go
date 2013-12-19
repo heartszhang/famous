@@ -2,18 +2,17 @@ package backend
 
 import (
 	"fmt"
-	"github.com/heartszhang/feed"
-	"github.com/heartszhang/gfwlist"
-	"github.com/qiniu/log"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+	"github.com/heartszhang/gfwlist"
+	"github.com/qiniu/log"
 )
 
 type FeedTick struct {
-	Tick  int64             `json:"tick"`
-	Feeds []feed.FeedEntity `json:"feeds,omitempty"`
+	Tick  int64        `json:"tick"`
+	Feeds []ReadEntity `json:"feeds,omitempty"`
 }
 type FeedsBackendConfig struct {
 	BackendIp             string `json:"web_ip"`
@@ -98,7 +97,7 @@ var backend_context struct {
 	config       FeedsBackendConfig
 	startup      time.Time
 	working      int64
-	feed_updates []feed.FeedEntity
+	feed_updates []ReadEntity
 	ruler        gfwlist.GfwRuler
 }
 

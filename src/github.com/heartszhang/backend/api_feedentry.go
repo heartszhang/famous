@@ -1,11 +1,13 @@
 package backend
 
 import (
+	"net/url"
+	"os"
+
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
 	"github.com/qiniu/log"
-	"net/url"
 )
 
 // category
@@ -19,7 +21,7 @@ func feeds_entries_since(category string, count uint, page uint) ([]feed.FeedEnt
 // count: must large than 0
 // page: 0 based page index
 // if page is 0, entries may be fetched online
-func feedentry_unread(source string, count int, page int) ([]feed.FeedEntry, error, int) {
+func feedentry_unread(source string, count int, page int) ([]ReadEntry, error, int) {
 	if count <= 0 {
 		panic("invalid arg count")
 	}
@@ -37,18 +39,25 @@ func feedentry_unread(source string, count int, page int) ([]feed.FeedEntry, err
 		if ext != "xml" && ext != "atom+xml" && ext != "rss+xml" {
 			return nil, new_backenderror(cache.StatusCode, "unsupported mime: "+cache.Mime), 0
 		}
-		fs, v, err := feed.NewFeedMaker(cache.LocalUtf8, source).MakeFeed()
+		f, err := os.Open(cache.LocalUtf8)
+		if err != nil {
+			return nil, err, cache.StatusCode
+		}
+
+		fs, v, err := feed.NewFeedMaker(f, source).MakeFeed()
+		f.Close()
+		rs := new_readsource(fs)
 		if err == nil {
-			new_feedsource_operator().update(fs)
+			new_feedsource_operator().update(rs)
 			log.Println("feed-update", fs.Name)
 		}
-		v = feedentry_filter(v)
-		log.Println("feedentries-filter", len(v))
+		rv := readentry_filter(new_readentries(v))
+		log.Println("feedentries-filter", len(rv))
 		sc = cache.StatusCode
 	}
-	v, err := new_feedentry_operator().topn_by_feedsource(count*page, count, source)
-	log.Println("unread-return(uri, page, count)", source, page, count, len(v), err)
-	return v, err, sc
+	rv, err := new_feedentry_operator().topn_by_feedsource(count*page, count, source)
+	log.Println("unread-return(uri, page, count)", source, page, count, len(rv), err)
+	return rv, err, sc
 }
 
 func feedentry_mark(uri string, flags uint) (uint, error) {

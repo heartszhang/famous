@@ -12,39 +12,38 @@ const (
 	baiduq = "http://iweizhi2.duapp.com/hub/popup.json"
 )
 
-func feedentries_updated() (feed.FeedSource, []feed.FeedEntry, error) {
+func feedentries_updated() (ReadSource, []ReadEntry, error) {
 	bcms := baidu.NewBcmsProxy(baiduq)
 	var v pubsub.PubsubMessage
 	err := bcms.FetchOneAsJson(&v)
 	if err != nil {
-		return feed.FeedSource{}, nil, err
+		return ReadSource{}, nil, err
 	}
 	if (v.Status.StatusCode != 200 && v.Status.StatusCode != 0) || v.Status.Feed == "" {
-		return feed.FeedSource{}, nil, new_backenderror(v.Status.StatusCode, v.Status.StatusReason)
+		return ReadSource{}, nil, new_backenderror(v.Status.StatusCode, v.Status.StatusReason)
 	}
-
-	fs := feed.FeedSource{
-		FeedSourceMeta: feed.FeedSourceMeta{
+	fs := ReadSource{
+		FeedSource: feed.FeedSource{
 			Name:        v.Title,
 			Uri:         v.Status.Feed,
 			Description: v.Subtitle,
 			Period:      v.Status.Period / 60,
+			Update:      int64(v.Updated),
 		},
-		Update:     v.Updated,
-		LastTouch:  unixtime.UnixTimeNow(),
-		NextTouch:  unixtime.UnixTime(v.Status.Period) + unixtime.UnixTimeNow(),
-		LastUpdate: unixtime.UnixTimeNow(),
+		LastTouch:  int64(unixtime.TimeNow()),
+		NextTouch:  int64(unixtime.Time(v.Status.Period) + unixtime.TimeNow()),
+		LastUpdate: int64(unixtime.TimeNow()),
 	}
 	if fs.Period == 0 {
 		fs.Period = 120 // minutes
 	}
-	fes := make([]feed.FeedEntry, len(v.Items))
+	fes := make([]ReadEntry, len(v.Items))
 	for idx, i := range v.Items {
-		fes[idx] = feed.FeedEntry{
-			FeedEntryMeta: feed.FeedEntryMeta{
+		fes[idx] = ReadEntry{
+			FeedEntry: feed.FeedEntry{
 				Uri:     i.Uri,
-				Title:   feed.FeedTitle{Main: i.Title},
-				PubDate: i.Published,
+				Title:   i.Title,
+				PubDate: int64(i.Published),
 				Summary: i.Summary,
 				Content: i.Content,
 				Tags:    i.Categories,
@@ -56,7 +55,7 @@ func feedentries_updated() (feed.FeedSource, []feed.FeedEntry, error) {
 		}
 	}
 	if err == nil {
-		fes = feedentry_filter(fes)
+		fes = readentry_filter(fes)
 		fo := new_feedsource_operator()
 		// ignore touch error, because, source may not be subscribed
 		fo.touch(fs.Uri, int64(fs.LastTouch), int64(fs.NextTouch), fs.Period)
@@ -65,7 +64,7 @@ func feedentries_updated() (feed.FeedSource, []feed.FeedEntry, error) {
 	return fs, fes, err
 }
 
-func feedentry_init_from_standardlinks(links *pubsub.PubsubStandardLink, fe feed.FeedEntry) {
+func feedentry_init_from_standardlinks(links *pubsub.PubsubStandardLink, fe ReadEntry) {
 	if links == nil {
 		return
 	}
@@ -81,7 +80,7 @@ func feedentry_init_from_standardlinks(links *pubsub.PubsubStandardLink, fe feed
 	}
 }
 
-func feedentry_init_from_links(links []pubsub.PubsubLink, fe feed.FeedEntry) {
+func feedentry_init_from_links(links []pubsub.PubsubLink, fe ReadEntry) {
 	for _, link := range links {
 		if link.Rel == "alternate" {
 			fe.Uri = link.Href
@@ -89,11 +88,11 @@ func feedentry_init_from_links(links []pubsub.PubsubLink, fe feed.FeedEntry) {
 	}
 }
 
-func update_popup() (feed.FeedEntity, error) {
+func update_popup() (ReadEntity, error) {
 	fs, fes, err := feedentries_updated()
 	if err == nil {
-		return feed.FeedEntity{FeedSource: fs, Entries: fes}, nil
+		return ReadEntity{ReadSource: fs, Entries: fes}, nil
 	}
 	log.Println("update-popup", err)
-	return feed.FeedEntity{}, err
+	return ReadEntity{}, err
 }

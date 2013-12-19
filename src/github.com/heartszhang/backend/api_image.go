@@ -1,13 +1,14 @@
 package backend
 
 import (
+	"net/url"
+	"os"
+	"strings"
+
 	"code.google.com/p/go.net/html"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
 	vt "github.com/heartszhang/videothumbnail"
-	"net/url"
-	"os"
-	"strings"
 )
 
 // /api/image/video.thumbnail?uri=
@@ -27,12 +28,12 @@ func image_description(uri string) (feed.FeedImage, error) {
 	cache, err := c.Get(uri)
 
 	v.Mime = cache.Mime
-	v.Code = cache.StatusCode
-	v.OriginLocal = cache.Local
+	v.Origin = cache.Local
+
 	if err != nil {
 		return v, err
 	}
-	v.ThumbnailLocal, v.Mime, v.Width, v.Height, err = curl.NewThumbnail(cache.Local, backend_context.config.ThumbnailFolder, backend_context.config.ThumbnailWidth, 0)
+	v.Thumbnail, v.Mime, v.Width, v.Height, err = curl.NewThumbnail(cache.Local, backend_context.config.ThumbnailFolder, backend_context.config.ThumbnailWidth, 0)
 	go imgo.save(uri, v)
 	return v, err
 }

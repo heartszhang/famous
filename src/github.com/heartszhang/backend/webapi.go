@@ -3,12 +3,13 @@ package backend
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/heartszhang/feed"
-	"github.com/qiniu/log"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/heartszhang/feed"
+	"github.com/qiniu/log"
 )
 
 func init() {
@@ -108,8 +109,8 @@ func webapi_opml_upload(w http.ResponseWriter, r *http.Request) {
 			fs, err := feed.OpmlExportFeedSource(f)
 			switch err {
 			case nil:
-				fs = feedsource_mark_subscribed(fs)
-				webapi_write_as_json(w, fs)
+				rs := feedsource_mark_subscribed(new_readsources(fs))
+				webapi_write_as_json(w, rs)
 			default:
 				webapi_write_error(w, err)
 			}

@@ -2,16 +2,17 @@ package backend
 
 import (
 	//	"code.google.com/p/go.net/html"
+	"io/ioutil"
+	"strings"
+	"sync"
+
 	"github.com/heartszhang/cleaner"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/markhtml"
-	"io/ioutil"
-	"strings"
-	"sync"
 )
 
-func feedentry_filter(v []feed.FeedEntry) []feed.FeedEntry {
+func readentry_filter(v []ReadEntry) []ReadEntry {
 	v = feed_entries_downloaded(v) // clean downloaded entries
 	v = feed_entries_clean(v)
 	v = feed_entries_clean_text(v)
@@ -21,11 +22,11 @@ func feedentry_filter(v []feed.FeedEntry) []feed.FeedEntry {
 	return v
 }
 
-func feed_entries_downloaded(entries []feed.FeedEntry) []feed.FeedEntry {
-	result := make(map[string]feed.FeedEntry)
+func feed_entries_downloaded(entries []ReadEntry) []ReadEntry {
+	result := make(map[string]ReadEntry)
 	var hashs []string
 	for _, entry := range entries {
-		hash := entry.Uri + "|" + entry.Title.Main
+		hash := entry.Uri + "|" + entry.Title
 		result[hash] = entry
 		hashs = append(hashs, hash)
 	}
@@ -33,22 +34,22 @@ func feed_entries_downloaded(entries []feed.FeedEntry) []feed.FeedEntry {
 	if err != nil {
 		return entries
 	}
-	var v []feed.FeedEntry
+	var v []ReadEntry
 	for _, hash := range hashs {
 		v = append(v, result[hash])
 	}
 	return v
 }
 
-func feed_entries_clean(entries []feed.FeedEntry) []feed.FeedEntry {
+func feed_entries_clean(entries []ReadEntry) []ReadEntry {
 	for i := 0; i < len(entries); i++ {
-		entries[i].Title.Main = strings.TrimSpace(entries[i].Title.Main)
+		entries[i].Title = strings.TrimSpace(entries[i].Title)
 		entries[i].Summary = strings.TrimSpace(entries[i].Summary)
 	}
 	return entries
 }
 
-func feed_entries_clean_text(entries []feed.FeedEntry) []feed.FeedEntry {
+func feed_entries_clean_text(entries []ReadEntry) []ReadEntry {
 	wg := &sync.WaitGroup{}
 	for i := 0; i < len(entries); i++ {
 		wg.Add(1)
@@ -58,7 +59,7 @@ func feed_entries_clean_text(entries []feed.FeedEntry) []feed.FeedEntry {
 	return entries
 }
 
-func feedentry_clean_text(entry *feed.FeedEntry, wg *sync.WaitGroup) {
+func feedentry_clean_text(entry *ReadEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
 	entry.Summary, entry.SummaryStatus = make_text_readable(entry, entry.Summary, true, false)
 	entry.Content, entry.ContentStatus = make_text_readable(entry, entry.Content, false, true)
@@ -76,7 +77,7 @@ func feedentry_clean_text(entry *feed.FeedEntry, wg *sync.WaitGroup) {
 	entry.Status |= entry.SummaryStatus.Status * diff
 }
 
-func make_text_readable(entry *feed.FeedEntry, txt string, trans, insimg bool) (string, feed.FeedTextStatus) {
+func make_text_readable(entry *ReadEntry, txt string, trans, insimg bool) (string, feed.FeedTextStatus) {
 	var status feed.FeedTextStatus
 	if txt == "" {
 		status.Status = status.Status | feed.Feed_status_content_empty
@@ -102,9 +103,9 @@ func make_text_readable(entry *feed.FeedEntry, txt string, trans, insimg bool) (
 	status.LinkCount = score.LinkCount
 	status.LinkWordCount = score.LinkWordCount
 	if status.WordCount < backend_config().SummaryMinWords {
-		if status.WordCount > 0 {
-			entry.Title.Others = append(entry.Title.Others, score.Text)
-		}
+		//		if status.WordCount > 0 {
+		//			entry.Title.Others = append(entry.Title.Others, score.Text)
+		//		}
 		status.Status = status.Status | feed.Feed_status_content_empty
 	}
 	if status.WordCount > 0 && feedentry_content_exists(score.Hash) {
@@ -123,11 +124,11 @@ func make_text_readable(entry *feed.FeedEntry, txt string, trans, insimg bool) (
 }
 
 // extract tags from summary and fulltext
-func feed_entries_autotag(entries []feed.FeedEntry) []feed.FeedEntry {
+func feed_entries_autotag(entries []ReadEntry) []ReadEntry {
 	return entries
 }
 
-func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
+func feed_entries_statis(entries []ReadEntry) []ReadEntry {
 	count := len(entries)
 	for i := 0; i < count; i++ {
 		entry := &entries[i]
@@ -151,10 +152,10 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 			entry.Status |= feed.Feed_status_image_many
 		}
 		if entry.Status&feed.Feed_status_text_empty != 0 {
-			d := strings.Join(entry.Title.Others, "\n")
-			if d == "" {
-				d = entry.Title.Main
-			}
+			//			d := strings.Join(entry.Title.Others, "\n")
+			//			if d == "" {
+			d := entry.Title
+			//			}
 			for i := len(entry.Videos) - 1; i >= 0; i = i - 1 {
 				if entry.Videos[i].Description == "" {
 					entry.Videos[i].Description = d
@@ -176,7 +177,7 @@ func feed_entries_statis(entries []feed.FeedEntry) []feed.FeedEntry {
 }
 
 // save to mongo
-func feed_entries_backup(entries []feed.FeedEntry) []feed.FeedEntry {
+func feed_entries_backup(entries []ReadEntry) []ReadEntry {
 	if entries == nil || len(entries) == 0 {
 		return entries
 	}

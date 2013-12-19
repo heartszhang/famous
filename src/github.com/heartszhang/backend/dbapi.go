@@ -5,11 +5,11 @@ import (
 )
 
 type feedentry_operator interface {
-	save([]feed.FeedEntry) ([]feed.FeedEntry, error)
-	save_one(feed.FeedEntry) (interface{}, error)
-	topn(skip, limit int) ([]feed.FeedEntry, error)
-	topn_by_category(skip, limit int, category string) ([]feed.FeedEntry, error)
-	topn_by_feedsource(skip, limit int, feed string) ([]feed.FeedEntry, error)
+	save([]ReadEntry) ([]ReadEntry, error)
+	save_one(ReadEntry) (interface{}, error)
+	topn(skip, limit int) ([]ReadEntry, error)
+	topn_by_category(skip, limit int, category string) ([]ReadEntry, error)
+	topn_by_feedsource(skip, limit int, feed string) ([]ReadEntry, error)
 	mark(link string, newmark uint) error
 	umark(uri string, markbit uint) error
 	umark_category(category string, markbit uint) error
@@ -46,17 +46,17 @@ type feedcategory_operator interface {
 type feedtag_operator feedcategory_operator
 
 type feedsource_operator interface {
-	save(feeds []feed.FeedSource) ([]feed.FeedSource, error)
-	upsert(f feed.FeedSource) error
-	update(f feed.FeedSource) error
-	find(uri string) (feed.FeedSource, error)
-	all() ([]feed.FeedSource, error)
+	save(feeds []ReadSource) ([]ReadSource, error)
+	upsert(f ReadSource) error
+	update(f ReadSource) error
+	find(uri string) (ReadSource, error)
+	all() ([]ReadSource, error)
 	touch(uri string, last, next, period int64) error
 	drop(uri string) error
 	set_subscribe_state(uri string, s int) error
-	save_one(f feed.FeedSource) error
-	findbatch(uris []string) ([]feed.FeedSource, error)
-	expired(beforeunxtime int64) ([]feed.FeedSource, error)
+	save_one(f ReadSource) error
+	findbatch(uris []string) ([]ReadSource, error)
+	expired(beforeunxtime int64) ([]ReadSource, error)
 }
 
 type feedcontent_operator interface {

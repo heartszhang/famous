@@ -1,10 +1,9 @@
 package backend
 
 import (
-	"github.com/heartszhang/feed"
+	"time"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	"time"
 )
 
 type feedentry_op coll_op
@@ -52,8 +51,8 @@ func (this feedentry_op) mark_source(source string, newmark uint) error {
 	})
 }
 
-func (this feedentry_op) save(entries []feed.FeedEntry) ([]feed.FeedEntry, error) {
-	inserted := make([]feed.FeedEntry, 0)
+func (this feedentry_op) save(entries []ReadEntry) ([]ReadEntry, error) {
+	var inserted []ReadEntry
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		for _, entry := range entries {
 			iid, err := insert_entry(coll, entry)
@@ -69,7 +68,7 @@ func (this feedentry_op) save(entries []feed.FeedEntry) ([]feed.FeedEntry, error
 	return inserted, err
 }
 
-func (this feedentry_op) save_one(entry feed.FeedEntry) (uid interface{}, err error) {
+func (this feedentry_op) save_one(entry ReadEntry) (uid interface{}, err error) {
 	do_in_session(this.coll, func(coll *mgo.Collection) error {
 		uid, err = insert_entry(coll, entry)
 		return err
@@ -120,24 +119,24 @@ func (this feedentry_op) unread_count_categories() (v []feedentry_unreadcount, e
 	})
 	return
 }
-func (this feedentry_op) topn(skip, limit int) ([]feed.FeedEntry, error) {
-	rtn := make([]feed.FeedEntry, 0)
+func (this feedentry_op) topn(skip, limit int) ([]ReadEntry, error) {
+	var rtn []ReadEntry
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false}).Sort("-pubdate").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
 
-func (this feedentry_op) topn_by_feedsource(skip, limit int, source string) ([]feed.FeedEntry, error) {
-	var rtn []feed.FeedEntry
+func (this feedentry_op) topn_by_feedsource(skip, limit int, source string) ([]ReadEntry, error) {
+	var rtn []ReadEntry
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false, "src": source}).Sort("-pubdate").Skip(skip).Limit(limit).All(&rtn)
 	})
 	return rtn, err
 }
 
-func (this feedentry_op) topn_by_category(skip, limit int, tag string) ([]feed.FeedEntry, error) {
-	rtn := make([]feed.FeedEntry, 0)
+func (this feedentry_op) topn_by_category(skip, limit int, tag string) ([]ReadEntry, error) {
+	var rtn []ReadEntry
 	err := do_in_session(this.coll, func(coll *mgo.Collection) error {
 		return coll.Find(bson.M{"readed": false, "tags": tag}).
 			Sort("-pubdate").
@@ -148,10 +147,10 @@ func (this feedentry_op) topn_by_category(skip, limit int, tag string) ([]feed.F
 	return rtn, err
 }
 
-func insert_entry(coll *mgo.Collection, entry feed.FeedEntry) (interface{}, error) {
+func insert_entry(coll *mgo.Collection, entry ReadEntry) (interface{}, error) {
 	xe := struct {
-		feed.FeedEntry `bson:",inline"`
-		TTL            time.Time `bson:"ttl"`
+		ReadEntry `bson:",inline"`
+		TTL       time.Time `bson:"ttl"`
 	}{entry, time.Now()}
 	ci, err := coll.Upsert(bson.M{"uri": entry.Uri}, bson.M{"$setOnInsert": &xe})
 	if ci == nil {

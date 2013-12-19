@@ -1,9 +1,10 @@
 package backend
 
 import (
-	"github.com/qiniu/log"
 	"net/http"
 	"strconv"
+
+	"github.com/qiniu/log"
 )
 
 func init() {
@@ -57,11 +58,11 @@ func webapi_image_entity(uri string, w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", cache.Mime)
 		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
 		w.Header().Set("x-image-meta-property-width", strconv.Itoa(cache.Width))
-		w.Header().Set("x-image-meta-property-alter", cache.OriginLocal)
+		w.Header().Set("x-image-meta-property-alter", cache.Origin)
 
-		http.ServeFile(w, r, cache.ThumbnailLocal)
+		http.ServeFile(w, r, cache.Thumbnail)
 	default:
-		webapi_write_error_code(w, err, cache.Code)
+		webapi_write_error(w, err)
 	}
 }
 
@@ -81,10 +82,10 @@ func webapi_image_origin(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", cache.Mime)
 		w.Header().Set("x-image-meta-property-height", strconv.Itoa(cache.Height))
 		w.Header().Set("x-image-meta-property-width", strconv.Itoa(cache.Width))
-		w.Header().Set("x-image-meta-property-alter", cache.ThumbnailLocal)
-		http.ServeFile(w, r, cache.OriginLocal)
+		w.Header().Set("x-image-meta-property-alter", cache.Thumbnail)
+		http.ServeFile(w, r, cache.Origin)
 	default:
-		webapi_write_error_code(w, err, cache.Code)
+		webapi_write_error(w, err)
 	}
 }
 
