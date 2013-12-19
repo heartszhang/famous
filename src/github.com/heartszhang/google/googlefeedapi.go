@@ -1,15 +1,16 @@
 package google
 
 import (
+	"fmt"
+	"net/http"
+	"strings"
+
 	"code.google.com/p/go.net/html"
 	"code.google.com/p/go.net/html/atom"
-	"fmt"
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/feed"
 	"github.com/heartszhang/oauth2"
 	"github.com/heartszhang/unixtime"
-	"net/http"
-	"strings"
 )
 
 type GoogleFeedApiService interface {
@@ -31,23 +32,26 @@ type find_result struct {
 	} `json:"responseData,omitempty"`
 }
 
-func findresult_to_entity(x find_result) ([]feed.FeedEntity, error) {
-	if x.ResponseStatus != 200 {
-		return nil, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
+const (
+	default_update_minutes int64 = 120
+)
+
+func (x find_result) to_feedentities() ([]feed.FeedEntity, error) {
+	if x.ResponseStatus != http.StatusOK {
+		return nil, gf_error{x.ResponseStatus, x.ResponseDetails}
 	}
-	v := make([]feed.FeedEntity, 0)
+	var v []feed.FeedEntity
 	if x.ResponseData == nil {
 		return v, nil
 	}
 	for _, e := range x.ResponseData.Entries {
 		v = append(v, feed.FeedEntity{
 			FeedSource: feed.FeedSource{
-				FeedSourceMeta: feed.FeedSourceMeta{Uri: e.Url,
-					Period:      120, // minutes
-					Name:        strip_html_tags(e.Title),
-					Description: strip_html_tags(e.ContentSnippet),
-					WebSite:     e.Website,
-				},
+				Uri:         e.Url,
+				Period:      default_update_minutes, // minutes
+				Name:        strip_html_tags(e.Title),
+				Description: strip_html_tags(e.ContentSnippet),
+				WebSite:     e.Website,
 			},
 		})
 	}
@@ -67,13 +71,13 @@ type load_result struct {
 			Description string `json:"description,omitempty"`
 			Type        string `json:"type,omitempty"`
 			Entries     []struct {
-				Title          string            `json:"title,omitempty"`
-				Link           string            `json:"link,omitempty"`
-				Author         string            `json:"author,omitempty"`
-				PublishedDate  unixtime.UnixTime `json:"publishedDate"`
-				ContentSnippet string            `json:"contentSnippet,omitempty"`
-				Content        string            `json:"content,omitempty"`
-				Categories     []string          `json:"categories,omitempty"`
+				Title          string        `json:"title,omitempty"`
+				Link           string        `json:"link,omitempty"`
+				Author         string        `json:"author,omitempty"`
+				PublishedDate  unixtime.Time `json:"publishedDate"`
+				ContentSnippet string        `json:"contentSnippet,omitempty"`
+				Content        string        `json:"content,omitempty"`
+				Categories     []string      `json:"categories,omitempty"`
 			} `json:"entries,omitempty"`
 		} `json:"feed,omitempty"`
 	} `json:"responseData,omitempty"`
@@ -83,34 +87,32 @@ func media_type(mime string) string {
 	s := strings.Split(mime, "/")
 	return s[0]
 }
-func loadresult_to_feedentity(x load_result) (feed.FeedEntity, error) {
-	if x.ResponseStatus != 200 || x.ResponseData == nil || x.ResponseData.Feed == nil {
-		return feed.FeedEntity{feed.FeedSource{}, nil}, googlefeed_error{x.ResponseStatus, x.ResponseDetails}
+func (x load_result) to_feedentity() (feed.FeedEntity, error) {
+	if x.ResponseStatus != http.StatusOK || x.ResponseData == nil || x.ResponseData.Feed == nil {
+		return feed.FeedEntity{}, gf_error{x.ResponseStatus, x.ResponseDetails}
 	}
 
-	v := make([]feed.FeedEntry, 0)
+	var v []feed.FeedEntry
 	f := x.ResponseData.Feed
 	s := feed.FeedSource{
-		FeedSourceMeta: feed.FeedSourceMeta{
-			Name:        f.Title,
-			Uri:         f.FeedUrl,
-			WebSite:     f.Website,
-			Description: f.Description,
-			Type:        feed.FeedSourceTypes[f.Type],
-			Period:      120, // minutes
-		},
+		Name:        strip_html_tags(f.Title),
+		Uri:         f.FeedUrl,
+		WebSite:     f.Website,
+		Description: f.Description,
+		Type:        feed.FeedSourceType(f.Type),
+		Period:      default_update_minutes, // minutes
 	}
 
 	for _, e := range f.Entries {
 		ne := feed.FeedEntry{
-			FeedEntryMeta: feed.FeedEntryMeta{
-				Title:   feed.FeedTitle{Main: e.Title},
-				Uri:     e.Link,
-				Summary: e.ContentSnippet,
-				Content: e.Content,
-				Tags:    e.Categories,
-				PubDate: e.PublishedDate,
-			},
+			Parent:  s.Uri,
+			Title:   e.Title,
+			Uri:     e.Link,
+			Summary: e.ContentSnippet,
+			Content: e.Content,
+			Tags:    e.Categories,
+			PubDate: int64(e.PublishedDate),
+			Author:  e.Author,
 		}
 		v = append(v, ne)
 	}
@@ -139,14 +141,14 @@ func (this google_feedapi) Find(q, hl string) ([]feed.FeedEntity, error) {
 		hl string `param:"hl"` // default en, nil means en
 		v  string `param:"v"`
 	}{q: q, hl: hl, v: "1.0"}
-	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this, nil)
 	v := find_result{}
 	uri := find_url + "?" + oauth2.HttpQueryEncode(p)
+	c := curl.NewCurlerDetail(this.temp_folder, curl.CurlProxyPolicyAlwayseProxy, 0, this, nil)
 	err := c.GetAsJson(uri, &v)
 	if err != nil {
 		return nil, err
 	}
-	x, err := findresult_to_entity(v)
+	x, err := v.to_feedentities()
 	return x, err
 }
 func make_num(num int) *int {
@@ -177,12 +179,10 @@ func (this google_feedapi) Load(uri, hl string, num int, scoring bool) (feed.Fee
 	if err != nil {
 		return feed.FeedEntity{}, err
 	}
-	s, err := loadresult_to_feedentity(v)
+	s, err := v.to_feedentity()
 	return s, err
 }
 
-// http://www.google.com/uds/Gfeeds?context=0&num=20&hl=en&output=json&q=http%3A%2F%2Fpansci.tw%2Ffeed&v=1.0
-// http://www.google.com/uds/GfindFeeds?context=0&hl=en&q=%E6%9E%9C%E5%A3%B3%E7%BD%91&v=1.0
 const (
 	feed_service = `https://ajax.googleapis.com/ajax/services/feed/`
 
@@ -237,11 +237,11 @@ func extract_html_text(node *html.Node) string {
 	return v
 }
 
-type googlefeed_error struct {
+type gf_error struct {
 	code   int
 	reason string
 }
 
-func (this googlefeed_error) Error() string {
+func (this gf_error) Error() string {
 	return fmt.Sprintf("%v: %v", this.code, this.reason)
 }

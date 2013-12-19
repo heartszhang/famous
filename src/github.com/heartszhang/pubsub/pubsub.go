@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"fmt"
+
 	"github.com/heartszhang/curl"
 	"github.com/heartszhang/oauth2"
 	"github.com/heartszhang/unixtime"
@@ -33,13 +34,8 @@ func NewSuperFeedrPubSubscriber(verify_mode, user, password string) PubSubscribe
 
 const (
 	hub_callback = "http://iweizhi2.duapp.com/hub_callback"
-	//	hub_superfeed = "https://Hearts:Refresh@push.superfeedr.com"
-	hub_google = "https://pubsubhubbub.appspot.com/subscribe"
+	hub_google   = "https://pubsubhubbub.appspot.com/subscribe"
 )
-
-func strptr(s string) *string {
-	return &s
-}
 
 type pubsub_param struct {
 	mode     string  `param:"hub.mode"`
@@ -59,7 +55,8 @@ func (this pubsuber) Subscribe(uri string) (int, error) {
 		format:   strptr("json"),
 		verify:   &this.verify,
 	}
-	resp, err := curl.NewCurlerDetail("", this.proxy_policy, 0, nil, nil).PostForm(this.service_provider, oauth2.HttpQueryValues(p))
+	c := curl.NewCurlerDetail("", this.proxy_policy, 0, nil, nil)
+	resp, err := c.PostForm(this.service_provider, oauth2.HttpQueryValues(p))
 	return resp, err
 }
 
@@ -77,7 +74,8 @@ func (this pubsuber) Unsubscribe(uri string) (int, error) {
 		callback: hub_callback,
 		verify:   &this.verify,
 	}
-	resp, err := curl.NewCurlerDetail("", this.proxy_policy, 0, nil, nil).PostForm(this.service_provider, oauth2.HttpQueryValues(p))
+	c := curl.NewCurlerDetail("", this.proxy_policy, 0, nil, nil)
+	resp, err := c.PostForm(this.service_provider, oauth2.HttpQueryValues(p))
 	return resp, err
 }
 
@@ -101,22 +99,21 @@ func (this pubsuber) Retrieve(uri string, count int) (string, error) {
 }
 
 type PubsubMessage struct { // same as FeedSource
-	//	XMLName xml.Name `json:"-" xml:"feed"`
 	Status struct {
-		StatusCode        int               `json:"code" xml:"code,attr"`
-		StatusReason      string            `json:"http,omitempty" xml:"http,omitempty"`
-		Feed              string            `json:"feed" xml:"feed,attr,omitempty"`
-		Period            int64             `json:"period" xml:"period"`
-		LastParse         unixtime.UnixTime `json:"lastParse" xml:"last_parse"`
-		LastMaintenanceAt unixtime.UnixTime `json:"lastMaintenanceAt" xml:"last_maintenance_at"`
-		NextFetch         unixtime.UnixTime `json:"nextFetch" xml:"next_fetch"`
-		LastFetch         unixtime.UnixTime `json:"lastFetch" xml:"last_fetch"`
-		EntriesCount      int               `json:"entriesCountSinceLastMaintenance" xml:"entries_count_since_last_maintenance"`
+		StatusCode        int           `json:"code" xml:"code,attr"`
+		StatusReason      string        `json:"http,omitempty" xml:"http,omitempty"`
+		Feed              string        `json:"feed" xml:"feed,attr,omitempty"`
+		Period            int64         `json:"period" xml:"period"`
+		LastParse         unixtime.Time `json:"lastParse" xml:"last_parse"`
+		LastMaintenanceAt unixtime.Time `json:"lastMaintenanceAt" xml:"last_maintenance_at"`
+		NextFetch         unixtime.Time `json:"nextFetch" xml:"next_fetch"`
+		LastFetch         unixtime.Time `json:"lastFetch" xml:"last_fetch"`
+		EntriesCount      int           `json:"entriesCountSinceLastMaintenance" xml:"entries_count_since_last_maintenance"`
 	} `json:"status" xml:"status"`
 	Title         string               `json:"title,omitempty" xml:"title"`
 	Subtitle      string               `json:"subtitle,omitempty" xml:"subtitle,omitempty"`
 	StandardLinks PubsubStandardLink   `json:"standardLinks,omitempty" xml:"-"`
-	Updated       unixtime.UnixTime    `json:"updated" xml:"updated"`
+	Updated       unixtime.Time        `json:"updated" xml:"updated"`
 	Items         []PubsubMessageEntry `json:"items,omitempty" xml:"entry,omitempty"`
 	Links         []PubsubLink         `json:"-" xml:"link,omitempty"`
 }
@@ -136,9 +133,13 @@ type PubsubMessageEntry struct {
 	Verb          string              `json:"verb,omitempty" xml:"-"`
 	Content       string              `json:"content,omitempty" xml:"content"`
 	Summary       string              `json:"summary,omitempty" xml:"summary"`
-	Published     unixtime.UnixTime   `json:"published" xml:"published"`
-	Updated       unixtime.UnixTime   `json:"updated" xml:"updated"`
+	Published     unixtime.Time       `json:"published" xml:"published"`
+	Updated       unixtime.Time       `json:"updated" xml:"updated"`
 	Title         string              `json:"title,omitempty" xml:"title"`
 	Links         []PubsubLink        `json:"-" xml:"link,omitempty"`
 	Categories    []string            `json:"categories,omitempty" xml:""`
+}
+
+func strptr(s string) *string {
+	return &s
 }

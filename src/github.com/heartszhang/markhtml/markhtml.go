@@ -61,10 +61,6 @@ func next_token(chars []rune, start int) (token, int) {
 		return token{token_type: token_type_eos}, start
 	case chars[start] == '[':
 		return expect_element(chars, start+1)
-		//	case chars[start] == 0xd:
-		//		fallthrough
-		//	case chars[start] == 0xa:
-		//		return expect_carrage(chars, start)
 	default:
 		return expect_element_text(chars, start)
 	}
