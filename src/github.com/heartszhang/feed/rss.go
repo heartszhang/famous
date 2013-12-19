@@ -8,7 +8,6 @@ import (
 	"github.com/heartszhang/unixtime"
 )
 
-// private wrapper around the RssFeed which gives us the <rss>..</rss> xml
 type rss struct {
 	XMLName xml.Name    `xml:"rss"`
 	Version string      `xml:"version,attr"` // 2.0

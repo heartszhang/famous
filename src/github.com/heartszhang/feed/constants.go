@@ -144,7 +144,6 @@ type FeedImage struct {
 	Origin    string `json:"origin,omitempty" bson:"origin,omitempty"`       // local cache
 	Width     int    `json:"width" bson:"width"`
 	Height    int    `json:"height" bson:"height"`
-	//	Code           int    `json:"code" bson:"code"`  // http status code
 }
 
 const (
