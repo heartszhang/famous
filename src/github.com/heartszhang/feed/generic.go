@@ -2,8 +2,7 @@ package feed
 
 import (
 	"encoding/xml"
-	"github.com/heartszhang/unixtime"
-	"os"
+	"io"
 )
 
 type FeedMaker interface {
@@ -11,41 +10,31 @@ type FeedMaker interface {
 }
 
 type feed_maker struct {
-	cache  string
-	source string
+	io.ReadSeeker
+	uri string
 }
 
-func NewFeedMaker(filepath, source string) FeedMaker {
-	return feed_maker{cache: filepath, source: source}
+func NewFeedMaker(reader io.ReadSeeker, source string) FeedMaker {
+	return feed_maker{ReadSeeker: reader, uri: source}
 }
+
 func (this feed_maker) MakeFeed() (FeedSource, []FeedEntry, error) {
 	var (
 		fs  FeedSource
 		fes []FeedEntry
 		err error
 	)
-	t := DetectFeedSourceType(this.cache)
+	t := DetectFeedSourceType(this.ReadSeeker)
+	this.ReadSeeker.Seek(0, 0)
 	switch t {
 	case Feed_type_atom:
-		fs, fes, err = feed_from_atom(this.cache)
+		fs, fes, err = feed_from_atom(this.ReadSeeker, this.uri)
 	case Feed_type_rss:
-		fs, fes, err = feed_from_rss(this.cache)
+		fs, fes, err = feed_from_rss(this.ReadSeeker, this.uri)
 	default:
-		fs, fes, err = FeedSource{}, nil, feed_error(this.cache+": invalid format")
+		fs, fes, err = FeedSource{}, nil, feed_error(this.uri+": invalid format")
 	}
-	if this.source != "" { // may be empty
-		fs.Uri = this.source
-	}
-	if fs.Period == 0 {
-		panic(this.cache + ":invalid period")
-	}
-	fs.LastTouch = unixtime.UnixTimeNow()
-	fs.LastUpdate = fs.Update
-	fs.NextTouch = unixtime.UnixTime(int64(fs.Period)*60 + int64(fs.LastTouch))
-	count := len(fes)
-	for i := 0; i < count; i++ {
-		fes[i].Parent = this.source
-	}
+
 	return fs, fes, err
 }
 
@@ -54,21 +43,15 @@ type feed_sketch struct {
 	XML     string `xml:",innerxml"`
 }
 
-func DetectFeedSourceType(filepath string) uint {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return Feed_type_unknown
-	}
-	defer f.Close()
-
-	decoder := xml.NewDecoder(f)
-	decoder.CharsetReader = charset_reader_passthrough
-
-	var (
-		v feed_sketch
-	)
-	err = decoder.Decode(&v)
-	return FeedSourceTypes[v.XMLName.Local]
+func DetectFeedSourceType(f io.Reader) uint {
+	var v feed_sketch
+	new_xml_decoder(f).Decode(&v)
+	return FeedSourceType(v.XMLName.Local)
+}
+func new_xml_decoder(f io.Reader) *xml.Decoder {
+	d := xml.NewDecoder(f)
+	d.CharsetReader = charset_reader_passthrough
+	return d
 }
 
 type feed_error string

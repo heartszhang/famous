@@ -1,9 +1,5 @@
 package feed
 
-import (
-//	"github.com/heartszhang/backend/core"
-)
-
 func feed_source_create(filepath string, url string) (FeedSource, error) {
 	return FeedSource{}, nil
 }

@@ -1,27 +1,23 @@
 package feed
 
-import (
-	"encoding/xml"
-	"io"
-)
+import "io"
 
-//<head><title/></head> is omitted
-type opml struct {
+type opml struct { //<head><title/></head> is omitted
 	Body struct {
 		Outline []opml_outline `xml:"outline" bson:"outline,omitempty" json:"outline,omitempty"`
 	} `xml:"body,omitempty" json:"-" bson:"-"`
 }
 
 type opml_outline struct {
-	Text        string         `xml:"text,attr" bson:"-" json:"-"` // same as title
-	Title       string         `xml:"title,attr,omitempty" bson:"title" json:"title"`
-	Type        string         `xml:"type,attr,omitempty" bson:"type" json:"type"` // type='rss' // or link
+	Text        string         `xml:"text,attr"` // same as title
+	Title       string         `xml:"title,attr,omitempty"`
+	Type        string         `xml:"type,attr,omitempty"` // type='rss' // or link
 	Description string         `xml:"description,attr,omitempty"`
 	Version     string         `xml:"version,attr,omitempty"`
-	Docs        string         `xml:"xmlUrl,attr" bson:"link" json:"link"`
-	Link        string         `xml:"htmlUrl,attr," bson:"htmlurl" json:"htmlurl"`
+	XmlUrl      string         `xml:"xmlUrl,attr"`
+	HtmlUrl     string         `xml:"htmlUrl,attr,"`
 	Category    string         `xml:"category,attr,omitempty"` // seped by ,
-	Children    []opml_outline `xml:"outline,omitempty" bson:"children,omitempty" json:"omitempty"`
+	Children    []opml_outline `xml:"outline,omitempty"`
 }
 
 func OpmlExportFeedSource(data io.Reader) ([]FeedSource, error) {
@@ -30,11 +26,8 @@ func OpmlExportFeedSource(data io.Reader) ([]FeedSource, error) {
 
 func feeds_category_create_opml(data io.Reader) ([]FeedSource, error) {
 	var o opml
-	d := xml.NewDecoder(data)
-	d.CharsetReader = charset_reader_passthrough
-
-	err := d.Decode(&o)
-	return o.to_feedscategory(), err
+	err := new_xml_decoder(data).Decode(&o)
+	return o.export_feedsources(), err
 }
 
 func (this opml_outline) name() string {
@@ -44,35 +37,31 @@ func (this opml_outline) name() string {
 	return this.Title
 }
 
-func (this opml_outline) export_feedsource(v []FeedSource) []FeedSource {
-	if this.Docs != "" {
+func (this opml_outline) export_feedsources(v []FeedSource, categories []string) []FeedSource {
+	if this.XmlUrl != "" { // this is a feed-source, not a category
 		x := FeedSource{
-			FeedSourceMeta: FeedSourceMeta{
-				Name:        this.name(),
-				Uri:         this.Docs,
-				Period:      _2hours,
-				Type:        Feed_type_feed, // may be atom?
-				WebSite:     this.Link,
-				Description: this.Description,
-			},
-			SubscribeState: FeedSourceSubscribeStateSubscribed,
-			EnableProxy:    0,
+			Name:        this.name(),
+			Uri:         this.XmlUrl,
+			Period:      _2hours,
+			Type:        FeedSourceType(this.Type), // may be atom?
+			WebSite:     this.HtmlUrl,
+			Description: this.Description,
+			Tags:        categories,
 		}
 		v = append(v, x)
+	} else {
+		categories = append(categories, this.name())
 	}
 	for _, child := range this.Children {
-		v = child.export_feedsource(v)
+		v = child.export_feedsources(v, categories)
 	}
 	return v
 }
 
-func (this opml) to_feedscategory() []FeedSource {
-	v := []FeedSource{}
-	if len(this.Body.Outline) == 0 {
-		return v
-	}
+func (this opml) export_feedsources() []FeedSource {
+	var v []FeedSource
 	for _, outline := range this.Body.Outline {
-		v = outline.export_feedsource(v)
+		v = outline.export_feedsources(v, nil)
 	}
 	return v
 }

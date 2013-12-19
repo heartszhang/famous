@@ -2,18 +2,49 @@ package feed
 
 import (
 	"encoding/xml"
+	"io"
+
 	"github.com/heartszhang/unixtime"
-	"os"
 )
+
+const atom_ns = "http://www.w3.org/2005/Atom"
+
+type atom_feed struct { // to feed_source
+	XMLName    xml.Name        `xml:"http://www.w3.org/2005/Atom feed"`
+	Title      string          `xml:"title"`
+	Subtitle   string          `xml:"subtitle,omitempty"`
+	Id         string          `xml:"id"`
+	Updated    unixtime.Time   `xml:"updated"` // rfc-822
+	Logo       string          `xml:"logo,omitempty"`
+	Icon       string          `xml:"icon,omitempty`
+	Links      []atom_link     `xml:"link,omitempty"`
+	Authors    []atom_person   `xml:"author,omitempty"`
+	Categories []atom_category `xml:"category,omitempty"`
+	Entries    []atom_entry    `xml:"entry,omitempty"`
+}
+
+type atom_entry struct { // to feed_entry
+	Title      string          `xml:"title"`
+	Id         string          `xml:"id"`
+	Updated    unixtime.Time   `xml:"updated"`
+	Published  unixtime.Time   `xml:"published"`
+	Summary    atom_text       `xml:"summary,omitempty"`
+	Content    atom_text       `xml:"content,omitempty"`
+	Source     string          `xml:"source,omitempty"`
+	Links      []atom_link     `xml:"link"`
+	Authors    []atom_person   `xml:"author,omitempty"`
+	Categories []atom_category `xml:"category,omitempty"`
+}
 
 type atom_link struct {
 	Rel    string `xml:"rel,attr,omitempty"`
 	Href   string `xml:"href,attr,omitempty"`
 	Type   string `xml:"type,attr,omitempty"`
 	Title  string `xml:"title,attr,omitempty"`
-	Length uint64 `xml:"length"`
+	Length int64  `xml:"length"`
 }
-type gd_image struct {
+
+type gd_image struct { // google ajax feed api
 	Width  int    `xml:"width"`
 	Height int    `xml:"height"`
 	Src    string `xml:"src,omitempty"`
@@ -23,12 +54,12 @@ type atom_person struct {
 	Name   string    `xml:"name,omitempty"`
 	Uri    string    `xml:"uri,omitempty"`
 	Email  string    `xml:"email,omitempty"`
-	Avatar *gd_image `xml:"image,omitempty"`
+	Avatar *gd_image `xml:"image,omitempty"` // no specified
 }
 
 type atom_text struct {
-	Type string `xml:"type,attr,omitempty"`
-	Body string `xml:",chardata"` // omitempty cannot be used
+	Type    string `xml:"type,attr,omitempty"` // mime
+	Content string `xml:",chardata"`
 }
 
 type atom_category struct {
@@ -37,138 +68,154 @@ type atom_category struct {
 	Label  string `xml:"label,omitempty"`
 }
 
-type atom_entry struct { // to feed_entry
-	Title      string            `xml:"title"`
-	Id         string            `xml:"id"`
-	Updated    unixtime.UnixTime `xml:"updated"`
-	Summary    atom_text         `xml:"summary,omitempty"`
-	Content    atom_text         `xml:"content,omitempty"`
-	Links      []atom_link       `xml:"link"`
-	Authors    []atom_person     `xml:"author,omitempty"`
-	Categories []atom_category   `xml:"category,omitempty"`
-}
-
-type atom_feed struct { // to feed_source
-	XMLName    xml.Name          `xml:"http://www.w3.org/2005/Atom feed"`
-	Title      string            `xml:"title"`
-	Subtitle   string            `xml:"subtitle,omitempty"`
-	Id         string            `xml:"id"`
-	Updated    unixtime.UnixTime `xml:"updated"` // rfc-822
-	Logo       string            `xml:"logo,omitempty"`
-	Links      []atom_link       `xml:"link,omitempty"`
-	Authors    []atom_person     `xml:"author,omitempty"`
-	Entries    []atom_entry      `xml:"entry,omitempty"`
-	Categories []atom_category   `xml:"category,omitempty"`
-}
-
-func feed_from_atom(filepath string) (FeedSource, []FeedEntry, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return FeedSource{Local: filepath}, nil, err
-	}
-	defer f.Close()
-
+func feed_from_atom(f io.Reader, uri string) (FeedSource, []FeedEntry, error) {
 	var v atom_feed
-	decoder := xml.NewDecoder(f)
-	decoder.CharsetReader = charset_reader_passthrough
-
-	err = decoder.Decode(&v)
-	x := v.to_feed_source(filepath)
-	x.Local = filepath
-	fes := v.extract_entries()
+	err := new_xml_decoder(f).Decode(&v)
+	x := v.to_feedsource(uri)
+	fes := v.extract_feedentries(x.Uri)
 	return x, fes, err
-}
-
-func atom_query_selector(links []atom_link, rel string) atom_link {
-	for _, l := range links {
-		if l.Rel == rel {
-			return l
-		}
-	}
-	return atom_link{}
 }
 
 const (
 	_2hours = 2 * 60 // minutes
 )
 
-func (this atom_feed) to_feed_source(local string) FeedSource {
-	f := FeedSource{
-		FeedSourceMeta: FeedSourceMeta{
-			Name:        this.Title,
-			Uri:         this.self(),
-			Period:      _2hours,
-			Logo:        this.Logo,
-			Type:        Feed_type_atom,
-			WebSite:     this.website(),
-			Description: this.Subtitle,
-		},
-		Update:         this.Updated,
-		Local:          local,
-		SubscribeState: FeedSourceSubscribeStateSubscribed,
-		EnableProxy:    0,
+func (this atom_feed) to_feedsource(uri string) FeedSource {
+	return FeedSource{
+		Name:        this.Title,
+		Uri:         this.self(uri),
+		Period:      _2hours,
+		Logo:        this.logo(),
+		Type:        Feed_type_atom,
+		WebSite:     this.website(),
+		Description: this.Subtitle,
+		Hub:         this.hub(),
+		Tags:        convert_categories(this.Categories),
+		Update:      int64(this.Updated),
 	}
-	f.Tags = make([]string, len(this.Categories))
-	for i, c := range this.Categories {
-		f.Tags[i] = c.Term
-	}
-	if len(this.Authors) > 0 && this.Logo == "" && this.Authors[0].Avatar != nil {
-		f.Logo = this.Authors[0].Avatar.Src
-	}
-	return f
 }
 
-func (this atom_feed) extract_entries() []FeedEntry {
-	v := make([]FeedEntry, len(this.Entries))
-	for idx, e := range this.Entries {
-		v[idx] = e.to_feed_entry(this.self())
+func convert_categories(categories []atom_category) []string {
+	var v []string
+	for _, category := range categories {
+		v = append(v, category.Term)
+	}
+	return v
+}
+func (this atom_feed) extract_feedentries(feeduri string) []FeedEntry {
+	var v []FeedEntry
+	for _, e := range this.Entries {
+		v = append(v, e.to_feedentry(feeduri))
 	}
 	return v
 }
 
-func (this atom_entry) to_feed_entry(source string) FeedEntry {
+func (this atom_entry) to_feedentry(feeduri string) FeedEntry {
 	e := FeedEntry{
-		FeedEntryMeta: FeedEntryMeta{
-			Parent:  source,
-			Type:    Feed_type_atom,
-			Uri:     this.website(),
-			Title:   FeedTitle{Main: this.Title},
-			PubDate: this.Updated,
-			Summary: this.Summary.Body,
-		},
-		Flags: 0,
+		Parent:  feeduri,
+		Type:    Feed_type_atom,
+		Uri:     this.website(),
+		Title:   this.Title,
+		PubDate: this.updated(),
+		Summary: this.Summary.Content,
+		Content: this.Content.Content,
+		Author:  this.select_author(),
+		Tags:    convert_categories(this.Categories),
 	}
-	if this.Content.Body != "" {
-		//		e.Content = &FeedContent{FullText: this.Content.Body}
-		e.Content = this.Content.Body
-	}
-	if len(this.Authors) > 0 {
-		auth := this.Authors[0].to_feedauthor()
-		e.Author = &auth
+	for _, link := range this.Links {
+		switch mime_to_feedmediatype(link.Type) {
+		case Feed_media_type_image:
+			e.Images = append(e.Images, FeedMedia(link.to_feedmedia()))
+		case Feed_media_type_video:
+			e.Videos = append(e.Videos, link.to_feedmedia())
+		case Feed_media_type_audio:
+			e.Audios = append(e.Audios, link.to_feedmedia())
+		}
 	}
 	return e
 }
 
-func (this atom_feed) self() string { // rel = self
-	l := atom_query_selector(this.Links, link_rel_self)
-	return l.Href
+func (this atom_entry) select_author() string {
+	var name, avatar_name string
+	for _, a := range this.Authors {
+		if a.Avatar != nil {
+			avatar_name = a.name()
+		}
+		name = a.name()
+	}
+	if avatar_name != "" {
+		return avatar_name
+	}
+	return name
+}
+
+func (this atom_feed) self(downloadeduri string) string { // rel = self
+	if downloadeduri != "" {
+		return downloadeduri
+	}
+	return atom_query_selector(this.Links, link_rel_self)
 }
 
 func (this atom_entry) website() string { // rel = alternate
-	l := atom_query_selector(this.Links, link_rel_alternate).Href
+	l := atom_query_selector(this.Links, link_rel_alternate)
 	if l == "" {
-		l = atom_query_selector(this.Links, "").Href
+		l = atom_query_selector(this.Links, "")
 	}
 	return l
 }
 
-func (this atom_person) to_feedauthor() FeedAuthor {
-	return FeedAuthor{Name: this.Name, Email: this.Email}
-}
 func (this atom_feed) website() string {
 	l := atom_query_selector(this.Links, "")
-	if l.Href == "" {
+	if l == "" {
 		l = atom_query_selector(this.Links, link_rel_alternate)
 	}
-	return l.Href
+	return l
+}
+
+func (this atom_feed) hub() string {
+	return atom_query_selector(this.Links, link_rel_hub)
+}
+
+func (this atom_person) name() string {
+	if this.Name != "" {
+		return this.Name
+	}
+	if this.Email != "" {
+		return this.Email
+	}
+	return this.Uri
+}
+
+func atom_query_selector(links []atom_link, rel string) string {
+	for _, l := range links {
+		if l.Rel == rel {
+			return l.Href
+		}
+	}
+	return ""
+}
+
+func (this atom_feed) logo() string {
+	if this.Logo != "" {
+		return this.Logo
+	}
+	return this.Icon
+}
+
+func (this atom_link) to_feedmedia() FeedMedia {
+	return FeedMedia{
+		Uri:    this.Href,
+		Mime:   this.Type,
+		Title:  this.Title,
+		Length: this.Length,
+	}
+}
+
+func (this atom_entry) updated() int64 {
+	var v int64
+	if this.Updated != 0 {
+		v = int64(this.Updated)
+	}
+	v = int64(this.Published)
+	return v
 }

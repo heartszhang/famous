@@ -1,9 +1,5 @@
 package feed
 
-import (
-//	"github.com/heartszhang/unixtime"
-)
-
 const (
 	Feed_media_type_none    uint = 0
 	Feed_media_type_unknown      = 1 << iota
@@ -16,10 +12,10 @@ const (
 )
 
 const (
-	Feed_flag_none   uint = 0
-	Feed_flag_readed      = 1 << iota
-	Feed_flag_star
-	Feed_flag_save
+	FeedEntry_flag_none   uint = 0
+	FeedEntry_flag_readed      = 1 << iota
+	FeedEntry_flag_star
+	FeedEntry_flag_save
 )
 
 const (
@@ -76,41 +72,26 @@ const (
 )
 
 type FeedLink struct {
-	media_type   uint   // feed_media_type...
-	Uri          string `json:"uri,omitempty" bson:"uri,omitempty"`                     // url
-	Alias        string `json:"alias,omitempty" bson:"alias,omitempty"`                 // title may be
-	Local        string `json:"local,omitempty" bson:"local,omitempty"`                 // downloaded origin html
-	CleanedLocal string `json:"cleaned_local,omitempty" bson:"cleaned_local,omitempty"` // cleaned-doc local rel path
-	Words        int    `json:"words" bson:"words"`                                     // words after cleaned
-	Sentences    int    `json:"sentences" bson:"sentences"`                             // sentences after cleaned
-	Links        int    `json:"links" bson:"links"`                                     // links after cleaned
-	Density      int    `json:"density" bson:"density"`                                 // density of original doc
-	Length       int64  `json:"length" bson:"length"`
+	Uri       string `json:"uri,omitempty" bson:"uri,omitempty"`     // url
+	Alias     string `json:"alias,omitempty" bson:"alias,omitempty"` // title may be
+	Local     string `json:"local,omitempty" bson:"local,omitempty"` // downloaded origin html
+	Words     int    `json:"words" bson:"words"`                     // words after cleaned
+	Sentences int    `json:"sentences" bson:"sentences"`             // sentences after cleaned
+	Links     int    `json:"links" bson:"links"`                     // links after cleaned
+	Density   int    `json:"density" bson:"density"`                 // density of original doc
+	Length    int64  `json:"length" bson:"length"`
 }
 
 type FeedMedia struct {
-	media_type  uint
 	Title       string `json:"title,omitempty" bson:"title,omitempty"`
 	Description string `json:"description,omitempty" bson:"description,omitempty"`
-	Uri         string `json:"uri,omitempty" bson:"uri,omitempty"`     // original url
-	Local       string `json:"local,omitempty" bson:"local,omitempty"` // image : download rel path, video : extraced flv/mp4 url
-	Width       int    `json:"width" bson:"width"`                     // -1 :unknown
-	Height      int    `json:"height" bson:"height"`                   // -1 : unknown
-	Length      int64  `json:"length" bson:"length"`
-	Duration    int    `json:"duration" bson:"duration"` // seconds, only for vidoe/audio
-	Mime        string `json:"mime,omitempty" bson:"mime,omitempty"`
+	Uri         string `json:"uri,omitempty" bson:"uri,omitempty"` // original url
+	Width       int    `json:"width" bson:"width"`                 // -1 :unknown
+	Height      int    `json:"height" bson:"height"`               // -1 : unknown
+	Length      int64  `json:"length" bson:"length"`               // bytes
+	Duration    int    `json:"duration" bson:"duration"`           // seconds, only for vidoe/audio
 	Thumbnail   string `json:"thumbnail,omitempty" bson:"thumbnail,omitempty"`
-}
-
-type FeedAuthor struct {
-	Name  string `json:"name,omitempty" bson:"name,omitempty"`
-	Email string `json:"email,omitempty" bson:"email,omitempty"`
-	Id    uint64 `json:"id" bson:"id"` // for tweet, weibo etc
-}
-
-type FeedTitle struct {
-	Main   string   `json:"main,omitempty" bson:"main,omitempty"`     // primary title
-	Others []string `json:"second,omitempty" bson:"second,omitempty"` // secondary or alternative titles, not including main
+	Mime        string `json:"mime,omitempty" bson:"mime,omitempty"`
 }
 
 type FeedContent struct {
@@ -121,14 +102,8 @@ type FeedContent struct {
 	Density uint        `json:"density" bson:"density"`
 	Links   uint        `json:"links" bson:"links"`
 	Status  uint64      `json:"status" bson:"status"`
-	Images  []FeedMedia `json:"images" bson:"images"`
-	Medias  []FeedMedia `json:"media" bson:"media"`
-}
-type FeedCache struct {
-	Uri          string `json:"uri" bson:"uri"`
-	Local        string `json:"local" bson:"local"`
-	LastModified string `json:"last_modified,omitempty" bson:"last_modified,omitempty"`
-	ETag         string `json:"etag,omitempty" bson:"etag,omitempty"`
+	Images  []FeedMedia `json:"images,omitempty" bson:"images,omitempty"`
+	Medias  []FeedMedia `json:"media,omitempty" bson:"media,omitempty"` // videos or audios
 }
 
 type FeedTextStatus struct {
@@ -138,22 +113,8 @@ type FeedTextStatus struct {
 	Status        uint64 `json:"status" bson:"status"`
 }
 
-const (
-	uint64_bits = 64
-)
-
-type FeedCategory struct {
-	Mask uint64 `json:"mask" bson:"mask"`
-	Name string `json:"name" bson:"name"`
-}
-
-type FeedTag struct {
-	Value string `json:"value,omitempty" bson:"value,omitempty"`
-	//	TTL   time.Time `json:"ttl" bson:"ttl"`
-}
-
 var (
-	FeedSourceTypes = map[string]uint{
+	feedsource_types = map[string]uint{
 		"":         Feed_type_unknown,
 		"rss":      Feed_type_rss,
 		"rss20":    Feed_type_rss,
@@ -165,16 +126,25 @@ var (
 		"blog":     Feed_type_blog,
 		"tweet":    Feed_type_tweet,
 		"weibo":    Feed_type_sina_weibo,
-		"qqweibo":  Feed_type_qq_weibo}
+		"qqweibo":  Feed_type_qq_weibo,
+	}
 )
 
+func FeedSourceType(typ string) uint {
+	if v, ok := feedsource_types[typ]; ok {
+		return v
+	}
+	return Feed_type_unknown
+}
+
 type FeedImage struct {
-	Mime           string `json:"mime,omitempty" bson:"mime,omitempty"`
-	ThumbnailLocal string `json:"thumbnail,omitempty" bson:"thumbnail,omitempty"`
-	OriginLocal    string `json:"origin,omitempty" bson:"origin,omitempty"`
-	Code           int    `json:"code" bson:"code"`
-	Width          int    `json:"width" bson:"width"`
-	Height         int    `json:"height" bson:"height"`
+	Mime      string `json:"mime,omitempty" bson:"mime,omitempty"`
+	Uri       string `json:"uri,omitempty" bson:"uri,omitempty"`
+	Thumbnail string `json:"thumbnail,omitempty" bson:"thumbnail,omitempty"` // local cache
+	Origin    string `json:"origin,omitempty" bson:"origin,omitempty"`       // local cache
+	Width     int    `json:"width" bson:"width"`
+	Height    int    `json:"height" bson:"height"`
+	//	Code           int    `json:"code" bson:"code"`  // http status code
 }
 
 const (
