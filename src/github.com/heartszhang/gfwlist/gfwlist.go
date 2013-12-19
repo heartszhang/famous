@@ -36,7 +36,7 @@ func NewGfwRuler(f io.Reader) (GfwRuler, error) {
 		case len(line) == 0: // ignore empty line
 		case strings.HasPrefix(line, `!`): // comment
 			comments++
-		case strings.HasPrefix(line, `[`): // ?
+		case strings.HasPrefix(line, `[`): // ?, ignored
 		case strings.HasPrefix(line, `||`): // path match
 			gc.add_path(line[2:])
 			pathes++
@@ -54,12 +54,7 @@ func NewGfwRuler(f io.Reader) (GfwRuler, error) {
 			pathqueries++
 		}
 	}
-	/*	log.Println("comments:", comments,
-		"\npath:\t", pathes,
-		"\nprefix:\t", prefixes,
-		"\nexception:\t", exceptions,
-		"\nregex:\t", regexes, "\npathquery:\t", pathqueries)
-	*/
+
 	return gc, nil
 }
 
@@ -69,27 +64,10 @@ type gfw_ruler struct {
 }
 
 type gfw_group struct {
-	path_rules      [2]wu_manber
-	querypath_rules [2]wu_manber
+	path_rules      [2]wu_manber // http and https
+	querypath_rules [2]wu_manber // http and https
 	prefix_rules    prefix_group
-	regex_rules     regex_group
-}
-
-const (
-	wu_manber_m          = 5 // largest common pattern length M
-	wu_manber_b          = 2 // 2 or 3
-	wu_manber_shift_size = 65536
-)
-
-type wu_manber struct {
-	shift    [wu_manber_shift_size]byte
-	patterns map[int][]wm_pattern
-	size     int
-}
-
-type wm_pattern struct {
-	pattern string
-	prefix  string
+	regex_rules     regex_group // not used
 }
 
 func (this *gfw_ruler) initialize() {
@@ -103,72 +81,6 @@ func (this *gfw_ruler) initialize() {
 	this.exceptions_rules.querypath_rules[1].initialize()
 	this.blocked_rules.prefix_rules.initialize()
 	this.exceptions_rules.prefix_rules.initialize()
-}
-func (this *wu_manber) initialize() {
-	for i := 0; i < wu_manber_shift_size; i++ {
-		this.shift[i] = wu_manber_m - wu_manber_b + 1
-	}
-	this.patterns = make(map[int][]wm_pattern)
-}
-func (this *wu_manber) wm_hash(str string, index int) int {
-	a := int(str[index])
-	b := int(str[index+1]) // this means that wu_manber_b = 2
-	key := a<<8 + b
-	return key
-}
-func (this *wu_manber) add(pattern string) {
-	if len(pattern) < wu_manber_m {
-		//		log.Println("ignore short pattern", pattern)
-		return
-	}
-	this.size++
-	for i := 0; i < wu_manber_m-1; i++ {
-		key := this.wm_hash(pattern, i)
-		c := this.shift[key]
-		shift := byte(wu_manber_m - wu_manber_b - i)
-		if shift < c {
-			this.shift[key] = shift
-		}
-		if shift == 0 {
-			this.patterns[key] = append(this.patterns[key], new_wu_pattern(pattern))
-		}
-	}
-}
-func new_wu_pattern(pattern string) wm_pattern {
-	prefix := pattern[:2]
-	return wm_pattern{pattern, prefix}
-}
-func (this *wu_manber) match(txt string) bool {
-	if this.size == 0 {
-		return false
-	}
-	//	log.Println("do-match", txt)
-	txtlen := len(txt)
-	ix := wu_manber_m - wu_manber_b
-	for ix <= txtlen-wu_manber_b {
-		key := this.wm_hash(txt, ix)
-		if shift := int(this.shift[key]); shift > 0 {
-			ix += shift
-			//			log.Println("shift", txt, shift, ix)
-		} else {
-			//			log.Println("match-end", txt[ix:])
-			patterns := this.patterns[key]
-			start := ix + wu_manber_b - wu_manber_m
-			prefix := txt[start : start+2] // 2 is prefix-length
-			for _, pattern := range patterns {
-				if pattern.prefix == prefix {
-					//					log.Println("do-pattern", pattern.pattern, pattern.prefix, txt, txt[ix:ix+2])
-					leftp := pattern.pattern[len(prefix):]
-					leftt := txt[start+len(prefix):]
-					if strings.HasPrefix(leftt, leftp) {
-						return true
-					}
-				}
-			}
-			ix++
-		}
-	}
-	return false
 }
 
 type prefix_group struct {
@@ -296,23 +208,4 @@ func (this *gfw_ruler) IsBlocked(uri string) bool {
 		scheme_index:   si,
 	}
 	return this.match(ui)
-}
-
-const prime_rk = 16777619
-
-//rabin-k hash algorithm
-func make_key(sep string) uint32 {
-	l := len(sep)
-	h := uint32(0)
-	for i := 0; i < l; i++ {
-		h = h*prime_rk + uint32(sep[i])
-	}
-	return h
-}
-
-func int_min(l, r int) int {
-	if l < r {
-		return l
-	}
-	return r
 }
