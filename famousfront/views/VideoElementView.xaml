@@ -6,8 +6,7 @@
   <DataTemplate DataType="{x:Type vm:VideoElementViewModel}">
     <Grid x:Name="_video_room" 
           Visibility="{Binding CurrentSource, Converter={StaticResource StringIsNullOrEmptyToVisibilityConverter}, FallbackValue=Collapsed}"
-            VerticalAlignment="Bottom" Height="{Binding FrontFlags.VideoElementHeight, Source={StaticResource _locator}}" 
-            Margin="{Binding Path=(params:General.BoldPadding), RelativeSource={RelativeSource self}, Mode=OneWay}">
+            VerticalAlignment="Bottom" Height="{Binding FrontFlags.VideoElementHeight, Source={StaticResource _locator}}" >
       <Grid.RowDefinitions>
         <RowDefinition Height="{Binding FrontFlags.ContentMarginHeight, Source={StaticResource _locator}}"/>
         <RowDefinition/>

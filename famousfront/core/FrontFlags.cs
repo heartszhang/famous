@@ -33,6 +33,7 @@ namespace famousfront.core
       SourceMargin = new Thickness(12d);
       ImageMaxHeight = 640.0;
       ImageMaxWidth = 400.0;
+      FigureMaxWidth = 320d;
       VideoElementHeight = 331.0;
       BodyMaxWidth = 800.0;
       SearchBoxTopOffset = 64.0;
@@ -112,6 +113,9 @@ namespace famousfront.core
 
     [DataMember(Name = "image_maxwidth")]
     public double ImageMaxWidth { get; set; }
+
+    [DataMember(Name = "figure_maxwidth")]
+    public double FigureMaxWidth { get; set; }
 
     [DataMember(Name = "body_maxwidth")]
     public double BodyMaxWidth { get; set; }

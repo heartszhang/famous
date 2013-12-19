@@ -42,7 +42,8 @@
             <Setter Property="HorizontalAnchor" Value="PageLeft"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Width" Value="{Binding Source={StaticResource _locator}, Path=FrontFlags.ImageMaxWidth}"/>
+            <Setter Property="Width" 
+                    Value="{Binding Source={StaticResource _locator}, Path=FrontFlags.FigureMaxWidth}"/>
           </Style>
         </Style.Resources>
         <Setter Property="FontFamily" Value="{StaticResource LightFont}"/>
